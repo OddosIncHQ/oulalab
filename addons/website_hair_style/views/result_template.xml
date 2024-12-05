@@ -1,8 +1,16 @@
 <template id="result_template" name="Resultado del Estilo de Cabello">
     <t t-call="website.layout">
-        <div class="container">
-            <h1>Resultado del Estilo de Cabello</h1>
-            <img t-att-src="image_url" alt="Imagen con nuevo estilo de cabello"/>
+        <div class="container mt-5">
+            <h1 class="text-center mb-4">Resultado del Estilo de Cabello</h1>
+            <div class="text-center">
+                <img t-att-src="image_url" alt="Imagen con nuevo estilo de cabello" 
+                     class="img-fluid rounded shadow-lg" 
+                     style="max-width: 80%; height: auto; border: 2px solid #ccc;"/>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/" class="btn btn-primary">Volver al Inicio</a>
+                <a href="/hair_style" class="btn btn-secondary">Probar otro estilo</a>
+            </div>
         </div>
     </t>
 </template>
