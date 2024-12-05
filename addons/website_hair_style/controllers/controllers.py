@@ -1,8 +1,34 @@
 from odoo import http
 import requests
 import json
+import time
+import hashlib
+import hmac
+import base64
 
 class HairStyleIntegration(http.Controller):
+
+    def generate_id_token(self, client_id, client_secret, timestamp):
+        """
+        Genera un ID token para la autenticación con la API de YouCam Online Editor.
+        """
+        # Crear el string base para el token
+        base_string = f"{client_id}&{timestamp}"
+
+        # Generar la firma HMAC usando el client_secret
+        signature = hmac.new(
+            client_secret.encode('utf-8'),
+            base_string.encode('utf-8'),
+            hashlib.sha256
+        ).digest()
+
+        # Codificar la firma en base64
+        encoded_signature = base64.b64encode(signature).decode('utf-8')
+
+        # Concatenar el client_id, timestamp y la firma para obtener el token
+        id_token = f"{client_id}.{timestamp}.{encoded_signature}"
+
+        return id_token
 
     @http.route('/hair_style/apply', type='http', auth='public', methods=['POST'], csrf=False)
     def apply_hair_style(self, **kwargs):
@@ -14,7 +40,7 @@ class HairStyleIntegration(http.Controller):
         client_id = 'TU_CLIENT_ID'
         client_secret = 'TU_CLIENT_SECRET'
         timestamp = str(int(time.time() * 1000))
-        id_token = generate_id_token(client_id, client_secret, timestamp)
+        id_token = self.generate_id_token(client_id, client_secret, timestamp)
 
         auth_response = requests.post(
             'https://yce-api-01.perfectcorp.com/s2s/v1.0/client/auth',
@@ -75,3 +101,4 @@ class HairStyleIntegration(http.Controller):
                         time.sleep(2)
             return "Error al subir la imagen."
         return "Error de autenticación con la API."
+
