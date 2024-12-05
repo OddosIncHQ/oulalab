@@ -93,7 +93,7 @@ class HairStyleIntegration(http.Controller):
                             status = status_response.json().get('result').get('status')
                             if status == 'success':
                                 result_url = status_response.json().get('result').get('result_url')
-                                return http.request.render('website_hair_style_integration.result_template', {
+                                return http.request.render('website_hair_style.result_template', {
                                     'image_url': result_url
                                 })
                             elif status == 'error':
@@ -101,4 +101,3 @@ class HairStyleIntegration(http.Controller):
                         time.sleep(2)
             return "Error al subir la imagen."
         return "Error de autenticación con la API."
-
