@@ -6,7 +6,7 @@
     'author': 'Tu Nombre',
     'depends': ['website'],
     'data': [
-        # Archivos de vistas o plantillas si son necesarios
+        'views/result_template.xml',
     ],
     'installable': True,
     'application': False,
