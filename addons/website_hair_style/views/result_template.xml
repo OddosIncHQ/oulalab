@@ -1,0 +1,8 @@
+<template id="result_template" name="Resultado del Estilo de Cabello">
+    <t t-call="website.layout">
+        <div class="container">
+            <h1>Resultado del Estilo de Cabello</h1>
+            <img t-att-src="image_url" alt="Imagen con nuevo estilo de cabello"/>
+        </div>
+    </t>
+</template>
