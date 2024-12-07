@@ -10,38 +10,44 @@ class HairStyleIntegration(http.Controller):
 
     def generate_id_token(self, client_id, client_secret, timestamp):
         """
-        Genera un ID token para la autenticación con la API de YouCam Online Editor.
+        Generates an ID token for authentication with the YouCam Online Editor API.
         """
-        # Crear el string base para el token
+        # Create the base string for the token
         base_string = f"{client_id}&{timestamp}"
 
-        # Generar la firma HMAC usando el client_secret
+        # Generate the HMAC signature using the client_secret
         signature = hmac.new(
             client_secret.encode('utf-8'),
             base_string.encode('utf-8'),
             hashlib.sha256
         ).digest()
 
-        # Codificar la firma en base64
+        # Encode the signature in base64
         encoded_signature = base64.b64encode(signature).decode('utf-8')
 
-        # Concatenar el client_id, timestamp y la firma para obtener el token
+        # Concatenate the client_id, timestamp, and signature to obtain the token
         id_token = f"{client_id}.{timestamp}.{encoded_signature}"
 
         return id_token
 
     @http.route('/hair_style/apply', type='http', auth='public', methods=['POST'], csrf=False)
     def apply_hair_style(self, **kwargs):
-        # Obtener datos del formulario
-        image = kwargs.get('image')
-        style = kwargs.get('style')
+        # Obtain form data
+        image = http.request.httprequest.files.get('image')  # Get the uploaded file
+        style = kwargs.get('style')  # Get the selected hairstyle
 
-        # Autenticación con la API de YouCam Online Editor
-        client_id = HczjFjWQ5063U0V6nUFVuArd7OLJDa5D
-        client_secret = MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCH/whjFmMH7KpRWSIQxcM9qweVhLx3YNLByGC+TTBuzHdNeDl+u2euECoHS9OEaFQ5I+Ze7jdXLpJiydSLu3GJnmyeZV4yOKlkknRWgZ8VYZv8U634s95fVLUnXie6WiHmYJvrUyQfZ+jpY5vCCnHm6fAVPtJ4vcHCsSPUjVioxQIDAQAB
+        if not image or not style:
+            return "Error: Both image and style must be provided."
+
+        # Client ID and Client Secret (Add your actual credentials here)
+        client_id = 'HczjFjWQ5063U0V6nUFVuArd7OLJDa5D'  # Replace with your Client ID
+        client_secret = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCH/whjFmMH7KpRWSIQxcM9qweVhLx3YNLByGC+TTBuzHdNeDl+u2euECoHS9OEaFQ5I+Ze7jdXLpJiydSLu3GJnmyeZV4yOKlkknRWgZ8VYZv8U634s95fVLUnXie6WiHmYJvrUyQfZ+jpY5vCCnHm6fAVPtJ4vcHCsSPUjVioxQIDAQAB'  # Replace with your Client Secret
+
+        # Generate the ID token
         timestamp = str(int(time.time() * 1000))
         id_token = self.generate_id_token(client_id, client_secret, timestamp)
 
+        # Authenticate with the API
         auth_response = requests.post(
             'https://yce-api-01.perfectcorp.com/s2s/v1.0/client/auth',
             json={
@@ -51,9 +57,9 @@ class HairStyleIntegration(http.Controller):
         )
 
         if auth_response.status_code == 200:
-            access_token = auth_response.json().get('result').get('access_token')
+            access_token = auth_response.json().get('result', {}).get('access_token')
 
-            # Subir la imagen a la API
+            # Upload the image to the API
             upload_response = requests.post(
                 'https://yce-api-01.perfectcorp.com/s2s/v1.0/file/hair-style',
                 headers={
@@ -63,9 +69,9 @@ class HairStyleIntegration(http.Controller):
             )
 
             if upload_response.status_code == 200:
-                file_id = upload_response.json().get('result').get('file_id')
+                file_id = upload_response.json().get('result', {}).get('file_id')
 
-                # Aplicar el estilo de cabello
+                # Apply the hairstyle
                 task_response = requests.post(
                     'https://yce-api-01.perfectcorp.com/s2s/v1.0/task/hair-style',
                     headers={
@@ -78,9 +84,9 @@ class HairStyleIntegration(http.Controller):
                 )
 
                 if task_response.status_code == 200:
-                    task_id = task_response.json().get('result').get('task_id')
+                    task_id = task_response.json().get('result', {}).get('task_id')
 
-                    # Consultar el estado de la tarea
+                    # Poll the API for task completion
                     while True:
                         status_response = requests.get(
                             f'https://yce-api-01.perfectcorp.com/s2s/v1.0/task/hair-style/{task_id}',
@@ -90,14 +96,15 @@ class HairStyleIntegration(http.Controller):
                         )
 
                         if status_response.status_code == 200:
-                            status = status_response.json().get('result').get('status')
+                            status = status_response.json().get('result', {}).get('status')
                             if status == 'success':
-                                result_url = status_response.json().get('result').get('result_url')
+                                result_url = status_response.json().get('result', {}).get('result_url')
                                 return http.request.render('website_hair_style.result_template', {
                                     'image_url': result_url
                                 })
                             elif status == 'error':
-                                return "Error al procesar la imagen."
-                        time.sleep(2)
-            return "Error al subir la imagen."
-        return "Error de autenticación con la API."
+                                return "Error: The image could not be processed."
+                        time.sleep(2)  # Wait before retrying
+
+            return "Error: The image could not be uploaded."
+        return "Error: Authentication with the API failed."
