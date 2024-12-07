@@ -37,8 +37,8 @@ class HairStyleIntegration(http.Controller):
         style = kwargs.get('style')
 
         # Autenticación con la API de YouCam Online Editor
-        client_id = 'TU_CLIENT_ID'
-        client_secret = 'TU_CLIENT_SECRET'
+        client_id = HczjFjWQ5063U0V6nUFVuArd7OLJDa5D
+        client_secret = MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCH/whjFmMH7KpRWSIQxcM9qweVhLx3YNLByGC+TTBuzHdNeDl+u2euECoHS9OEaFQ5I+Ze7jdXLpJiydSLu3GJnmyeZV4yOKlkknRWgZ8VYZv8U634s95fVLUnXie6WiHmYJvrUyQfZ+jpY5vCCnHm6fAVPtJ4vcHCsSPUjVioxQIDAQAB
         timestamp = str(int(time.time() * 1000))
         id_token = self.generate_id_token(client_id, client_secret, timestamp)
 
