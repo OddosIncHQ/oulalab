@@ -1,5 +1,5 @@
 {
-    'name': 'Integración de Estilos de Cabello en el Sitio Web',
+    'name': 'Integración de Estilos de Cabello en el Sitio Web 2.0',
     'version': '2.0',
     'category': 'Website',
     'summary': 'Integración de la API de YouCam Online Editor para estilos de cabello en el sitio web de Odoo',
