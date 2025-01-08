@@ -4,7 +4,7 @@
 
 {
     'name': 'Account Budget with Multi Currency',
-    'version': '3.1.3',
+    'version': '4.1.3',
     'price': 59.0,
     'currency': 'EUR',
     'license': 'Other proprietary',
@@ -20,11 +20,11 @@ Account Budget Multi Currency
         'account_budget'
     ],
     'images': ['static/description/image.png'],
-    'live_test_url': 'https://probuseappdemo.com/probuse_apps/account_budget_multi_currency/1207',
+    # 'live_test_url': 'https://probuseappdemo.com/probuse_apps/account_budget_multi_currency/1207',
+    'live_test_url': 'https://probuseappdemo.com/probuse_apps/account_budget_multi_currency/1427',
     'data': [
         'views/account_budget_view.xml',
         'views/account_budget_analysis_view.xml',
-        'report/budget_report_view.xml',
      ],
     'installable': True,
     'application': False,

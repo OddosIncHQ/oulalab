@@ -57,27 +57,48 @@ class CrossoveredBudgetLines(models.Model):
     )
     custom_planned_amount = fields.Monetary(
         compute='_compute_custom_planned_amount',
-        string='Planned Amount (Other Currency)',
+        string='Budgeted (Other Currency)',
         store=True,
         required=True,
-        help="Amount you plan to earn/spend. Record a positive amount if it is a revenue and a negative amount if it is a cost.",
         currency_field='custom_currency_id',
         inverse="_inverse_custom_planned_amount"
     )
     custom_practical_amount = fields.Monetary(
-        compute='_compute_custom_practical_amount',
-        store=True,
-        string='Practical Amount (Other Currency)',
-        help="Amount really earned/spent.",
+        # compute='_compute_custom_practical_amount',  
+        compute='_compute_custom_all',
+        # store=True,
+        string='Committed (Other Currency)',
+        help="Already Billed amount + Confirmed purchase orders.",
         currency_field='custom_currency_id'
+    )
+    custom_achieved_amount = fields.Monetary(
+        compute='_compute_custom_all',
+        string='Achieved (Other Currency)',
+        help="Amount Billed/Invoiced."
     )
     custom_theoritical_amount = fields.Monetary(
         compute='_compute_custom_theoritical_amount',
-        store=True,
-        string='Theoretical Amount (Other Currency)',
-        help="Amount you are supposed to have earned/spent at this date.",
+        # store=True,
+        string='Theoretical (Other Currency)',
+        help="Amount supposed to be Billed/Invoiced, formula = (Budget Amount / Budget Days) x Budget Days Completed.",
         currency_field='custom_currency_id'
     )
+
+    def _compute_custom_all(self):
+        grouped = {
+            line: (committed, achieved)
+            for line, committed, achieved in self.env['budget.report']._read_group(
+                domain=[('budget_line_id', 'in', self.ids)],
+                groupby=['budget_line_id'],
+                aggregates=['committed:sum', 'achieved:sum'],
+            )
+        }
+        for line in self:
+            committed, achieved = grouped.get(line, (0, 0))
+            converted_practical_amount = line.company_id.currency_id._convert(committed, line.custom_currency_id, line.company_id)
+            converted_achieved_amount = line.company_id.currency_id._convert(achieved, line.custom_currency_id, line.company_id)
+            line.custom_practical_amount = converted_practical_amount
+            line.custom_achieved_amount = converted_achieved_amount
 
     @api.model
     # def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -122,7 +143,7 @@ class CrossoveredBudgetLines(models.Model):
         return result
 
     # @api.depends('planned_amount')
-    @api.depends('budget_amount')
+    @api.depends('budget_amount', 'custom_currency_id')
     def _compute_custom_planned_amount(self):
         for line in self:
             line.custom_planned_amount = 0.0
@@ -142,47 +163,6 @@ class CrossoveredBudgetLines(models.Model):
             else:
                 # line.planned_amount = line.custom_planned_amount
                 line.budget_amount = line.custom_planned_amount
-
-    # @api.depends('practical_amount')
-    @api.depends('committed_amount')
-    def _compute_custom_practical_amount(self):
-        for line in self:
-            # acc_ids = line.general_budget_id.account_ids.ids
-            date_to = line.date_to
-            date_from = line.date_from
-            amount_in_budget_curr = 0.0
-            # if line.analytic_account_id.id:
-            if line.account_id.id:
-                analytic_line_obj = self.env['account.analytic.line']
-                # domain = [('account_id', '=', line.analytic_account_id.id),
-                #           ('date', '>=', date_from),
-                #           ('date', '<=', date_to),
-                #           ]
-                domain = [('account_id', '=', line.account_id.id),
-                          ('date', '>=', date_from),
-                          ('date', '<=', date_to),
-                          ]
-                # if acc_ids:
-                # domain += [('general_account_id', 'in', acc_ids)]
-                # domain += [('general_account_id', 'in', line.account_id.id)]
-                
-                analytic_line_ids = analytic_line_obj.search(domain)
-                for analytic_line_id in analytic_line_ids:
-                    amount_in_budget_curr += line.currency_id._convert(analytic_line_id.amount, line.custom_currency_id, line.company_id, analytic_line_id.date)
-            else:
-                aml_obj = self.env['account.move.line']
-                domain = [('account_id', 'in',
-                           # line.general_budget_id.account_ids.ids),
-                           line.account_id.id),
-                          ('date', '>=', date_from),
-                          ('date', '<=', date_to),
-                          ('move_id.state', '=', 'posted')
-                          ]
-                account_move_line_ids = aml_obj.search(domain)
-                for account_move_line_id in account_move_line_ids:
-                    acc_move_line_amount = account_move_line_id.credit - account_move_line_id.debit
-                    amount_in_budget_curr += line.currency_id._convert(acc_move_line_amount, line.custom_currency_id, line.company_id, account_move_line_id.date)
-            line.custom_practical_amount = amount_in_budget_curr
 
     @api.depends('date_from', 'date_to')
     def _compute_custom_theoritical_amount(self):
