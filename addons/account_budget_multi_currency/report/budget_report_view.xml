@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="budget_report_view_pivot_inherit_multi_currency" model="ir.ui.view">
+            <field name="name">budget.report.view.pivot.inherit.multi.currency</field>
+            <field name="model">budget.report</field>
+            <field name="inherit_id" ref="account_budget.budget_report_view_pivot" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='budget']" position="after">
+                    <field name="custom_planned_amount" type="measure" />
+                </xpath>
+                <xpath expr="//field[@name='committed']" position="after">
+                    <field name="custom_practical_amount" type="measure" />
+                </xpath>
+                <xpath expr="//field[@name='achieved']" position="after">
+                    <field name="custom_theoritical_amount" type="measure" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="budget_report_view_tree_inherit_multi_currency" model="ir.ui.view">
+            <field name="name">budget.report.view.list.inherit.multi.currency</field>
+            <field name="model">budget.report</field>
+            <field name="inherit_id" ref="account_budget.budget_report_view_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='budget']" position="after">
+                    <field name="custom_planned_amount"/>
+                </xpath>
+                <xpath expr="//field[@name='committed']" position="after">
+                    <field name="custom_practical_amount"/>
+                </xpath>
+                <xpath expr="//field[@name='achieved']" position="after">
+                    <field name="custom_theoritical_amount"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="budget_report_view_search_inherit_multi_currency" model="ir.ui.view">
+            <field name="name">budget.report.view.search.inherit.multi.currency</field>
+            <field name="model">budget.report</field>
+            <field name="inherit_id" ref="account_budget.budget_report_view_search" />
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='budget']" position="after">
+                    <filter string="Planned Amount (Other Currency)" name="custom_planned_amount" domain="[('line_type','=','budget')]"/>
+                </xpath>
+                <xpath expr="//filter[@name='committed']" position="after">
+                    <filter string="Practical Amount (Other Currency)" name="custom_practical_amount" domain="[('line_type','=','budget')]"/>
+                </xpath>
+                <xpath expr="//filter[@name='achieved']" position="after">
+                    <filter string="Theoretical Amount (Other Currency)" name="custom_theoritical_amount" domain="[('line_type','=','budget')]"/>
+                </xpath>
+            </field>
+        </record>
+    </data> 
+</odoo>
