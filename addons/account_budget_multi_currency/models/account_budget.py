@@ -74,7 +74,8 @@ class CrossoveredBudgetLines(models.Model):
     custom_achieved_amount = fields.Monetary(
         compute='_compute_custom_all',
         string='Achieved (Other Currency)',
-        help="Amount Billed/Invoiced."
+        help="Amount Billed/Invoiced.",
+        currency_field='custom_currency_id'
     )
     custom_theoritical_amount = fields.Monetary(
         compute='_compute_custom_theoritical_amount',

@@ -26,7 +26,8 @@
                 <xpath expr="//field[@name='budget_amount']" position="after">
                     <field name="custom_planned_amount" type="measure" string="Budgeted (Other Currency)"/>
                     <field name="custom_practical_amount" type="measure" string="Committed (Other Currency)"/>
-                    <field name="custom_theoritical_amount" type="measure" string="Achieved (Other Currency)"/>
+                    <field name="custom_achieved_amount" type="measure" string="Achieved (Other Currency)"/>
+                    <field name="custom_theoritical_amount" type="measure" string="Theoretical (Other Currency)"/>
                 </xpath>
             </field>
         </record>
@@ -42,7 +43,8 @@
                 </xpath>
                 <xpath expr="//field[@name='committed_amount']" position="after">
                     <field name="custom_practical_amount" type="measure" string="Committed (Other Currency)"/>
-                    <field name="custom_theoritical_amount" type="measure" string="Achieved (Other Currency)"/>
+                    <field name="custom_achieved_amount" type="measure" string="Achieved (Other Currency)"/>
+                    <field name="custom_theoritical_amount" type="measure" string="Theoretical (Other Currency)"/>
                 </xpath>
             </field>
         </record>
@@ -60,7 +62,8 @@
                 </xpath>
                 <xpath expr="//field[@name='theoritical_amount']" position="after">
                     <field name="custom_practical_amount" type="measure" string="Committed (Other Currency)"/>
-                    <field name="custom_theoritical_amount" type="measure" string="Achieved (Other Currency)"/>
+                    <field name="custom_achieved_amount" type="measure" string="Achieved (Other Currency)"/>
+                    <field name="custom_theoritical_amount" type="measure" string="Theoretical (Other Currency)"/>
                 </xpath>
             </field>
         </record>

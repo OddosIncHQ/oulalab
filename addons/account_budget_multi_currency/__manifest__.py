@@ -3,13 +3,13 @@
 # Part of Probuse Consulting Service Pvt Ltd. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Account Budget with Multi Currency',
-    'version': '5.1.3',
+    'name': 'Account Budget with Multi Currency | Transforming Budget Management with Multi-Currency Options',
+    'version': '5.2.3',
     'price': 59.0,
     'currency': 'EUR',
     'license': 'Other proprietary',
     'category': 'Accounting/Accounting',
-    'summary': 'Multi Currency Account Budget',
+    'summary': 'Multi-Currency Account Budgeting: Simplifying Financial Planning',
     'description': """
 Account Budget Multi Currency
     """,
