@@ -2,6 +2,7 @@
 <odoo>
 
     <!-- Enlace al menú de portal personalizado -->
+    <!-- Este XPath es correcto y añadirá el enlace a la sección de documentos del portal. -->
     <template id="portal_my_home_arriendo_link" inherit_id="portal.portal_my_home">
         <xpath expr="//div[@id='o_portal_docs']/ul" position="inside">
             <li>
@@ -17,80 +18,205 @@
         <t t-call="portal.portal_layout">
             <t t-set="title">Mis Arriendos</t>
 
-            <div class="container">
-                <h2>Mi Suscripción de Arriendo</h2>
-                <t t-if="subscription">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <strong>Suscripción:</strong> <t t-esc="subscription.name"/>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Cliente:</strong> <t t-esc="subscription.partner_id.name"/>
-                        </div>
-                    </div>
+            <div class="container o_portal_fullwidth_touch"> <!-- Añadido o_portal_fullwidth_touch para mejor responsividad -->
+                <div class="row">
+                    <div class="col-12">
+                        <h2 class="mb-3 text-center">Mi Suscripción de Arriendo</h2> <!-- Centrar título -->
+                        
+                        <!-- Sección para mostrar mensajes de éxito o error (desde request.session) -->
+                        <!-- Estos mensajes se mostrarán una vez y luego se eliminarán de la sesión. -->
+                        <t t-if="request.session.get('rental_success_message')">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <t t-esc="request.session.pop('rental_success_message')"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </t>
+                        <t t-if="request.session.get('rental_error_message')">
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <t t-esc="request.session.pop('rental_error_message')"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </t>
 
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card p-2">
-                                <strong>Prendas Arrendadas</strong><br/>
-                                <span class="text-primary h4"><t t-esc="subscription.x_cantidad_prendas_en_posesion"/></span>
+                        <t t-if="subscription">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Suscripción:</strong> <t t-esc="subscription.name"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Cliente:</strong> <t t-esc="subscription.partner_id.name"/>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card p-2">
-                                <strong>Máx. Permitidas</strong><br/>
-                                <span class="text-success h4"><t t-esc="subscription.x_max_prendas_permitidas"/></span>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card p-2">
-                                <strong>Cambios Usados</strong><br/>
-                                <span class="text-warning h4"><t t-esc="subscription.x_cambios_usados_mes"/></span>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card p-2">
-                                <strong>Cambios Permitidos</strong><br/>
-                                <span class="text-info h4"><t t-esc="subscription.x_cambios_permitidos_mes"/></span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <h4>Prendas en Posesión</h4>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Prenda</th>
-                                <th>Número de Serie</th>
-                                <th>Fecha de Arriendo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="prendas_arrendadas" t-as="linea">
-                                <tr>
-                                    <td><t t-esc="linea.prenda_id.display_name"/></td>
-                                    <td><t t-esc="linea.numero_serie_id.name"/></td>
-                                    <td><t t-esc="linea.fecha_arriendo.strftime('%d/%m/%Y')"/></td>
-                                </tr>
+                            <div class="row mb-4">
+                                <!-- Tarjetas de resumen de límites -->
+                                <div class="col-md-3 col-6 mb-3"> <!-- Añadido col-6 para mejor responsividad en móvil -->
+                                    <div class="card p-2 text-center h-100 shadow-sm"> <!-- Añadido h-100 y shadow-sm -->
+                                        <strong>Prendas Arrendadas</strong><br/>
+                                        <span class="text-primary h4"><t t-esc="subscription.x_cantidad_prendas_en_posesion"/></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card p-2 text-center h-100 shadow-sm">
+                                        <strong>Máx. Permitidas</strong><br/>
+                                        <span class="text-success h4"><t t-esc="subscription.x_max_prendas_permitidas"/></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card p-2 text-center h-100 shadow-sm">
+                                        <strong>Cambios Usados</strong><br/>
+                                        <span class="text-warning h4"><t t-esc="subscription.x_cambios_usados_mes"/></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card p-2 text-center h-100 shadow-sm">
+                                        <strong>Cambios Permitidos</strong><br/>
+                                        <span class="text-info h4"><t t-esc="subscription.x_cambios_permitidos_mes"/></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 class="mb-3">Prendas en Posesión</h4>
+                            <t t-if="prendas_arrendadas">
+                                <table class="table table-striped table-responsive-sm"> <!-- Añadido table-responsive-sm para móviles -->
+                                    <thead>
+                                        <tr>
+                                            <th>Prenda</th>
+                                            <th>Número de Serie</th>
+                                            <th>Fecha de Arriendo</th>
+                                            <th>Acciones</th> <!-- Columna para acciones de devolución/cambio -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="prendas_arrendadas" t-as="linea">
+                                            <tr>
+                                                <td><t t-esc="linea.prenda_id.display_name"/></td>
+                                                <td><t t-esc="linea.numero_serie_id.name"/></td>
+                                                <td><t t-esc="linea.fecha_arriendo.strftime('%d/%m/%Y %H:%M')"/></td> <!-- Mostrar hora también -->
+                                                <td>
+                                                    <!-- Formulario para devolución de una prenda específica -->
+                                                    <form t-attf-action="/my/rentals/request_return" method="post" class="d-inline-block">
+                                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token"/>
+                                                        <input type="hidden" name="lot_ids" t-att-value="linea.numero_serie_id.id"/>
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Devolver Prenda">
+                                                            <i class="fa fa-undo"/> Devolver
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
                             </t>
-                        </tbody>
-                    </table>
+                            <t t-else="">
+                                <p class="text-muted">No tienes prendas arrendadas en este momento.</p>
+                            </t>
 
-                    <div class="mt-4">
-                        <a href="/my/rentals/catalog" class="btn btn-primary">Ver Catálogo</a>
-                        <a href="#" class="btn btn-warning">Solicitar Cambio</a>
-                        <a href="#" class="btn btn-danger">Solicitar Devolución</a>
+                            <div class="mt-4 text-center"> <!-- Centrar los botones de acción -->
+                                <a href="/my/rentals/catalog" class="btn btn-primary me-2">Ver Catálogo</a>
+                                <!-- Botones que activan modales para acciones complejas -->
+                                <button type="button" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#changeModal">Solicitar Cambio</button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#returnMultipleModal">Devolver Varias</button>
+                            </div>
+
+                            <!-- Modal para Solicitar Cambio -->
+                            <div class="modal fade" id="changeModal" tabindex="-1" aria-labelledby="changeModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form t-attf-action="/my/rentals/request_change" method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token"/>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="changeModalLabel">Solicitar Cambio de Prenda</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Selecciona la(s) prenda(s) que deseas devolver y luego selecciona la(s) nueva(s) prenda(s) del catálogo.</p>
+                                                <div class="mb-3">
+                                                    <label for="lot_ids_to_return" class="form-label">Prendas a Devolver:</label>
+                                                    <select name="lot_ids_to_return" id="lot_ids_to_return" class="form-control" multiple="multiple" required="required">
+                                                        <t t-foreach="prendas_arrendadas" t-as="linea_to_return">
+                                                            <option t-att-value="linea_to_return.numero_serie_id.id">
+                                                                <t t-esc="linea_to_return.prenda_id.display_name"/> (<t t-esc="linea_to_return.numero_serie_id.name"/>)
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples.</small>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="new_product_ids" class="form-label">Nuevas Prendas a Recibir (IDs de Productos):</label>
+                                                    <!-- Este campo requeriría un selector de productos más avanzado con JS en un entorno real -->
+                                                    <input type="text" name="new_product_ids" id="new_product_ids" class="form-control" placeholder="Ej: 1,2,3 (IDs de productos separados por coma)"/>
+                                                    <small class="form-text text-muted">Para un cambio real, se requeriría una selección dinámica de productos del catálogo. Por ahora, introduce los IDs de producto.</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                <button type="submit" class="btn btn-primary">Enviar Solicitud de Cambio</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal para Devolver Varias Prendas -->
+                            <div class="modal fade" id="returnMultipleModal" tabindex="-1" aria-labelledby="returnMultipleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form t-attf-action="/my/rentals/request_return" method="post">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token"/>
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="returnMultipleModalLabel">Devolver Varias Prendas</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Selecciona las prendas que deseas devolver:</p>
+                                                <div class="mb-3">
+                                                    <label for="lot_ids_multiple" class="form-label">Prendas a Devolver:</label>
+                                                    <select name="lot_ids" id="lot_ids_multiple" class="form-control" multiple="multiple" required="required">
+                                                        <t t-foreach="prendas_arrendadas" t-as="linea_to_return_multi">
+                                                            <option t-att-value="linea_to_return_multi.numero_serie_id.id">
+                                                                <t t-esc="linea_to_return_multi.prenda_id.display_name"/> (<t t-esc="linea_to_return_multi.numero_serie_id.name"/>)
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples.</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                <button type="submit" class="btn btn-primary">Enviar Solicitud de Devolución</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </t>
+                        <t t-else="">
+                            <p class="text-muted">No tienes una suscripción activa en este momento.</p>
+                        </t>
                     </div>
-                </t>
-                <t t-if="not subscription">
-                    <p class="text-muted">No tienes una suscripción activa en este momento.</p>
-                </t>
+                </div>
             </div>
         </t>
     </template>
 
-    <!-- Plantilla de límite excedido -->
-    <template id="portal_limited" name="Límite Excedido">
+    <!-- Plantilla sin suscripción activa -->
+    <!-- Ahora puede recibir un mensaje de error desde el controlador -->
+    <template id="portal_no_subscription" name="Sin Suscripción">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-5">
+                <h3>No tienes suscripción activa</h3>
+                <p t-if="error_message" class="text-danger"><t t-esc="error_message"/></p>
+                <p t-else="" class="text-muted">Actualmente no tienes una suscripción activa para arriendo de prendas.</p>
+                <a href="/" class="btn btn-secondary mt-3">Volver al inicio</a>
+            </div>
+        </t>
+    </template>
+
+    <!-- La plantilla 'portal_limited' se vuelve redundante si usamos mensajes flash en el dashboard.
+         Se recomienda eliminarla y redirigir siempre al dashboard con el mensaje de error. -->
+    <!-- <template id="portal_limited" name="Límite Excedido">
         <t t-call="portal.portal_layout">
             <div class="container mt-5">
                 <h3 class="text-danger">Límite alcanzado</h3>
@@ -98,16 +224,6 @@
                 <a href="/my/rentals" class="btn btn-secondary mt-3">Volver</a>
             </div>
         </t>
-    </template>
-
-    <!-- Plantilla sin suscripción activa -->
-    <template id="portal_no_subscription" name="Sin Suscripción">
-        <t t-call="portal.portal_layout">
-            <div class="container mt-5">
-                <h3>No tienes suscripción activa</h3>
-                <p>Actualmente no tienes una suscripción activa para arriendo de prendas.</p>
-            </div>
-        </t>
-    </template>
+    </template> -->
 
 </odoo>
