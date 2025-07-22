@@ -4,26 +4,47 @@
     <record id="view_sale_subscription_form_inherit_arriendo" model="ir.ui.view">
         <field name="name">sale.subscription.form.arriendo</field>
         <field name="model">sale.subscription</field>
+        <!-- Correcto: hereda de la vista principal del formulario de suscripción. -->
         <field name="inherit_id" ref="sale_subscription.sale_subscription_view_form"/>
         <field name="arch" type="xml">
+            <!-- Añadimos nuestros campos de límites después del grupo principal de la cabecera. -->
+            <!-- La ubicación es buena para mantener la información de configuración visible. -->
             <xpath expr="//sheet/group" position="after">
                 <group string="Límites de Arriendo">
                     <field name="x_max_prendas_permitidas"/>
                     <field name="x_cambios_permitidos_mes"/>
+                    <!-- Estos campos son de solo lectura y se actualizan por el sistema. -->
                     <field name="x_cambios_usados_mes" readonly="1"/>
                     <field name="x_proxima_fecha_reseteo_cambios" readonly="1"/>
+                    <!-- Campo computado para mostrar la cantidad actual de prendas en posesión -->
+                    <field name="x_cantidad_prendas_en_posesion" readonly="1"/>
                 </group>
             </xpath>
 
+            <!-- Añadimos una nueva pestaña en el notebook para las prendas en posesión. -->
             <xpath expr="//sheet/notebook" position="inside">
-                <page string="Prendas Arrendadas">
-                    <field name="x_prendas_en_posesion_ids" context="{'default_suscripcion_id': active_id}">
-                        <tree editable="bottom">
+                <page string="Prendas Arrendadas" name="prendas_arrendadas_page"> <!-- Añadido 'name' para referencia futura -->
+                    <!--
+                        El campo One2many para 'x_prendas_en_posesion_ids'.
+                        'context': 'default_suscripcion_id': active_id es útil para la creación rápida.
+                        'can_create': False y 'can_write': False si no quieres que se creen/editen directamente desde aquí,
+                        ya que se gestionan por los movimientos de stock.
+                    -->
+                    <field name="x_prendas_en_posesion_ids"
+                           context="{'default_suscripcion_id': active_id}"
+                           nolabel="1" <!-- Oculta la etiqueta del campo One2many si no la necesitas -->
+                           widget="one2many_list" <!-- Widget explícito para One2many -->
+                           can_create="false" <!-- No permitir crear nuevas líneas desde aquí -->
+                           can_write="false"> <!-- No permitir editar líneas desde aquí -->
+                        <!-- Usar <list> en lugar de <tree> para Odoo 18. -->
+                        <list editable="bottom"> <!-- editable="bottom" permite edición rápida si es necesario, pero 'can_write=false' lo anulará. -->
                             <field name="prenda_id"/>
                             <field name="numero_serie_id"/>
                             <field name="fecha_arriendo"/>
                             <field name="estado"/>
-                        </tree>
+                            <field name="fecha_devolucion"/> <!-- Mostrar fecha de devolución también -->
+                            <field name="active" invisible="1"/> <!-- Ocultar si no es relevante en la lista -->
+                        </list>
                     </field>
                 </page>
             </xpath>
