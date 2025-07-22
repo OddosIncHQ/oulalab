@@ -1,0 +1,41 @@
+.card .form-check {
+    margin-top: 10px;
+}
+
+.card-img-top {
+    border-bottom: 1px solid #ddd;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.container h2 {
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.selection-counter {
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1055;
+}
+
+.card:hover {
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    transform: scale(1.01);
+    transition: all 0.2s ease-in-out;
+}
