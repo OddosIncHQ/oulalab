@@ -1,16 +1,24 @@
-# -*- coding: utf-8 -*-
 {
     'name': 'Arriendo de Prendas por Suscripción',
-    'version': '1.0',
+    'version': '1.0.0',
     'summary': 'Gestión de arriendo de prendas bajo modelo de suscripción',
     'description': """
-        Módulo para la administración de arriendo de prendas mediante suscripciones.
-        Incluye gestión de productos, stock, suscripciones, portal para clientes y vistas personalizadas.
+        Este módulo permite ofrecer productos (prendas) en modalidad de arriendo mediante suscripciones periódicas. 
+        Integra gestión de productos, stock, suscripciones y un portal web para clientes.
+        La tienda en línea (`website_sale`) ha sido adaptada para soportar el modelo de arriendo en lugar de venta directa.
     """,
     'author': 'Tu Nombre o Empresa',
-    'website': 'https://tusitio.com',
+    'website': 'https://www.tusitio.com',
     'category': 'Sales/Subscription',
-    'depends': ['base', 'product', 'stock', 'sale', 'website', 'portal', 'sale_subscription'],
+    'depends': [
+        'base',
+        'sale_subscription',
+        'stock',
+        'product',
+        'website',
+        'website_portal',
+        'website_sale',
+    ],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
@@ -27,9 +35,13 @@
             'arriendo_prendas_suscripcion/static/src/css/arriendo_styles.css',
             'arriendo_prendas_suscripcion/static/src/js/arriendo_scripts.js',
         ],
+        'web.assets_frontend': [
+            'arriendo_prendas_suscripcion/static/src/css/arriendo_styles.css',
+            'arriendo_prendas_suscripcion/static/src/js/arriendo_scripts.js',
+        ],
     },
-    'application': True,
     'installable': True,
+    'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
 }
