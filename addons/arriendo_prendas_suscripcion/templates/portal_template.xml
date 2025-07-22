@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Enlace al menú de portal personalizado -->
+    <template id="portal_my_home_arriendo_link" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[@id='o_portal_docs']/ul" position="inside">
+            <li>
+                <a class="btn btn-link" href="/my/rentals">
+                    <i class="fa fa-cube"/> Mis Arriendos
+                </a>
+            </li>
+        </xpath>
+    </template>
+
+    <!-- Panel de control de arriendo del cliente -->
+    <template id="portal_dashboard" name="Portal Arriendo">
+        <t t-call="portal.portal_layout">
+            <t t-set="title">Mis Arriendos</t>
+
+            <div class="container">
+                <h2>Mi Suscripción de Arriendo</h2>
+                <t t-if="subscription">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Suscripción:</strong> <t t-esc="subscription.name"/>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Cliente:</strong> <t t-esc="subscription.partner_id.name"/>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card p-2">
+                                <strong>Prendas Arrendadas</strong><br/>
+                                <span class="text-primary h4"><t t-esc="subscription.x_cantidad_prendas_en_posesion"/></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card p-2">
+                                <strong>Máx. Permitidas</strong><br/>
+                                <span class="text-success h4"><t t-esc="subscription.x_max_prendas_permitidas"/></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card p-2">
+                                <strong>Cambios Usados</strong><br/>
+                                <span class="text-warning h4"><t t-esc="subscription.x_cambios_usados_mes"/></span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card p-2">
+                                <strong>Cambios Permitidos</strong><br/>
+                                <span class="text-info h4"><t t-esc="subscription.x_cambios_permitidos_mes"/></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4>Prendas en Posesión</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Prenda</th>
+                                <th>Número de Serie</th>
+                                <th>Fecha de Arriendo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="prendas_arrendadas" t-as="linea">
+                                <tr>
+                                    <td><t t-esc="linea.prenda_id.display_name"/></td>
+                                    <td><t t-esc="linea.numero_serie_id.name"/></td>
+                                    <td><t t-esc="linea.fecha_arriendo.strftime('%d/%m/%Y')"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-4">
+                        <a href="/my/rentals/catalog" class="btn btn-primary">Ver Catálogo</a>
+                        <a href="#" class="btn btn-warning">Solicitar Cambio</a>
+                        <a href="#" class="btn btn-danger">Solicitar Devolución</a>
+                    </div>
+                </t>
+                <t t-if="not subscription">
+                    <p class="text-muted">No tienes una suscripción activa en este momento.</p>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Plantilla de límite excedido -->
+    <template id="portal_limited" name="Límite Excedido">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-5">
+                <h3 class="text-danger">Límite alcanzado</h3>
+                <p t-esc="error"/>
+                <a href="/my/rentals" class="btn btn-secondary mt-3">Volver</a>
+            </div>
+        </t>
+    </template>
+
+    <!-- Plantilla sin suscripción activa -->
+    <template id="portal_no_subscription" name="Sin Suscripción">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-5">
+                <h3>No tienes suscripción activa</h3>
+                <p>Actualmente no tienes una suscripción activa para arriendo de prendas.</p>
+            </div>
+        </t>
+    </template>
+
+</odoo>
