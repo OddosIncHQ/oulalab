@@ -6,13 +6,33 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
+            <!-- Opción 1: Añadir una nueva pestaña "Configuración de Arriendo" -->
+            <!-- Esta opción es buena si esperas tener muchos campos relacionados con el arriendo en el futuro. -->
             <xpath expr="//sheet/notebook" position="inside">
-                <page string="Configuración de Arriendo">
+                <page string="Configuración de Arriendo" name="arriendo_config_page"> <!-- Añadido 'name' para referencia futura -->
                     <group>
                         <field name="x_es_prenda_arrendable"/>
                     </group>
                 </page>
             </xpath>
+
+            <!-- Opción 2 (Alternativa): Añadir el campo en la pestaña "Información General" o "Ventas" -->
+            <!-- Si solo es un checkbox, a menudo es más intuitivo ponerlo en una pestaña existente
+                 donde se configuran otros aspectos del producto. -->
+            <!-- Por ejemplo, dentro de la pestaña "Información General" (General Information)
+                 después del campo 'type' o 'detailed_type'. -->
+            <!--
+            <xpath expr="//field[@name='detailed_type']" position="after">
+                <field name="x_es_prenda_arrendable"/>
+            </xpath>
+            -->
+            <!-- O en la pestaña 'Ventas' (Sales) si está muy relacionado con cómo se vende/arrienda. -->
+            <!--
+            <xpath expr="//page[@name='sales']//group" position="inside">
+                <field name="x_es_prenda_arrendable"/>
+            </xpath>
+            -->
+            
         </field>
     </record>
 
