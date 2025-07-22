@@ -6,13 +6,9 @@ class ArriendoPrendaLinea(models.Model):
     _name = 'arriendo.prenda.linea'
     _description = 'Línea de Prenda Arrendada'
     _order = 'fecha_arriendo desc'
-    _sql_constraints = [
-        (
-            'unique_serie_per_suscripcion',
-            'unique(suscripcion_id, numero_serie_id)',
-            'Una misma prenda (serie) no puede estar arrendada más de una vez en la misma suscripción.'
-        )
-    ]
+    
+    # Hemos eliminado la restricción _sql_constraints aquí.
+    # La unicidad de la prenda activa en todo el sistema se maneja con _check_numero_serie_disponible.
 
     suscripcion_id = fields.Many2one(
         'sale.subscription',
@@ -25,6 +21,7 @@ class ArriendoPrendaLinea(models.Model):
         'product.product',
         string='Prenda',
         required=True,
+        # Considera actualizar este dominio una vez que 'x_es_prenda_arrendable' esté en product.product
         domain=[('type', '=', 'product')]
     )
 
@@ -67,6 +64,5 @@ class ArriendoPrendaLinea(models.Model):
                 ], limit=1)
                 if conflict:
                     raise ValidationError(_(
-                        'La prenda con número de serie "%s" ya está arrendada en otra suscripción activa.'
-                    ) % (record.numero_serie_id.display_name))
-
+                        'La prenda con número de serie "%s" ya está arrendada en la suscripción "%s" y está activa. No puede ser arrendada nuevamente.'
+                    ) % (record.numero_serie_id.display_name, conflict.suscripcion_id.display_name))
