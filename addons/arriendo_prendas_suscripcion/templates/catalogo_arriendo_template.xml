@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="portal_catalogo_arriendo" name="Catálogo de Arriendo">
+        <t t-call="portal.portal_layout">
+            <div class="container">
+                <h2>Catálogo de Prendas Disponibles</h2>
+
+                <form id="rentForm" action="/my/rentals/request_rent" method="POST">
+                    <div class="row">
+                        <t t-foreach="productos" t-as="producto">
+                            <div class="col-md-3 mb-4">
+                                <div class="card h-100">
+                                    <t t-if="producto.image_1920">
+                                        <img t-att-src="'data:image/png;base64,%s' % producto.image_1920" class="card-img-top" style="height: 200px; object-fit: cover;"/>
+                                    </t>
+                                    <div class="card-body">
+                                        <h5 class="card-title"><t t-esc="producto.display_name"/></h5>
+                                        <p class="card-text">
+                                            <strong>Referencia:</strong> <t t-esc="producto.default_code"/>
+                                        </p>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="product_ids" t-att-value="producto.id"/>
+                                            <label class="form-check-label">Seleccionar</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-success">Confirmar Solicitud de Arriendo</button>
+                        <a href="/my/rentals" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+
+</odoo>
