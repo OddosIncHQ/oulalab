@@ -6,11 +6,33 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
-            <!-- Añadimos nuestros campos después del campo partner_id -->
+            <!--
+                Añadimos nuestros campos después del campo partner_id.
+                Considera envolverlos en un <group> o <field> con un label
+                para darles más contexto visual, especialmente si son campos relacionados.
+                También, podrías hacer que 'x_es_cambio_prenda' dependa de 'x_suscripcion_id'.
+            -->
             <xpath expr="//group/field[@name='partner_id']" position="after">
-                <field name="x_suscripcion_id" options="{'no_create': True}"/>
-                <field name="x_es_cambio_prenda"/>
+                <field name="x_suscripcion_id" options="{'no_create': True, 'no_create_edit': True}"
+                       domain="[('partner_id', '=', partner_id), ('state', '=', 'open')]"/> <!-- Filtrar por cliente y suscripciones activas -->
+                <field name="x_es_cambio_prenda"
+                       attrs="{'invisible': [('x_suscripcion_id', '=', False)]}"/> <!-- Solo visible si hay una suscripción -->
             </xpath>
+
+            <!-- Opcional: Si quieres una sección dedicada para arriendos, puedes usar un notebook/page
+                 o un grupo de campos más estructurado.
+                 Por ejemplo, después de los campos principales de la cabecera, antes de las líneas de productos.
+            -->
+            <!--
+            <xpath expr="//notebook/page[@name='operations']" position="before">
+                <page string="Información de Arriendo" name="arriendo_info_page">
+                    <group>
+                        <field name="x_suscripcion_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        <field name="x_es_cambio_prenda"/>
+                    </group>
+                </page>
+            </xpath>
+            -->
         </field>
     </record>
 
