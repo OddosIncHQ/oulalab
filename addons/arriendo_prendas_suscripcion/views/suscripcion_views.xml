@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_sale_subscription_form_inherit_arriendo" model="ir.ui.view">
+        <field name="name">sale.subscription.form.arriendo</field>
+        <field name="model">sale.subscription</field>
+        <field name="inherit_id" ref="sale_subscription.sale_subscription_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="Límites de Arriendo">
+                    <field name="x_max_prendas_permitidas"/>
+                    <field name="x_cambios_permitidos_mes"/>
+                    <field name="x_cambios_usados_mes" readonly="1"/>
+                    <field name="x_proxima_fecha_reseteo_cambios" readonly="1"/>
+                </group>
+            </xpath>
+
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Prendas Arrendadas">
+                    <field name="x_prendas_en_posesion_ids" context="{'default_suscripcion_id': active_id}">
+                        <tree editable="bottom">
+                            <field name="prenda_id"/>
+                            <field name="numero_serie_id"/>
+                            <field name="fecha_arriendo"/>
+                            <field name="estado"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
