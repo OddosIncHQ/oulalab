@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Vista de árbol (listado) -->
+    <record id="view_arriendo_prenda_linea_tree" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.tree</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="suscripcion_id"/>
+                <field name="prenda_id"/>
+                <field name="numero_serie_id"/>
+                <field name="fecha_arriendo"/>
+                <field name="estado"/>
+                <field name="fecha_devolucion"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista de formulario -->
+    <record id="view_arriendo_prenda_linea_form" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.form</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="suscripcion_id"/>
+                        <field name="prenda_id"/>
+                        <field name="numero_serie_id"/>
+                        <field name="fecha_arriendo"/>
+                        <field name="fecha_devolucion"/>
+                        <field name="estado"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda -->
+    <record id="view_arriendo_prenda_linea_search" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.search</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="suscripcion_id"/>
+                <field name="prenda_id"/>
+                <field name="numero_serie_id"/>
+                <field name="estado"/>
+                <field name="fecha_arriendo"/>
+                <field name="fecha_devolucion"/>
+                <filter name="activo" string="Activos" domain="[('active', '=', True)]"/>
+                <filter name="inactivos" string="Inactivos" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción de ventana -->
+    <record id="action_arriendo_prenda_linea" model="ir.actions.act_window">
+        <field name="name">Prendas Arrendadas</field>
+        <field name="res_model">arriendo.prenda.linea</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay líneas de prendas arrendadas.
+            </p>
+            <p>Desde aquí puedes gestionar el historial de prendas entregadas a los suscriptores.</p>
+        </field>
+    </record>
+
+    <!-- Menú -->
+    <menuitem id="menu_arriendo_prenda_root"
+              name="Arriendo de Prendas"
+              sequence="10"
+              parent="base.menu_sales"/>
+
+    <menuitem id="menu_arriendo_prenda_linea"
+              name="Prendas Arrendadas"
+              parent="menu_arriendo_prenda_root"
+              action="action_arriendo_prenda_linea"
+              sequence="20"/>
+
+</odoo>
