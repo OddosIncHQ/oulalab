@@ -11,9 +11,9 @@ class ArriendoPortal(http.Controller):
         user = request.env.user
         # Siempre es buena práctica intentar buscar la suscripción sin sudo() primero
         # y luego usar sudo() si se requiere acceso a campos no públicos o para operaciones internas.
-        # Aquí, como es para el propio usuario, no debería necesitar sudo, pero el modelo sale.subscription
+        # Aquí, como es para el propio usuario, no debería necesitar sudo, pero el modelo sale.order
         # puede tener reglas de registro que lo requieran para el portal. Lo mantendremos así por ahora.
-        subscription = request.env['sale.subscription'].sudo().search([
+        subscription = request.env['sale.order'].sudo().search([
             ('partner_id', '=', user.partner_id.id),
             ('state', '=', 'open')
         ], limit=1)
@@ -60,7 +60,7 @@ class ArriendoPortal(http.Controller):
         
         # Obtener la suscripción del usuario para mostrar límites en el catálogo
         user = request.env.user
-        subscription = request.env['sale.subscription'].sudo().search([
+        subscription = request.env['sale.order'].sudo().search([
             ('partner_id', '=', user.partner_id.id),
             ('state', '=', 'open')
         ], limit=1)
@@ -82,7 +82,7 @@ class ArriendoPortal(http.Controller):
             return request.redirect('/my/rentals?error_message=%s' % _("Debes seleccionar al menos una prenda para arrendar."))
 
         user = request.env.user
-        subscription = request.env['sale.subscription'].sudo().search([
+        subscription = request.env['sale.order'].sudo().search([
             ('partner_id', '=', user.partner_id.id),
             ('state', '=', 'open')
         ], limit=1)
@@ -192,7 +192,7 @@ class ArriendoPortal(http.Controller):
             return request.redirect('/my/rentals?error_message=%s' % _("Debes seleccionar al menos una prenda para devolver."))
 
         user = request.env.user
-        subscription = request.env['sale.subscription'].sudo().search([
+        subscription = request.env['sale.order'].sudo().search([
             ('partner_id', '=', user.partner_id.id),
             ('state', '=', 'open')
         ], limit=1)
@@ -270,7 +270,7 @@ class ArriendoPortal(http.Controller):
         new_product_ids = [int(p_id) for p_id in new_product_ids_str if p_id.isdigit()]
 
         user = request.env.user
-        subscription = request.env['sale.subscription'].sudo().search([
+        subscription = request.env['sale.order'].sudo().search([
             ('partner_id', '=', user.partner_id.id),
             ('state', '=', 'open')
         ], limit=1)
