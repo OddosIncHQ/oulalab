@@ -1,6 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_arriendo_prenda_linea_manager,arriendo.prenda.linea manager,model_arriendo_prenda_linea,arriendo_prendas_suscripcion.group_arriendo_manager,1,1,1,1
-access_arriendo_prenda_linea_sales,arriendo.prenda.linea ventas,model_arriendo_prenda_linea,sales_team.group_sale_salesman,1,1,1,0
-access_arriendo_prenda_linea_stock,arriendo.prenda.linea inventario,model_arriendo_prenda_linea,stock.group_stock_user,1,1,1,1
-access_arriendo_prenda_linea_user,arriendo.prenda.linea usuario,model_arriendo_prenda_linea,base.group_user,1,0,0,0
-
+access_arriendo_prenda_linea_manager,arriendo.prenda.linea manager,arriendo_prendas_suscripcion.model_arriendo_prenda_linea,arriendo_prendas_suscripcion.group_arriendo_manager,1,1,1,1
+access_arriendo_prenda_linea_sales,arriendo.prenda.linea ventas,arriendo_prendas_suscripcion.model_arriendo_prenda_linea,sales_team.group_sale_salesman,1,1,1,0
+access_arriendo_prenda_linea_stock,arriendo.prenda.linea inventario,arriendo_prendas_suscripcion.model_arriendo_prenda_linea,stock.group_stock_user,1,1,1,1
+access_arriendo_prenda_linea_user,arriendo.prenda.linea usuario,arriendo_prendas_suscripcion.model_arriendo_prenda_linea,base.group_user,1,0,0,0
