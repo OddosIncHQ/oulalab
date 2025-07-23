@@ -3,10 +3,10 @@
 
     <record id="ir_cron_reset_monthly_subscription_changes" model="ir.cron">
         <field name="name">Resetear Cambios Mensuales de Suscripciones</field>
-        <!-- Referencia al modelo sale.subscription. Asegúrate de que el ref sea correcto. -->
+        <!-- Referencia al modelo sale.order. Asegúrate de que el ref sea correcto. -->
         <field name="model_id" ref="sale_subscription.model_sale_subscription"/>
         <field name="state">code</field>
-        <!-- El código que se ejecutará. Llama al método que definiste en sale.subscription. -->
+        <!-- El código que se ejecutará. Llama al método que definiste en sale.order. -->
         <field name="code">model.action_reset_monthly_changes()</field>
         <!-- El usuario bajo el cual se ejecutará la tarea. user_root tiene todos los permisos. -->
         <field name="user_id" ref="base.user_root"/>
