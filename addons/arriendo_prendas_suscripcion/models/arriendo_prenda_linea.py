@@ -3,12 +3,9 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 class ArriendoPrendaLinea(models.Model):
-    _name = 'arriendo.prenda.linea'
+    _name = 'arriendo_prendas_suscripcion.arriendo_prenda_linea'
     _description = 'Línea de Prenda Arrendada'
     _order = 'fecha_arriendo desc'
-    
-    # Hemos eliminado la restricción _sql_constraints aquí.
-    # La unicidad de la prenda activa en todo el sistema se maneja con _check_numero_serie_disponible.
 
     suscripcion_id = fields.Many2one(
         'sale.order',
@@ -21,7 +18,6 @@ class ArriendoPrendaLinea(models.Model):
         'product.product',
         string='Prenda',
         required=True,
-        # Considera actualizar este dominio una vez que 'x_es_prenda_arrendable' esté en product.product
         domain=[('type', '=', 'product')]
     )
 
