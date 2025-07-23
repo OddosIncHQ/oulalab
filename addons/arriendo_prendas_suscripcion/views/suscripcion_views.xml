@@ -2,8 +2,8 @@
 <odoo>
 
     <record id="view_sale_subscription_form_inherit_arriendo" model="ir.ui.view">
-        <field name="name">sale.subscription.form.arriendo</field>
-        <field name="model">sale.subscription</field>
+        <field name="name">sale.order.form.arriendo</field>
+        <field name="model">sale.order</field>
         <!-- Correcto: hereda de la vista principal del formulario de suscripción. -->
         <field name="inherit_id" ref="sale_subscription.sale_subscription_view_form"/>
         <field name="arch" type="xml">
