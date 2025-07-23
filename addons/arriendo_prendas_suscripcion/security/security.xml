@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
+    <!-- Grupo para gestión de arriendos -->
     <record id="group_arriendo_manager" model="res.groups">
         <field name="name">Manager de Arriendos</field>
         <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <!-- Registro manual del modelo para permitir su uso en ir.model.access.csv -->
+    <record id="model_arriendo_prenda_linea" model="ir.model">
+        <field name="name">arriendo_prenda_linea</field>
+        <field name="model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
     </record>
 
 </odoo>
