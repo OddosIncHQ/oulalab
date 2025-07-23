@@ -3,7 +3,7 @@
 
     <record id="group_arriendo_manager" model="res.groups">
         <field name="name">Manager de Arriendos</field>
-        <field name="category_id" ref="base.module_category_sales_management"/>
+        <field name="category_id" ref="base.module_category_sales"/>
     </record>
 
 </odoo>
