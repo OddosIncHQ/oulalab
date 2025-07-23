@@ -7,7 +7,7 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     x_suscripcion_id = fields.Many2one(
-        'sale.subscription',
+        'sale.order',
         string='Suscripción'
     )
 

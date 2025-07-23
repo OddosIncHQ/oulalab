@@ -5,7 +5,7 @@ from datetime import date # Importar date para operaciones de fecha si se usa di
 
 
 class SaleSubscription(models.Model):
-    _inherit = 'sale.subscription'
+    _inherit = 'sale.order'
 
     x_max_prendas_permitidas = fields.Integer(
         string='Máx. Prendas Permitidas',

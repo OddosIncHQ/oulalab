@@ -11,7 +11,7 @@ class ArriendoPrendaLinea(models.Model):
     # La unicidad de la prenda activa en todo el sistema se maneja con _check_numero_serie_disponible.
 
     suscripcion_id = fields.Many2one(
-        'sale.subscription',
+        'sale.order',
         string='Suscripción',
         required=True,
         ondelete='cascade'
