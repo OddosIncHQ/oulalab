@@ -32,11 +32,10 @@
                     -->
                     <field name="x_prendas_en_posesion_ids"
                            context="{'default_suscripcion_id': active_id}"
-                           nolabel="1" <!-- Oculta la etiqueta del campo One2many si no la necesitas -->
-                           widget="one2many_list" <!-- Widget explícito para One2many -->
-                           can_create="false" <!-- No permitir crear nuevas líneas desde aquí -->
-                           can_write="false"> <!-- No permitir editar líneas desde aquí -->
-                        <!-- Usar <list> en lugar de <tree> para Odoo 18. -->
+                           nolabel="1"
+                           widget="one2many_list"
+                           can_create="false" 
+                           can_write="false"> 
                         <list editable="bottom"> <!-- editable="bottom" permite edición rápida si es necesario, pero 'can_write=false' lo anulará. -->
                             <field name="prenda_id"/>
                             <field name="numero_serie_id"/>
