@@ -6,9 +6,4 @@
         <field name="category_id" ref="base.module_category_sales"/>
     </record>
 
-     <record id="model_arriendo_prendas_suscripcion_arriendo_prenda_linea" model="ir.model">
-        <field name="name">arriendo_prenda_linea</field>
-        <field name="model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
-    </record>
-
 </odoo>
