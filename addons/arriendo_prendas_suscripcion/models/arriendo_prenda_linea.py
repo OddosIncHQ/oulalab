@@ -1,90 +1,76 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-import logging
-
-_logger = logging.getLogger(__name__)
 
 class ArriendoPrendaLinea(models.Model):
-    _name = 'arriendo_prendas_suscripcion.arriendo_prenda_linea'
-    _description = 'Línea de Prenda Arrendada'
+    """
+    Este es el modelo principal que rastrea cada instancia de una prenda arrendada.
+    """
+    # Nombre estandarizado. Este es el identificador único del modelo.
+    _name = 'arriendo.prenda.linea'
+    _description = 'Línea de Historial de Prenda Arrendada'
     _order = 'fecha_arriendo desc'
 
     suscripcion_id = fields.Many2one(
         'sale.order',
         string='Suscripción',
         required=True,
-        ondelete='cascade'
+        ondelete='cascade',
+        domain="[('is_subscription', '=', True)]"
     )
 
     prenda_id = fields.Many2one(
         'product.product',
         string='Prenda',
         required=True,
-        domain=[('type', '=', 'product')]
+        domain="[('x_es_prenda_arrendable', '=', True)]"
     )
 
     numero_serie_id = fields.Many2one(
-        'stock.production.lot',
+        'stock.lot',
         string='Número de Serie',
-        required=False,
-        check_company=False,
+        required=True,
+        ondelete='restrict'
     )
 
     fecha_arriendo = fields.Datetime(
-        string='Fecha de Arriendo',
+        string='Fecha de Envío (Arriendo)',
         required=True,
-        default=fields.Datetime.now
+        default=fields.Datetime.now,
+        readonly=True
     )
 
     fecha_devolucion = fields.Datetime(
-        string='Fecha de Devolución'
+        string='Fecha de Devolución',
+        readonly=True
     )
 
     estado = fields.Selection([
-        ('arrendada', 'Arrendada'),
-        ('devuelta', 'Devuelta'),
-        ('en_limpieza', 'En Limpieza'),
-        ('mantenimiento', 'Mantenimiento'),
-        ('perdida', 'Perdida')
-    ], string='Estado', default='arrendada', required=True)
+        ('arrendada', 'En posesión del cliente'),
+        ('devuelta', 'Devuelta en almacén'),
+        ('en_limpieza', 'En limpieza/revisión'),
+        ('mantenimiento', 'En mantenimiento'),
+        ('perdida', 'Declarada como perdida')
+    ], string='Estado', default='arrendada', required=True, tracking=True)
 
-    active = fields.Boolean(string='Activo', default=True)
-
-    @api.onchange('prenda_id')
-    def _onchange_prenda_id(self):
-        """
-        Limpia la serie si no corresponde a la prenda,
-        y filtra el dominio para las series según el producto.
-        """
-        try:
-            if self.numero_serie_id and getattr(self.numero_serie_id, 'product_id', False):
-                if self.numero_serie_id.product_id != self.prenda_id:
-                    self.numero_serie_id = False
-            else:
-                self.numero_serie_id = False
-        except Exception as e:
-            _logger.warning("⚠️ Error en onchange de prenda_id: %s", e)
-            self.numero_serie_id = False
-
-        return {
-            'domain': {
-                'numero_serie_id': [('product_id', '=', self.prenda_id.id)] if self.prenda_id else []
-            }
-        }
-
+    active = fields.Boolean(
+        string='Activo',
+        default=True,
+        help="Una línea inactiva representa un arriendo histórico. Las activas representan prendas actualmente en posesión del cliente."
+    )
+    
     @api.constrains('numero_serie_id', 'estado', 'active')
     def _check_numero_serie_disponible(self):
         for record in self:
             if record.estado == 'arrendada' and record.active and record.numero_serie_id:
-                conflict = self.search([
+                conflicto = self.search([
+                    ('id', '!=', record.id),
                     ('numero_serie_id', '=', record.numero_serie_id.id),
                     ('estado', '=', 'arrendada'),
                     ('active', '=', True),
-                    ('id', '!=', record.id)
                 ], limit=1)
-                if conflict:
+                
+                if conflicto:
                     raise ValidationError(_(
-                        'La prenda con número de serie "%s" ya está arrendada en la suscripción "%s" y está activa. '
-                        'No puede ser arrendada nuevamente.'
-                    ) % (record.numero_serie_id.display_name, conflict.suscripcion_id.display_name))
+                        'La prenda con número de serie "%s" ya se encuentra activamente arrendada en la suscripción "%s".'
+                    ) % (record.numero_serie_id.name, conflicto.suscripcion_id.name))
