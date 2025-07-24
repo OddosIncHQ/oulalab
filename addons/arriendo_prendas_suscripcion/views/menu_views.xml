@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- ====================================================== -->
     <!-- MENÚ RAÍZ DE LA APLICACIÓN                             -->
-    <!-- Este es el menú principal que aparecerá en el home de Odoo -->
+    <!-- Visible para cualquier usuario logueado.               -->
     <!-- ====================================================== -->
     <menuitem
         id="menu_arriendo_root"
         name="Arriendos"
         web_icon="arriendo_prendas_suscripcion,static/description/icon.png"
         sequence="10"
-        groups="arriendo_prendas_suscripcion.group_arriendo_user"
+        groups="base.group_user"
     />
 
     <!-- ====================================================== -->
     <!-- MENÚS PRINCIPALES DE LA APLICACIÓN                     -->
+    <!-- Aquí aplicamos los grupos de seguridad específicos.    -->
     <!-- ====================================================== -->
 
     <!-- Menú para Suscripciones -->
@@ -23,6 +23,7 @@
         parent="menu_arriendo_root"
         action="sale_subscription.sale_subscription_action"
         sequence="10"
+        groups="arriendo_prendas_suscripcion.group_arriendo_user"
     />
 
     <!-- Menú para el Historial de Arriendos -->
@@ -30,8 +31,9 @@
         id="menu_arriendo_historial"
         name="Historial de Arriendos"
         parent="menu_arriendo_root"
-        action="action_arriendo_prenda_linea"
+        action="arriendo_prendas_suscripcion.action_arriendo_prenda_linea"
         sequence="20"
+        groups="arriendo_prendas_suscripcion.group_arriendo_user"
     />
 
     <!-- Menú para Inventario (Albaranes) -->
@@ -42,7 +44,6 @@
         sequence="30"
         groups="stock.group_stock_user"
     />
-        <!-- Submenú para ver TODOS los albaranes -->
         <menuitem
             id="menu_arriendo_stock_picking"
             name="Albaranes"
@@ -59,35 +60,24 @@
         sequence="100"
         groups="arriendo_prendas_suscripcion.group_arriendo_manager"
     />
-        <!-- Submenú para configurar las prendas arrendables -->
-        <menuitem
-            id="menu_arriendo_productos_config"
-            name="Prendas Arrendables"
-            parent="menu_arriendo_configuracion_root"
-            action="product.product_template_action"
-            sequence="10"
-        />
-        <!-- Creamos una acción específica para que al hacer clic,
-             la vista de productos se filtre y solo muestre los arrendables. -->
         <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
             <field name="name">Prendas Arrendables</field>
             <field name="res_model">product.template</field>
             <field name="view_mode">kanban,tree,form</field>
-            <field name="context">{'search_default_x_es_prenda_arrendable': 1}</field>
+            <field name="context">{'search_default_x_es_prenda_arrendable': 1, 'default_x_es_prenda_arrendable': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
                     No se encontraron productos marcados como "Prenda Arrendable".
                 </p><p>
-                    Ve a cualquier producto y activa la opción en la pestaña 'Configuración de Arriendo' para que aparezca aquí.
+                    Crea un nuevo producto o ve a uno existente y activa la opción en la pestaña 'Configuración de Arriendo'.
                 </p>
             </field>
         </record>
-        <!-- Reemplazamos la acción del menú para que use nuestro filtro -->
         <menuitem
             id="menu_arriendo_productos_config"
-            action="action_ver_prendas_arrendables"
+            name="Prendas Arrendables"
             parent="menu_arriendo_configuracion_root"
+            action="action_ver_prendas_arrendables"
             sequence="10"
         />
-
 </odoo>
