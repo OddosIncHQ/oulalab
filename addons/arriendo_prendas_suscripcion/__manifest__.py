@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 {
     'name': 'Arriendos por Suscripción',
     'version': '1.3.2',
