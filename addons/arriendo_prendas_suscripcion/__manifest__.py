@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Arriendos por Suscripción',
-    'version': '1.2.4', # Incrementamos la versión
+    'version': '1.3.0',
     'summary': 'Aplicación para la gestión integral del modelo de arriendo de prendas.',
     'author': 'Tu Nombre/Empresa',
     'category': 'Sales/Subscription',
@@ -21,7 +21,6 @@
         'data/cron_jobs.xml',
         
         # 3. Vistas que definen acciones y componentes base
-        #    Cargamos estas primero para que las acciones estén disponibles.
         'views/arriendo_prenda_linea_views.xml',
         'views/suscripcion_views.xml',
         'views/stock_picking_views.xml',
@@ -44,4 +43,5 @@
     'installable': True,
     'license': 'LGPL-3',
     'web_icon': 'arriendo_prendas_suscripcion,static/description/icon.png',
+    'post_init_hook': 'post_init_hook',
 }
