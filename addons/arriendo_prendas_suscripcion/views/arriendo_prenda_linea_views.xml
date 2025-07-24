@@ -1,12 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Vista de Lista (Tree) -->
-    <record id="view_arriendo_prenda_linea_tree" model="ir.ui.view">
-        <field name="name">arriendo.prenda.linea.tree</field>
+    <!--
+        Vistas para el modelo arriendo.prenda.linea
+        Este archivo define las vistas de lista, formulario y búsqueda,
+        así como la acción de ventana para acceder a ellas.
+    -->
+
+    <!-- Vista de Búsqueda (Search) -->
+    <record id="view_arriendo_prenda_linea_search" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.search</field>
         <field name="model">arriendo.prenda.linea</field>
         <field name="arch" type="xml">
-            <tree decoration-info="estado=='arrendada'"
+            <search>
+                <field name="suscripcion_id"/>
+                <field name="prenda_id"/>
+                <field name="numero_serie_id"/>
+                <field name="estado"/>
+                <separator/>
+                <filter name="filter_arrendada" string="En Posesión del Cliente" domain="[('estado', '=', 'arrendada')]"/>
+                <filter name="filter_devuelta" string="Devueltas" domain="[('estado', '=', 'devuelta')]"/>
+                <filter name="filter_active" string="Activas" domain="[('active', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="groupby_suscripcion" string="Suscripción" context="{'group_by': 'suscripcion_id'}"/>
+                    <filter name="groupby_prenda" string="Prenda" context="{'group_by': 'prenda_id'}"/>
+                    <filter name="groupby_estado" string="Estado" context="{'group_by': 'estado'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vista de Lista (List) - CORREGIDO PARA ODOO 18 -->
+    <record id="view_arriendo_prenda_linea_list" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.list</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <!-- La etiqueta <tree> ha sido reemplazada por <list> en Odoo 18 -->
+            <list decoration-info="estado=='arrendada'"
                   decoration-success="estado=='devuelta'"
                   decoration-warning="estado in ('en_limpieza', 'mantenimiento')"
                   decoration-danger="estado=='perdida'">
@@ -17,11 +48,11 @@
                 <field name="fecha_devolucion"/>
                 <field name="estado"/>
                 <field name="active" widget="boolean_toggle"/>
-            </tree>
+            </list>
         </field>
     </record>
 
-    <!-- Vista de Formulario -->
+    <!-- Vista de Formulario (Form) -->
     <record id="view_arriendo_prenda_linea_form" model="ir.ui.view">
         <field name="name">arriendo.prenda.linea.form</field>
         <field name="model">arriendo.prenda.linea</field>
@@ -30,14 +61,14 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="suscripcion_id"/>
-                            <field name="prenda_id"/>
-                            <field name="numero_serie_id"/>
+                            <field name="suscripcion_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="prenda_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="numero_serie_id" options="{'no_create': True, 'no_open': True}"/>
                         </group>
                         <group>
                             <field name="estado"/>
-                            <field name="fecha_arriendo"/>
-                            <field name="fecha_devolucion"/>
+                            <field name="fecha_arriendo" readonly="1"/>
+                            <field name="fecha_devolucion" readonly="1"/>
                             <field name="active"/>
                         </group>
                     </group>
@@ -46,11 +77,14 @@
         </field>
     </record>
 
-    <!-- Acción de Ventana (se mantiene igual) -->
+    <!-- Acción de Ventana (Action Window) -->
     <record id="action_arriendo_prenda_linea" model="ir.actions.act_window">
         <field name="name">Historial de Arriendos</field>
         <field name="res_model">arriendo.prenda.linea</field>
-        <field name="view_mode">tree,form</field>
+        <!-- Se actualiza el view_mode para reflejar el cambio de tree a list -->
+        <field name="view_mode">list,form</field>
+        <!-- Enlazamos la vista de búsqueda que creamos -->
+        <field name="search_view_id" ref="view_arriendo_prenda_linea_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aún no hay registros de arriendos.
@@ -59,11 +93,5 @@
             </p>
         </field>
     </record>
-
-    <!--
-    SE HAN ELIMINADO LOS MENUS ANTERIORES DE AQUÍ.
-    Los <menuitem> que estaban aquí (menu_arriendo_prenda_root y menu_arriendo_prenda_linea)
-    han sido reemplazados por la estructura centralizada en 'views/menu_views.xml'.
-    -->
 
 </odoo>
