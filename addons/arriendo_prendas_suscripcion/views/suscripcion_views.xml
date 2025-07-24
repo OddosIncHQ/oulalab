@@ -4,10 +4,10 @@
     <record id="view_sale_subscription_form_inherit_arriendo" model="ir.ui.view">
         <field name="name">sale.order.form.arriendo</field>
         <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="inherit_id" ref="sale_subscription.sale_subscription_view_form"/>
         <field name="arch" type="xml">
 
-            <!-- Añadimos nuestros campos de límites después del grupo principal de la cabecera. -->
+            <!-- Añadir grupo con los campos de límites -->
             <xpath expr="//sheet/group" position="after">
                 <group string="Límites de Arriendo">
                     <field name="x_max_prendas_permitidas"/>
@@ -18,16 +18,15 @@
                 </group>
             </xpath>
 
-            <!-- Añadimos una nueva pestaña en el notebook para las prendas en posesión. -->
+            <!-- Añadir pestaña con prendas arrendadas -->
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Prendas Arrendadas" name="prendas_arrendadas_page">
                     <field name="x_prendas_en_posesion_ids"
                            context="{'default_suscripcion_id': id}"
                            nolabel="1"
                            widget="one2many_list"
-                           can_create="false" 
-                           can_write="false"> 
-                        <list editable="bottom">
+                           readonly="1">
+                        <list>
                             <field name="prenda_id"/>
                             <field name="numero_serie_id"/>
                             <field name="fecha_arriendo"/>
