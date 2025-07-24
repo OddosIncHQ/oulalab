@@ -1,6 +1,6 @@
 {
     'name': 'Arriendo de Prendas por Suscripción',
-    'version': '1.0.0',
+    'version': '1.0.1',
     'summary': 'Gestión de arriendo de prendas bajo modelo de suscripción',
     'description': """
         Este módulo permite ofrecer productos (prendas) en modalidad de arriendo mediante suscripciones periódicas.
