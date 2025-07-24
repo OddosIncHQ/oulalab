@@ -2,106 +2,118 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
-
 class StockPicking(models.Model):
+    """
+    Hereda de 'stock.picking' (Albaranes) para integrar la lógica de arriendo
+    directamente en las operaciones de inventario (envíos y devoluciones).
+    """
     _inherit = 'stock.picking'
 
     x_suscripcion_id = fields.Many2one(
         'sale.order',
-        string='Suscripción'
+        string='Suscripción Asociada',
+        # El dominio asegura que solo se muestren suscripciones activas del cliente seleccionado.
+        domain="[('partner_id', '=', partner_id), ('is_subscription', '=', True), ('stage_category', '=', 'progress')]",
+        help="Vincular este albarán a una suscripción activa del cliente para automatizar el registro del arriendo."
     )
 
     x_es_cambio_prenda = fields.Boolean(
-        string='Es Cambio de Prenda',
-        default=False
+        string='Es un Cambio de Prenda',
+        default=False,
+        help="Marcar si este envío cuenta como uno de los cambios mensuales permitidos por la suscripción."
     )
 
-    @api.constrains('move_ids_without_package', 'x_suscripcion_id', 'x_es_cambio_prenda')
+    @api.constrains('move_ids_without_package', 'x_suscripcion_id', 'state')
     def _check_subscription_limits(self):
+        """
+        Valida antes de confirmar un movimiento que no se excedan los límites de la suscripción.
+        Se dispara al añadir/modificar líneas o al asignar una suscripción.
+        """
         for picking in self:
-            # Solo aplicar la validación a albaranes de salida que tienen una suscripción asociada.
-            if picking.picking_type_id.code != 'outgoing' or not picking.x_suscripcion_id:
+            # Aplicar solo a albaranes de SALIDA, que no estén cancelados y tengan una suscripción.
+            if picking.state == 'cancel' or picking.picking_type_code != 'outgoing' or not picking.x_suscripcion_id:
                 continue
 
             suscripcion = picking.x_suscripcion_id
+            
+            # 1. Validar límite de cambios mensuales.
+            if picking.x_es_cambio_prenda:
+                if suscripcion.x_cambios_usados_mes >= suscripcion.x_cambios_permitidos_mes:
+                    raise ValidationError(_(
+                        "Límite de cambios alcanzado: La suscripción %s ya ha usado sus %s cambios este mes."
+                    ) % (suscripcion.name, suscripcion.x_cambios_permitidos_mes))
 
-            # Calcular el total de prendas salientes en este picking que son arrendables.
-            # Usamos `move_line_ids_without_package` para las cantidades reales procesadas (`qty_done`)
-            # o `move_ids_without_package` para las cantidades planificadas (`product_uom_qty`).
-            # Si esta validación se ejecuta *antes* de que el picking esté 'done',
-            # `product_uom_qty` es más apropiado para la planificación.
-            # Si se ejecuta *después* de la validación, `qty_done` de `move_line_ids_without_package` es lo correcto.
-            # Asumiendo que esta es una validación PRE-VALIDACIÓN del picking:
-            prendas_salientes = sum(
-                move.product_uom_qty # Usar product_uom_qty para la cantidad planificada en el movimiento.
+            # 2. Validar límite de prendas en posesión.
+            # Se calcula sobre la cantidad demandada (product_uom_qty) ya que la validación es antes de procesar.
+            prendas_en_este_envio = sum(
+                move.product_uom_qty
                 for move in picking.move_ids_without_package
                 if move.product_id.x_es_prenda_arrendable
             )
-
-            # Para una validación más precisa al momento de la confirmación (done),
-            # podrías usar `move_line_ids_without_package` y `qty_done`.
-            # Sin embargo, `@api.constrains` se dispara en CREATE/WRITE, no necesariamente al 'done'.
-            # La lógica actual con `product_uom_qty` es válida para una validación en borrador/confirmación.
-
-            # `x_cantidad_prendas_en_posesion` debe ser un campo computado en la suscripción
-            # que refleje el número actual de prendas activas arrendadas.
-            total_post_envio = suscripcion.x_cantidad_prendas_en_posesion + prendas_salientes
-
-            if total_post_envio > suscripcion.x_max_prendas_permitidas:
+            
+            total_prendas_post_envio = suscripcion.x_cantidad_prendas_en_posesion + prendas_en_este_envio
+            
+            if total_prendas_post_envio > suscripcion.x_max_prendas_permitidas:
                 raise ValidationError(_(
-                    'Supera el máximo de prendas permitidas (%s) para esta suscripción (%s). Con este envío, el cliente tendría %s prendas.'
-                ) % (suscripcion.x_max_prendas_permitidas, suscripcion.display_name, total_post_envio))
-
-            if picking.x_es_cambio_prenda and \
-               suscripcion.x_cambios_usados_mes >= suscripcion.x_cambios_permitidos_mes:
-                raise ValidationError(_(
-                    'Se ha alcanzado el límite de cambios permitidos este mes para la suscripción %s.'
-                ) % suscripcion.display_name)
+                    "Límite de prendas excedido: La suscripción %s permite un máximo de %s prendas. "
+                    "El cliente ya tiene %s y este envío añadiría %s, resultando en un total de %s."
+                ) % (
+                    suscripcion.name,
+                    suscripcion.x_max_prendas_permitidas,
+                    suscripcion.x_cantidad_prendas_en_posesion,
+                    prendas_en_este_envio,
+                    total_prendas_post_envio
+                ))
 
     def _action_done(self):
-        # Llama al método original de Odoo para que el picking se valide correctamente.
-        res = super()._action_done()
+        """
+        Sobrescribe el método que se ejecuta al validar un albarán.
+        Aquí se automatiza la creación y actualización de las líneas de arriendo.
+        """
+        # Primero, llamar a la lógica original para que el albarán se procese normalmente.
+        res = super(StockPicking, self)._action_done()
 
+        # Luego, añadir nuestra lógica personalizada.
         for picking in self:
-            # Lógica para albaranes de salida (el cliente se lleva la prenda)
-            if picking.picking_type_id.code == 'outgoing' and picking.x_suscripcion_id:
-                suscripcion = picking.x_suscripcion_id
-                for ml in picking.move_line_ids_without_package:
-                    # Asegurarse de que la prenda es arrendable y tiene un número de serie asignado
-                    if ml.product_id.x_es_prenda_arrendable and ml.lot_id:
-                        # Crea una nueva línea de arriendo para la prenda que sale
-                        self.env['arriendo.prenda.linea'].create({
-                            'suscripcion_id': suscripcion.id,
-                            'prenda_id': ml.product_id.id,
-                            'numero_serie_id': ml.lot_id.id,
-                            'fecha_arriendo': fields.Datetime.now(),
-                            'estado': 'arrendada',
-                            'active': True,
-                        })
-                # Incrementa el contador de cambios si es un picking de cambio
+            if not picking.x_suscripcion_id:
+                continue
+
+            suscripcion = picking.x_suscripcion_id
+            ArriendoLinea = self.env['arriendo.prenda.linea']
+
+            # --- LÓGICA PARA ENVÍOS (SALIDAS) ---
+            if picking.picking_type_code == 'outgoing':
+                # Incrementar el contador de cambios si aplica.
                 if picking.x_es_cambio_prenda:
                     suscripcion.x_cambios_usados_mes += 1
 
-            # Lógica para albaranes de entrada (el cliente devuelve la prenda)
-            elif picking.picking_type_id.code == 'incoming' and picking.x_suscripcion_id:
-                suscripcion = picking.x_suscripcion_id
-                for ml in picking.move_line_ids_without_package:
-                    # Asegurarse de que la prenda es arrendable y tiene un número de serie asignado
-                    if ml.product_id.x_es_prenda_arrendable and ml.lot_id:
-                        # Busca la línea de arriendo activa para esta prenda y suscripción
-                        linea = self.env['arriendo.prenda.linea'].search([
-                            ('suscripcion_id', '=', suscripcion.id),
-                            ('numero_serie_id', '=', ml.lot_id.id),
-                            ('estado', '=', 'arrendada'), # Solo busca las que están actualmente arrendadas
-                            ('active', '=', True), # Solo busca las líneas activas
-                        ], limit=1) # Solo necesitamos una, la más reciente si hubiera varias por algún error.
-                        if linea:
-                            # Actualiza el estado y la fecha de devolución, y la inactiva
-                            linea.write({
-                                'estado': 'devuelta',
-                                'fecha_devolucion': fields.Datetime.now(),
-                                'active': False, # Marca como inactiva para que no cuente en 'x_cantidad_prendas_en_posesion'
-                            })
+                # Itera sobre las líneas de movimiento ya procesadas.
+                for move_line in picking.move_line_ids.filtered(lambda ml: ml.product_id.x_es_prenda_arrendable and ml.lot_id):
+                    ArriendoLinea.create({
+                        'suscripcion_id': suscripcion.id,
+                        'prenda_id': move_line.product_id.id,
+                        'numero_serie_id': move_line.lot_id.id,
+                        'fecha_arriendo': picking.date_done, # Usar la fecha de validación del albarán.
+                        'estado': 'arrendada',
+                        'active': True,
+                    })
 
+            # --- LÓGICA PARA DEVOLUCIONES (ENTRADAS) ---
+            elif picking.picking_type_code == 'incoming':
+                for move_line in picking.move_line_ids.filtered(lambda ml: ml.product_id.x_es_prenda_arrendable and ml.lot_id):
+                    # Busca la línea de arriendo activa para esta prenda/serie y suscripción.
+                    linea_a_devolver = ArriendoLinea.search([
+                        ('suscripcion_id', '=', suscripcion.id),
+                        ('numero_serie_id', '=', move_line.lot_id.id),
+                        ('estado', '=', 'arrendada'),
+                        ('active', '=', True),
+                    ], limit=1)
+                    
+                    if linea_a_devolver:
+                        linea_a_devolver.write({
+                            'estado': 'devuelta',
+                            'fecha_devolucion': picking.date_done, # Usar la fecha de validación del albarán.
+                            'active': False, # Se desactiva para que no cuente en el total en posesión.
+                        })
         return res
 
