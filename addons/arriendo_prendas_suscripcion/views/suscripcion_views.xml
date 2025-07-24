@@ -37,7 +37,7 @@
                            can_write="false"> 
                         <list editable="bottom"> <!-- editable="bottom" permite edición rápida si es necesario, pero 'can_write=false' lo anulará. -->
                             <field name="prenda_id"/>
-                            <field name="numero_serie_id" domain="[('product_id', '=', prenda_id)]"/>
+                            <field name="numero_serie_id"/>
                             <field name="fecha_arriendo"/>
                             <field name="estado"/>
                             <field name="fecha_devolucion"/> <!-- Mostrar fecha de devolución también -->
