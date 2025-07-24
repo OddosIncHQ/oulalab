@@ -47,6 +47,24 @@ class ArriendoPrendaLinea(models.Model):
 
     active = fields.Boolean(string='Activo', default=True)
 
+    @api.onchange('prenda_id')
+    def _onchange_prenda_id(self):
+        """
+        Filtra las series disponibles al seleccionar una prenda.
+        """
+        if self.prenda_id:
+            return {
+                'domain': {
+                    'numero_serie_id': [('product_id', '=', self.prenda_id.id)]
+                }
+            }
+        else:
+            return {
+                'domain': {
+                    'numero_serie_id': []
+                }
+            }
+
     @api.constrains('numero_serie_id', 'estado', 'active')
     def _check_numero_serie_disponible(self):
         for record in self:
