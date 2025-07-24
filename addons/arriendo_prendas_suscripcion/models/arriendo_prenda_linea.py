@@ -24,7 +24,8 @@ class ArriendoPrendaLinea(models.Model):
     numero_serie_id = fields.Many2one(
         'stock.production.lot',
         string='Número de Serie',
-        required=True,
+        required=False,
+        check_company=False,
     )
 
     fecha_arriendo = fields.Datetime(
