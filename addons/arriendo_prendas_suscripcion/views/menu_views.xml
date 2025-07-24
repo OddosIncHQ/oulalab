@@ -48,7 +48,7 @@
         <record id="action_arriendo_salidas" model="ir.actions.act_window">
             <field name="name">Salidas de Arriendo</field>
             <field name="res_model">stock.picking</field>
-            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
             <field name="domain">[('picking_type_code', '=', 'outgoing'), ('x_suscripcion_id', '!=', False)]</field>
             <field name="context">{'default_picking_type_code': 'outgoing'}</field>
             <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No hay salidas de arriendo.</p></field>
@@ -58,7 +58,7 @@
         <record id="action_arriendo_entradas" model="ir.actions.act_window">
             <field name="name">Devoluciones de Arriendo</field>
             <field name="res_model">stock.picking</field>
-            <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
+            <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
             <field name="domain">[('picking_type_code', '=', 'incoming'), ('x_suscripcion_id', '!=', False)]</field>
             <field name="context">{'default_picking_type_code': 'incoming'}</field>
             <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No hay devoluciones de arriendo.</p></field>
@@ -93,13 +93,12 @@
         name="Productos"
         parent="menu_arriendo_root"
         sequence="40"
-        groups="base.group_user"
     />
         <!-- Acción para ver y crear PRENDAS ARRENDABLES -->
         <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
             <field name="name">Prendas Arrendables</field>
             <field name="res_model">product.template</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban,list,form</field>
             <field name="context">{'search_default_x_es_prenda_arrendable': 1, 'default_x_es_prenda_arrendable': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">No se encontraron productos marcados como "Prenda Arrendable".</p>
