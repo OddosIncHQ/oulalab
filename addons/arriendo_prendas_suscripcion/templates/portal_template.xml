@@ -4,14 +4,16 @@
     <!-- Enlace al menú de portal personalizado -->
     <!-- Este XPath es correcto y añadirá el enlace a la sección de documentos del portal. -->
     <template id="portal_my_home_arriendo_link" inherit_id="portal.portal_my_home">
-        <xpath expr="//div[contains(@class, 'o_portal_docs')]/ul" position="inside">
-            <li>
-                <a t-attf-href="/my/rentals">
-                    <i class="fa fa-cube"/> Mis Arriendos
-                </a>
-            </li>
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/web/static/img/icons/actions/product_return.svg'"/>
+                <t t-set="title">Mis Arriendos</t>
+                <t t-set="text">Consulta tus prendas arrendadas y realiza cambios o devoluciones.</t>
+                <t t-set="url" t-value="'/my/rentals'"/>
+            </t>
         </xpath>
     </template>
+
 
 
 
