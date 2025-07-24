@@ -6,9 +6,10 @@ class ArriendoPrendaLinea(models.Model):
     """
     Este es el modelo principal que rastrea cada instancia de una prenda arrendada.
     """
-    # Nombre estandarizado. Este es el identificador único del modelo.
     _name = 'arriendo.prenda.linea'
     _description = 'Línea de Historial de Prenda Arrendada'
+    # Herencia para habilitar el chatter y el seguimiento de campos
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'fecha_arriendo desc'
 
     suscripcion_id = fields.Many2one(
@@ -18,33 +19,28 @@ class ArriendoPrendaLinea(models.Model):
         ondelete='cascade',
         domain="[('is_subscription', '=', True)]"
     )
-
     prenda_id = fields.Many2one(
         'product.product',
         string='Prenda',
         required=True,
         domain="[('x_es_prenda_arrendable', '=', True)]"
     )
-
     numero_serie_id = fields.Many2one(
         'stock.lot',
         string='Número de Serie',
         required=True,
         ondelete='restrict'
     )
-
     fecha_arriendo = fields.Datetime(
         string='Fecha de Envío (Arriendo)',
         required=True,
         default=fields.Datetime.now,
         readonly=True
     )
-
     fecha_devolucion = fields.Datetime(
         string='Fecha de Devolución',
         readonly=True
     )
-
     estado = fields.Selection([
         ('arrendada', 'En posesión del cliente'),
         ('devuelta', 'Devuelta en almacén'),
@@ -56,6 +52,7 @@ class ArriendoPrendaLinea(models.Model):
     active = fields.Boolean(
         string='Activo',
         default=True,
+        tracking=True,
         help="Una línea inactiva representa un arriendo histórico. Las activas representan prendas actualmente en posesión del cliente."
     )
     
