@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Arriendos por Suscripción',
-    'version': '1.3.0',
+    'version': '1.3.1',
     'summary': 'Aplicación para la gestión integral del modelo de arriendo de prendas.',
     'author': 'Tu Nombre/Empresa',
     'category': 'Sales/Subscription',
@@ -11,25 +11,17 @@
         'product',
         'website',
         'portal',
+        'mail', # <-- DEPENDENCIA AÑADIDA
     ],
     'data': [
-        # 1. Seguridad (SIEMPRE PRIMERO)
         'security/security.xml',
         'security/ir.model.access.csv',
-
-        # 2. Datos
         'data/cron_jobs.xml',
-        
-        # 3. Vistas que definen acciones y componentes base
         'views/arriendo_prenda_linea_views.xml',
         'views/suscripcion_views.xml',
         'views/stock_picking_views.xml',
         'views/product_views.xml',
-        
-        # 4. Menús (que utilizan las acciones definidas en los archivos de arriba)
         'views/menu_views.xml',
-        
-        # 5. Plantillas del Portal
         'templates/portal_template.xml',
         'templates/catalogo_arriendo_template.xml',
     ],
