@@ -12,24 +12,21 @@ class ArriendoCustomerPortal(CustomerPortal):
     def _get_active_subscription(self):
         """
         Método helper para obtener la suscripción activa del usuario del portal.
-        Busca una suscripción que esté en una etapa de "en progreso".
+        Busca una suscripción que esté en estado 'Venta' (activa).
         """
         return request.env['sale.order'].search([
             ('partner_id', '=', request.env.user.partner_id.id),
             ('is_subscription', '=', True),
-            ('stage_category', '=', 'progress'),
+            ('state', '=', 'sale'), # CORRECCIÓN: Se usa 'state' en lugar de 'stage_category'
         ], limit=1)
 
     def _prepare_home_portal_values(self, counters):
         """
         Sobrescribe el método estándar del portal para añadir nuestro contador de arriendos.
-        Este método es llamado automáticamente por Odoo al renderizar la página de "Mi Cuenta".
         """
         values = super(ArriendoCustomerPortal, self)._prepare_home_portal_values(counters)
         
         subscription = self._get_active_subscription()
-        # Añadimos el contador de prendas al diccionario de valores.
-        # La plantilla usará 'rental_count' para decidir si muestra la sección.
         values['rental_count'] = subscription.x_cantidad_prendas_en_posesion if subscription else 0
             
         return values
@@ -37,8 +34,7 @@ class ArriendoCustomerPortal(CustomerPortal):
     @http.route(['/my/rentals', '/my/rentals/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_rentals(self, page=1, **kw):
         """
-        Muestra el panel principal del portal de arriendos con las prendas
-        actualmente en posesión del cliente.
+        Muestra el panel principal del portal de arriendos.
         """
         subscription = self._get_active_subscription()
         if not subscription:
@@ -58,7 +54,7 @@ class ArriendoCustomerPortal(CustomerPortal):
         if not subscription:
             return request.redirect('/my/rentals?error_message=' + _("Necesitas una suscripción activa para ver el catálogo."))
 
-        # Lógica mejorada para encontrar productos realmente disponibles
+        # Lógica para encontrar productos disponibles
         available_lots = request.env['stock.lot'].sudo().search([
             ('product_id.x_es_prenda_arrendable', '=', True),
             ('quant_ids.quantity', '>', 0),
@@ -83,7 +79,6 @@ class ArriendoCustomerPortal(CustomerPortal):
     def portal_request_rental(self, **post):
         """
         Procesa la solicitud de arriendo desde el catálogo.
-        Crea un albarán de salida (borrador) para que el equipo de almacén lo prepare.
         """
         subscription = self._get_active_subscription()
         product_ids = [int(pid) for pid in request.httprequest.form.getlist('product_ids')]
@@ -92,11 +87,9 @@ class ArriendoCustomerPortal(CustomerPortal):
             return request.redirect('/my/rentals/catalog')
 
         try:
-            # Validar límites
             if len(product_ids) > (subscription.x_max_prendas_permitidas - subscription.x_cantidad_prendas_en_posesion):
                 raise ValidationError(_("Has seleccionado más prendas de las que tu suscripción permite."))
 
-            # Crear el albarán de salida usando el método del modelo
             picking = subscription.sudo()._create_rental_picking('outgoing', product_ids=product_ids)
             
             return request.redirect('/my/rentals?success_message=' + _("Tu solicitud para %s prenda(s) ha sido creada. El albarán %s está listo para ser procesado.") % (len(product_ids), picking.name))
@@ -108,7 +101,6 @@ class ArriendoCustomerPortal(CustomerPortal):
     def portal_request_return(self, **post):
         """
         Procesa la solicitud de devolución.
-        Crea un albarán de entrada (borrador) para que el equipo de almacén lo reciba.
         """
         subscription = self._get_active_subscription()
         lot_ids = [int(lid) for lid in request.httprequest.form.getlist('lot_ids')]
@@ -117,7 +109,6 @@ class ArriendoCustomerPortal(CustomerPortal):
             return request.redirect('/my/rentals')
 
         try:
-            # Crear el albarán de entrada usando el método del modelo
             picking = subscription.sudo()._create_rental_picking('incoming', lot_ids=lot_ids)
 
             return request.redirect('/my/rentals?success_message=' + _("Tu solicitud de devolución para %s prenda(s) ha sido creada. El albarán %s está listo para ser procesado.") % (len(lot_ids), picking.name))
