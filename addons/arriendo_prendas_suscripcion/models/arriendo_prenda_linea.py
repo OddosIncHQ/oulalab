@@ -25,7 +25,6 @@ class ArriendoPrendaLinea(models.Model):
         'stock.production.lot',
         string='Número de Serie',
         required=True,
-        domain="[('product_id', '=', prenda_id)]"
     )
 
     fecha_arriendo = fields.Datetime(
