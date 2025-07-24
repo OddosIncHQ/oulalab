@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 {
     'name': 'Arriendos por Suscripción',
-    'version': '1.2.3', # Incrementamos la versión
+    'version': '1.2.4', # Incrementamos la versión
     'summary': 'Aplicación para la gestión integral del modelo de arriendo de prendas.',
     'author': 'Tu Nombre/Empresa',
     'category': 'Sales/Subscription',
@@ -19,14 +20,17 @@
         # 2. Datos
         'data/cron_jobs.xml',
         
-        # 3. Vistas y Menús
-        'views/menu_views.xml',
+        # 3. Vistas que definen acciones y componentes base
+        #    Cargamos estas primero para que las acciones estén disponibles.
         'views/arriendo_prenda_linea_views.xml',
         'views/suscripcion_views.xml',
         'views/stock_picking_views.xml',
         'views/product_views.xml',
         
-        # 4. Plantillas del Portal
+        # 4. Menús (que utilizan las acciones definidas en los archivos de arriba)
+        'views/menu_views.xml',
+        
+        # 5. Plantillas del Portal
         'templates/portal_template.xml',
         'templates/catalogo_arriendo_template.xml',
     ],
