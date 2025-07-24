@@ -50,15 +50,19 @@ class ArriendoPrendaLinea(models.Model):
     @api.onchange('prenda_id')
     def _onchange_prenda_id(self):
         """
-        Filtra las series disponibles al seleccionar una prenda.
+        Al cambiar la prenda, filtra las series correspondientes
+        y limpia la serie seleccionada si ya no corresponde.
         """
         if self.prenda_id:
+            if self.numero_serie_id and self.numero_serie_id.product_id != self.prenda_id:
+                self.numero_serie_id = False
             return {
                 'domain': {
                     'numero_serie_id': [('product_id', '=', self.prenda_id.id)]
                 }
             }
         else:
+            self.numero_serie_id = False
             return {
                 'domain': {
                     'numero_serie_id': []
