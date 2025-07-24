@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Arriendos por Suscripción',
-    'version': '1.3.1',
+    'version': '1.3.2',
     'summary': 'Aplicación para la gestión integral del modelo de arriendo de prendas.',
     'author': 'Tu Nombre/Empresa',
     'category': 'Sales/Subscription',
