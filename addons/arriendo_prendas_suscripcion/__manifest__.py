@@ -16,7 +16,7 @@
         'stock',
         'product',
         'website',
-        'portal', # ¡CAMBIO AQUÍ! De 'website_portal' a 'portal'
+        'portal',
         'website_sale',
     ],
     'data': [
@@ -40,4 +40,5 @@
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
+    'post_init_hook': 'post_init_hook',  # ← Agregado aquí
 }
