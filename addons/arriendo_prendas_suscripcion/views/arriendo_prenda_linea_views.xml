@@ -2,11 +2,12 @@
 <odoo>
 
     <!-- Vista de lista -->
-    <record id="view_arriendo_prenda_linea_tree" model="ir.ui.view">
-        <field name="name">arriendo_prenda_linea.list</field>
+    <record id="view_arriendo_prenda_linea_list" model="ir.ui.view">
+        <field name="name">view_arriendo_prenda_linea_list</field>
         <field name="model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
+        <field name="type">list</field>
         <field name="arch" type="xml">
-            <tree decoration-info="estado == 'arrendada'"
+            <list decoration-info="estado == 'arrendada'"
                   decoration-success="estado == 'devuelta'"
                   decoration-danger="estado == 'perdida'">
                 <field name="suscripcion_id"/>
@@ -16,9 +17,10 @@
                 <field name="estado"/>
                 <field name="fecha_devolucion"/>
                 <field name="active" invisible="1"/>
-            </tree>
+            </list>
         </field>
     </record>
+
 
     <!-- Vista de formulario -->
     <record id="view_arriendo_prenda_linea_form" model="ir.ui.view">
