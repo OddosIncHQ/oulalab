@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class ArriendoPrendaLinea(models.Model):
     _name = 'arriendo_prendas_suscripcion.arriendo_prenda_linea'
@@ -50,10 +53,19 @@ class ArriendoPrendaLinea(models.Model):
 
     @api.onchange('prenda_id')
     def _onchange_prenda_id(self):
-        if self.numero_serie_id and self.numero_serie_id.product_id != self.prenda_id:
-            self.numero_serie_id = False  # limpia si ya no coincide
-        elif not self.prenda_id:
-            self.numero_serie_id = False  # limpia si prenda_id está vacío
+        """
+        Limpia la serie si no corresponde a la prenda,
+        y filtra el dominio para las series según el producto.
+        """
+        try:
+            if self.numero_serie_id and getattr(self.numero_serie_id, 'product_id', False):
+                if self.numero_serie_id.product_id != self.prenda_id:
+                    self.numero_serie_id = False
+            else:
+                self.numero_serie_id = False
+        except Exception as e:
+            _logger.warning("⚠️ Error en onchange de prenda_id: %s", e)
+            self.numero_serie_id = False
 
         return {
             'domain': {
@@ -61,11 +73,10 @@ class ArriendoPrendaLinea(models.Model):
             }
         }
 
-
     @api.constrains('numero_serie_id', 'estado', 'active')
     def _check_numero_serie_disponible(self):
         for record in self:
-            if record.estado == 'arrendada' and record.active:
+            if record.estado == 'arrendada' and record.active and record.numero_serie_id:
                 conflict = self.search([
                     ('numero_serie_id', '=', record.numero_serie_id.id),
                     ('estado', '=', 'arrendada'),
@@ -74,5 +85,6 @@ class ArriendoPrendaLinea(models.Model):
                 ], limit=1)
                 if conflict:
                     raise ValidationError(_(
-                        'La prenda con número de serie "%s" ya está arrendada en la suscripción "%s" y está activa. No puede ser arrendada nuevamente.'
+                        'La prenda con número de serie "%s" ya está arrendada en la suscripción "%s" y está activa. '
+                        'No puede ser arrendada nuevamente.'
                     ) % (record.numero_serie_id.display_name, conflict.suscripcion_id.display_name))
