@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
+
 class ArriendoPrendaLinea(models.Model):
     """
     Este es el modelo principal que rastrea cada instancia de una prenda arrendada.
