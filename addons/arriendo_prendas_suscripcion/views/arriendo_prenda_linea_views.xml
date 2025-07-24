@@ -37,7 +37,7 @@
                                readonly="1"/>
                         <field name="fecha_arriendo" readonly="1"/>
                         <field name="estado"/>
-                        <field name="fecha_devolucion" attrs="{'readonly': [('estado', '!=', 'devuelta')]}"/>
+                        <field name="fecha_devolucion" modifiers='{"readonly": [["estado", "!=", "devuelta"]]}'/>
                         <field name="active"/>
                     </group>
                 </sheet>
