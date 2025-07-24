@@ -1,5 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Menú Raíz de la Aplicación -->
+    <!-- ====================================================== -->
+    <!-- MENÚ RAÍZ DE LA APLICACIÓN                             -->
+    <!-- ====================================================== -->
     <menuitem
         id="menu_arriendo_root"
         name="Arriendos"
@@ -7,6 +10,10 @@
         sequence="10"
         groups="base.group_user"
     />
+
+    <!-- ====================================================== -->
+    <!-- MENÚS PRINCIPALES DE LA APLICACIÓN                     -->
+    <!-- ====================================================== -->
 
     <!-- Menú para Suscripciones -->
     <menuitem
@@ -44,6 +51,7 @@
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
             <field name="domain">[('picking_type_code', '=', 'outgoing'), ('x_suscripcion_id', '!=', False)]</field>
             <field name="context">{'default_picking_type_code': 'outgoing'}</field>
+            <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No hay salidas de arriendo.</p></field>
         </record>
 
         <!-- Acción para ver solo ENTRADAS (devoluciones) de arriendo -->
@@ -53,20 +61,39 @@
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
             <field name="domain">[('picking_type_code', '=', 'incoming'), ('x_suscripcion_id', '!=', False)]</field>
             <field name="context">{'default_picking_type_code': 'incoming'}</field>
+            <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No hay devoluciones de arriendo.</p></field>
         </record>
 
         <!-- Submenús de Inventario -->
-        <menuitem id="menu_arriendo_salidas" name="Salidas de Arriendo" parent="menu_arriendo_inventario_root" action="action_arriendo_salidas" sequence="10"/>
-        <menuitem id="menu_arriendo_entradas" name="Devoluciones de Arriendo" parent="menu_arriendo_inventario_root" action="action_arriendo_entradas" sequence="20"/>
-        <menuitem id="menu_arriendo_stock_picking_all" name="Todos los Traslados" parent="menu_arriendo_inventario_root" action="stock.action_picking_tree_all" sequence="30"/>
+        <menuitem
+            id="menu_arriendo_salidas"
+            name="Salidas de Arriendo"
+            parent="menu_arriendo_inventario_root"
+            action="action_arriendo_salidas"
+            sequence="10"
+        />
+        <menuitem
+            id="menu_arriendo_entradas"
+            name="Devoluciones de Arriendo"
+            parent="menu_arriendo_inventario_root"
+            action="action_arriendo_entradas"
+            sequence="20"
+        />
+        <menuitem
+            id="menu_arriendo_stock_picking_all"
+            name="Todos los Traslados"
+            parent="menu_arriendo_inventario_root"
+            action="stock.action_picking_tree_all"
+            sequence="30"
+        />
 
-    <!-- Menú para Productos -->
+    <!-- Menú para Productos (CORREGIDO) -->
     <menuitem
         id="menu_arriendo_productos_root"
         name="Productos"
         parent="menu_arriendo_root"
         sequence="40"
-        groups="product.group_product_user"
+        groups="base.group_user"
     />
         <!-- Acción para ver y crear PRENDAS ARRENDABLES -->
         <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
@@ -76,11 +103,25 @@
             <field name="context">{'search_default_x_es_prenda_arrendable': 1, 'default_x_es_prenda_arrendable': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">No se encontraron productos marcados como "Prenda Arrendable".</p>
-                <p>Haz clic en 'Crear' para añadir una nueva prenda para arriendo.</p>
+                <p>Haz clic en 'Crear' para añadir una nueva prenda para arriendo, o edita un producto existente y activa la opción en la pestaña 'Arriendo'.</p>
             </field>
         </record>
 
         <!-- Submenús de Productos -->
-        <menuitem id="menu_arriendo_productos_arrendables" name="Prendas Arrendables" parent="menu_arriendo_productos_root" action="action_ver_prendas_arrendables" sequence="10"/>
-        <menuitem id="menu_arriendo_productos_todos" name="Todos los Productos" parent="menu_arriendo_productos_root" action="product.product_template_action_all" sequence="20"/>
+        <menuitem
+            id="menu_arriendo_productos_arrendables"
+            name="Prendas Arrendables"
+            parent="menu_arriendo_productos_root"
+            action="action_ver_prendas_arrendables"
+            sequence="10"
+            groups="product.group_product_user"
+        />
+        <menuitem
+            id="menu_arriendo_productos_todos"
+            name="Todos los Productos"
+            parent="menu_arriendo_productos_root"
+            action="product.product_template_action_all"
+            sequence="20"
+            groups="product.group_product_user"
+        />
 </odoo>
