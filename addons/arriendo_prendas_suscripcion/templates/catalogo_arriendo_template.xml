@@ -57,7 +57,7 @@
                                         </t>
                                         
                                         <div class="card-body d-flex flex-column"> <!-- Flexbox para alinear contenido -->
-                                            <h5 class="card-title text-truncate" title="<t t-esc="producto.display_name"/>"><t t-esc="producto.display_name"/></h5>
+                                            <h5 class="card-title text-truncate" t-att-title="producto.display_name"><t t-esc="producto.display_name"/></h5>
                                             <p class="card-text mb-2">
                                                 <strong>Ref:</strong> <t t-esc="producto.default_code or 'N/A'"/>
                                             </p>
