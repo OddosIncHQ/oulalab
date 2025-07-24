@@ -1,101 +1,69 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Vista de lista -->
-    <record id="view_arriendo_prenda_linea_list" model="ir.ui.view">
-        <field name="name">view_arriendo_prenda_linea_list</field>
-        <field name="model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
+    <!-- Vista de Lista (Tree) -->
+    <record id="view_arriendo_prenda_linea_tree" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.tree</field>
+        <field name="model">arriendo.prenda.linea</field>
         <field name="arch" type="xml">
-            <list decoration-info="estado == 'arrendada'"
-                  decoration-success="estado == 'devuelta'"
-                  decoration-danger="estado == 'perdida'">
+            <tree decoration-info="estado=='arrendada'"
+                  decoration-success="estado=='devuelta'"
+                  decoration-warning="estado in ('en_limpieza', 'mantenimiento')"
+                  decoration-danger="estado=='perdida'">
                 <field name="suscripcion_id"/>
                 <field name="prenda_id"/>
                 <field name="numero_serie_id"/>
                 <field name="fecha_arriendo"/>
-                <field name="estado"/>
                 <field name="fecha_devolucion"/>
-                <field name="active" invisible="1"/>
-            </list>
+                <field name="estado"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
         </field>
     </record>
 
-    <!-- Vista de formulario -->
+    <!-- Vista de Formulario -->
     <record id="view_arriendo_prenda_linea_form" model="ir.ui.view">
-        <field name="name">arriendo_prenda_linea.form</field>
-        <field name="model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
+        <field name="name">arriendo.prenda.linea.form</field>
+        <field name="model">arriendo.prenda.linea</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
                     <group>
-                        <field name="suscripcion_id" readonly="1"/>
-                        <field name="prenda_id" readonly="1"/>
-                        <field name="numero_serie_id"
-                               options="{'no_create': True, 'no_create_edit': True}"
-                               readonly="1"/>
-                        <field name="fecha_arriendo" readonly="1"/>
-                        <field name="estado"/>
-                        <field name="fecha_devolucion" modifiers='{"readonly": [["estado", "!=", "devuelta"]]}'/>
-                        <field name="active"/>
+                        <group>
+                            <field name="suscripcion_id"/>
+                            <field name="prenda_id"/>
+                            <field name="numero_serie_id"/>
+                        </group>
+                        <group>
+                            <field name="estado"/>
+                            <field name="fecha_arriendo"/>
+                            <field name="fecha_devolucion"/>
+                            <field name="active"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Vista de búsqueda -->
-    <record id="view_arriendo_prenda_linea_search" model="ir.ui.view">
-        <field name="name">arriendo_prenda_linea.search</field>
-        <field name="model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="suscripcion_id"/>
-                <field name="prenda_id"/>
-                <field name="numero_serie_id"/>
-                <field name="estado"/>
-                <field name="fecha_arriendo"/>
-                <field name="fecha_devolucion"/>
-                <filter name="activo" string="Activos" domain="[('active', '=', True)]"/>
-                <filter name="inactivos" string="Inactivos" domain="[('active', '=', False)]"/>
-                <separator/>
-                <filter name="estado_arrendada" string="Estado: Arrendada" domain="[('estado', '=', 'arrendada')]"/>
-                <filter name="estado_devuelta" string="Estado: Devuelta" domain="[('estado', '=', 'devuelta')]"/>
-                <group expand="0" string="Agrupar por">
-                    <filter name="groupby_suscripcion" string="Suscripción" context="{'group_by': 'suscripcion_id'}"/>
-                    <filter name="groupby_prenda" string="Prenda" context="{'group_by': 'prenda_id'}"/>
-                    <filter name="groupby_estado" string="Estado" context="{'group_by': 'estado'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
-
-    <!-- Acción de ventana -->
+    <!-- Acción de Ventana (se mantiene igual) -->
     <record id="action_arriendo_prenda_linea" model="ir.actions.act_window">
-        <field name="name">Prendas Arrendadas</field>
-        <field name="res_model">arriendo_prendas_suscripcion.arriendo_prenda_linea</field>
-        <field name="view_mode">list,form</field>
-        <field name="search_view_id" ref="view_arriendo_prenda_linea_search"/>
+        <field name="name">Historial de Arriendos</field>
+        <field name="res_model">arriendo.prenda.linea</field>
+        <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No hay líneas de prendas arrendadas.
+                Aún no hay registros de arriendos.
+            </p><p>
+                Los registros se crean automáticamente al validar albaranes de salida vinculados a una suscripción.
             </p>
-            <p>Desde aquí puedes gestionar el historial de prendas entregadas a los suscriptores.</p>
         </field>
     </record>
 
-    <!-- Menú Raíz -->
-    <menuitem id="menu_arriendo_prenda_root"
-              name="Arriendo de Prendas"
-              sequence="10"
-              parent="sale.sale_menu_root"
-              groups="arriendo_prendas_suscripcion.group_arriendo_manager,sales_team.group_sale_salesman,stock.group_stock_user"/>
-
-    <!-- Submenú -->
-    <menuitem id="menu_arriendo_prenda_linea"
-              name="Prendas Arrendadas"
-              parent="menu_arriendo_prenda_root"
-              action="action_arriendo_prenda_linea"
-              sequence="20"
-              groups="arriendo_prendas_suscripcion.group_arriendo_manager,sales_team.group_sale_salesman,stock.group_stock_user"/>
+    <!--
+    SE HAN ELIMINADO LOS MENUS ANTERIORES DE AQUÍ.
+    Los <menuitem> que estaban aquí (menu_arriendo_prenda_root y menu_arriendo_prenda_linea)
+    han sido reemplazados por la estructura centralizada en 'views/menu_views.xml'.
+    -->
 
 </odoo>
