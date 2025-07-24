@@ -1,7 +1,9 @@
 from odoo import models, fields, api
 from datetime import date
 from dateutil.relativedelta import relativedelta
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -20,24 +22,24 @@ class SaleOrder(models.Model):
 
     @api.model
     def action_reset_monthly_changes(self):
-        """Resetea los cambios usados en el mes para las suscripciones activas."""
+        """Resetea los cambios usados en el mes para suscripciones activas (state = 'sale')."""
         hoy = date.today()
+        nueva_fecha = (hoy + relativedelta(months=1)).replace(day=1)
         ordenes = self.search([
-            ('x_proxima_fecha_reseteo_cambios', '<=', hoy)
+            ('x_proxima_fecha_reseteo_cambios', '<=', hoy),
+            ('state', '=', 'sale')
         ])
         for orden in ordenes:
-            nueva_fecha = (hoy + relativedelta(months=1)).replace(day=1)
             orden.write({
                 'x_cambios_usados_mes': 0,
                 'x_proxima_fecha_reseteo_cambios': nueva_fecha,
             })
-            _logger = self.env['ir.logging']
-            _logger.create({
-                'name': 'Reset mensual',
-                'type': 'server',
-                'level': 'INFO',
-                'message': f"Reset mensual aplicado a {orden.name}",
-                'path': 'sale.order',
-                'func': 'action_reset_monthly_changes',
-                'line': 0,
-            })
+            # Log en servidor
+            _logger.info("Reset mensual aplicado a %s", orden.name)
+
+            # Mensaje en el chatter
+            orden.message_post(
+                body=f"✔️ Cambios usados este mes fueron reiniciados automáticamente el {hoy.strftime('%Y-%m-%d')}. "
+                     f"Próximo reseteo: {nueva_fecha.strftime('%Y-%m-%d')}",
+                subtype_xmlid="mail.mt_note"
+            )
