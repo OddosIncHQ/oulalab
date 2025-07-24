@@ -50,25 +50,17 @@ class ArriendoPrendaLinea(models.Model):
 
     @api.onchange('prenda_id')
     def _onchange_prenda_id(self):
-        """
-        Al cambiar la prenda, filtra las series correspondientes
-        y limpia la serie seleccionada si ya no corresponde.
-        """
-        if self.prenda_id:
-            if self.numero_serie_id and self.numero_serie_id.product_id != self.prenda_id:
-                self.numero_serie_id = False
-            return {
-                'domain': {
-                    'numero_serie_id': [('product_id', '=', self.prenda_id.id)]
-                }
+        if self.numero_serie_id and self.numero_serie_id.product_id != self.prenda_id:
+            self.numero_serie_id = False  # limpia si ya no coincide
+        elif not self.prenda_id:
+            self.numero_serie_id = False  # limpia si prenda_id está vacío
+
+        return {
+            'domain': {
+                'numero_serie_id': [('product_id', '=', self.prenda_id.id)] if self.prenda_id else []
             }
-        else:
-            self.numero_serie_id = False
-            return {
-                'domain': {
-                    'numero_serie_id': []
-                }
-            }
+        }
+
 
     @api.constrains('numero_serie_id', 'estado', 'active')
     def _check_numero_serie_disponible(self):
