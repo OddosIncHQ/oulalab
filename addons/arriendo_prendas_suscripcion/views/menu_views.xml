@@ -106,14 +106,13 @@
             </field>
         </record>
 
-        <!-- Submenús de Productos -->
+        <!-- Submenús de Productos (CORREGIDO: Se eliminaron los grupos) -->
         <menuitem
             id="menu_arriendo_productos_arrendables"
             name="Prendas Arrendables"
             parent="menu_arriendo_productos_root"
             action="action_ver_prendas_arrendables"
             sequence="10"
-            groups="product.group_product_user"
         />
         <menuitem
             id="menu_arriendo_productos_todos"
@@ -121,6 +120,5 @@
             parent="menu_arriendo_productos_root"
             action="product.product_template_action_all"
             sequence="20"
-            groups="product.group_product_user"
         />
 </odoo>
