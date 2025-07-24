@@ -1,10 +1,10 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from odoo.api import Environment, SUPERUSER_ID
 
 def post_init_hook(cr, registry):
     """Set nextcall del cron a la próxima fecha del mes (1° del siguiente mes a las 03:00)"""
-    from odoo.api import Environment
-    env = Environment(cr, SUPERUSER_ID=1, context={})
+    env = Environment(cr, SUPERUSER_ID, {})
     cron = env.ref('arriendo_prendas_suscripcion.ir_cron_reset_monthly_subscription_changes', raise_if_not_found=False)
 
     if cron:
