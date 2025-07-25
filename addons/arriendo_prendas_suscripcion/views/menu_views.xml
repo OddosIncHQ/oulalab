@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <!-- ====================================================== -->
     <!-- MENÚ RAÍZ DE LA APLICACIÓN                             -->
     <!-- ====================================================== -->
@@ -12,10 +13,8 @@
     />
 
     <!-- ====================================================== -->
-    <!-- MENÚS PRINCIPALES DE LA APLICACIÓN                     -->
+    <!-- MENÚ DE SUSCRIPCIONES                                  -->
     <!-- ====================================================== -->
-
-    <!-- Menú para Suscripciones -->
     <menuitem
         id="menu_arriendo_suscripciones"
         name="Suscripciones"
@@ -25,7 +24,9 @@
         groups="arriendo_prendas_suscripcion.group_arriendo_user"
     />
 
-    <!-- Menú para el Historial de Arriendos -->
+    <!-- ====================================================== -->
+    <!-- MENÚ HISTORIAL DE ARRIENDOS                            -->
+    <!-- ====================================================== -->
     <menuitem
         id="menu_arriendo_historial"
         name="Historial de Arriendos"
@@ -35,7 +36,9 @@
         groups="arriendo_prendas_suscripcion.group_arriendo_user"
     />
 
-    <!-- Menú para Operaciones de Inventario -->
+    <!-- ====================================================== -->
+    <!-- MENÚ DE INVENTARIO                                     -->
+    <!-- ====================================================== -->
     <menuitem
         id="menu_arriendo_inventario_root"
         name="Operaciones de Inventario"
@@ -44,81 +47,111 @@
         groups="stock.group_stock_user"
     />
 
-        <!-- Acción para ver solo SALIDAS de arriendo -->
-        <record id="action_arriendo_salidas" model="ir.actions.act_window">
-            <field name="name">Salidas de Arriendo</field>
-            <field name="res_model">stock.picking</field>
-            <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
-            <field name="domain">[('picking_type_code', '=', 'outgoing'), ('x_suscripcion_id', '!=', False)]</field>
-            <field name="context">{'default_picking_type_code': 'outgoing'}</field>
-            <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No hay salidas de arriendo.</p></field>
-        </record>
+    <!-- Acción para Salidas -->
+    <record id="action_arriendo_salidas" model="ir.actions.act_window">
+        <field name="name">Salidas de Arriendo</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
+        <field name="domain">[('picking_type_code', '=', 'outgoing'), ('x_suscripcion_id', '!=', False)]</field>
+        <field name="context">{'default_picking_type_code': 'outgoing'}</field>
+    </record>
 
-        <!-- Acción para ver solo ENTRADAS (devoluciones) de arriendo -->
-        <record id="action_arriendo_entradas" model="ir.actions.act_window">
-            <field name="name">Devoluciones de Arriendo</field>
-            <field name="res_model">stock.picking</field>
-            <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
-            <field name="domain">[('picking_type_code', '=', 'incoming'), ('x_suscripcion_id', '!=', False)]</field>
-            <field name="context">{'default_picking_type_code': 'incoming'}</field>
-            <field name="help" type="html"><p class="o_view_nocontent_smiling_face">No hay devoluciones de arriendo.</p></field>
-        </record>
+    <!-- Acción para Devoluciones -->
+    <record id="action_arriendo_entradas" model="ir.actions.act_window">
+        <field name="name">Devoluciones de Arriendo</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
+        <field name="domain">[('picking_type_code', '=', 'incoming'), ('x_suscripcion_id', '!=', False)]</field>
+        <field name="context">{'default_picking_type_code': 'incoming'}</field>
+    </record>
 
-        <!-- Submenús de Inventario -->
-        <menuitem
-            id="menu_arriendo_salidas"
-            name="Salidas de Arriendo"
-            parent="menu_arriendo_inventario_root"
-            action="action_arriendo_salidas"
-            sequence="10"
-        />
-        <menuitem
-            id="menu_arriendo_entradas"
-            name="Devoluciones de Arriendo"
-            parent="menu_arriendo_inventario_root"
-            action="action_arriendo_entradas"
-            sequence="20"
-        />
-        <menuitem
-            id="menu_arriendo_stock_picking_all"
-            name="Todos los Traslados"
-            parent="menu_arriendo_inventario_root"
-            action="stock.action_picking_tree_all"
-            sequence="30"
-        />
+    <!-- Submenús de Inventario -->
+    <menuitem
+        id="menu_arriendo_salidas"
+        name="Salidas de Arriendo"
+        parent="menu_arriendo_inventario_root"
+        action="action_arriendo_salidas"
+        sequence="10"
+    />
+    <menuitem
+        id="menu_arriendo_entradas"
+        name="Devoluciones de Arriendo"
+        parent="menu_arriendo_inventario_root"
+        action="action_arriendo_entradas"
+        sequence="20"
+    />
+    <menuitem
+        id="menu_arriendo_stock_picking_all"
+        name="Todos los Traslados"
+        parent="menu_arriendo_inventario_root"
+        action="stock.action_picking_tree_all"
+        sequence="30"
+    />
 
-    <!-- Menú para Productos (CORREGIDO) -->
+    <!-- ====================================================== -->
+    <!-- MENÚ DE PRODUCTOS                                      -->
+    <!-- ====================================================== -->
     <menuitem
         id="menu_arriendo_productos_root"
         name="Productos"
         parent="menu_arriendo_root"
         sequence="40"
     />
-        <!-- Acción para ver y crear PRENDAS ARRENDABLES -->
-        <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
-            <field name="name">Prendas Arrendables</field>
-            <field name="res_model">product.template</field>
-            <field name="view_mode">kanban,list,form</field>
-            <field name="context">{'search_default_x_es_prenda_arrendable': 1, 'default_x_es_prenda_arrendable': 1}</field>
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No se encontraron productos marcados como "Prenda Arrendable".</p>
-                <p>Haz clic en 'Crear' para añadir una nueva prenda para arriendo, o edita un producto existente y activa la opción en la pestaña 'Arriendo'.</p>
-            </field>
-        </record>
 
-        <!-- Submenús de Productos (CORREGIDO: Se eliminaron los grupos) -->
-        <menuitem
-            id="menu_arriendo_productos_arrendables"
-            name="Prendas Arrendables"
-            parent="menu_arriendo_productos_root"
-            action="action_ver_prendas_arrendables"
-            sequence="10"
-        />
-        <menuitem
-            id="menu_arriendo_productos_todos"
-            name="Todos los Productos"
-            parent="menu_arriendo_productos_root"
-            action="product.product_template_action_all"
-            sequence="20"
-        />
+    <!-- Acción para Ver Prendas Arrendables -->
+    <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
+        <field name="name">Prendas Arrendables</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_x_es_prenda_arrendable': 1, 'default_x_es_prenda_arrendable': 1}</field>
+        <field name="domain">[('x_es_prenda_arrendable', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No se encontraron productos marcados como "Prenda Arrendable".</p>
+            <p>Puedes crear uno nuevo o editar un producto y activar la opción "Es prenda arrendable".</p>
+        </field>
+    </record>
+
+    <!-- Submenú de Prendas Arrendables -->
+    <menuitem
+        id="menu_arriendo_productos_arrendables"
+        name="Prendas Arrendables"
+        parent="menu_arriendo_productos_root"
+        action="action_ver_prendas_arrendables"
+        sequence="10"
+    />
+
+    <!-- Opcional: Todos los productos (puedes eliminar este menú si no quieres mostrar todo) -->
+    <menuitem
+        id="menu_arriendo_productos_todos"
+        name="Todos los Productos"
+        parent="menu_arriendo_productos_root"
+        action="product.product_template_action_all"
+        sequence="20"
+    />
+
+    <!-- ====================================================== -->
+    <!-- MENÚ DE CLIENTES CON SUSCRIPCIÓN                       -->
+    <!-- ====================================================== -->
+    <menuitem
+        id="menu_arriendo_clientes_root"
+        name="Clientes"
+        parent="menu_arriendo_root"
+        sequence="50"
+    />
+
+    <record id="action_clientes_con_suscripcion" model="ir.actions.act_window">
+        <field name="name">Clientes con Suscripción</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('sale_order_ids.is_subscription', '=', True)]</field>
+    </record>
+
+    <menuitem
+        id="menu_arriendo_clientes_con_suscripcion"
+        name="Clientes con Suscripción"
+        parent="menu_arriendo_clientes_root"
+        action="action_clientes_con_suscripcion"
+        sequence="10"
+    />
+
 </odoo>
