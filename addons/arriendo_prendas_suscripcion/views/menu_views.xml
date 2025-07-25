@@ -87,9 +87,9 @@
             </field>
         </record>
 
-        <!-- Submenús de Productos (Aquí sí se aplican los grupos) -->
-        <menuitem id="menu_arriendo_productos_arrendables" name="Prendas Arrendables" parent="menu_arriendo_productos_root" action="action_ver_prendas_arrendables" sequence="10" groups="product.group_product_user"/>
-        <menuitem id="menu_arriendo_productos_todos" name="Todos los Productos" parent="menu_arriendo_productos_root" action="product.product_template_action_all" sequence="20" groups="product.group_product_user"/>
+        <!-- Submenús de Productos (CORREGIDO: Sin grupos de seguridad) -->
+        <menuitem id="menu_arriendo_productos_arrendables" name="Prendas Arrendables" parent="menu_arriendo_productos_root" action="action_ver_prendas_arrendables" sequence="10"/>
+        <menuitem id="menu_arriendo_productos_todos" name="Todos los Productos" parent="menu_arriendo_productos_root" action="product.product_template_action_all" sequence="20"/>
 
     <!-- Menú para Clientes (CORREGIDO: Sin grupo de seguridad) -->
     <menuitem
@@ -109,7 +109,7 @@
             </field>
         </record>
 
-        <!-- Submenú de Clientes (Aquí sí se aplica el grupo) -->
-        <menuitem id="menu_arriendo_clientes_con_suscripcion" name="Clientes con Suscripción" parent="menu_arriendo_clientes_root" action="action_clientes_con_suscripcion" sequence="10" groups="sales_team.group_sale_salesman"/>
+        <!-- Submenú de Clientes (CORREGIDO: Sin grupo de seguridad) -->
+        <menuitem id="menu_arriendo_clientes_con_suscripcion" name="Clientes con Suscripción" parent="menu_arriendo_clientes_root" action="action_clientes_con_suscripcion" sequence="10"/>
 
 </odoo>
