@@ -15,7 +15,7 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
             const res = this._super.apply(this, arguments);
 
             this.selectionCount = this.$('input[type="checkbox"][name="product_ids"]:checked').length;
-            this.maxAllowed = parseInt(this.$el.data('max-allowed') || 0);
+            this.maxAllowed = parseInt(this.$el.attr('data-max-allowed')) || 0;
 
             this._createToast();
             this._updateSelectionCounter();
@@ -42,9 +42,11 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         _updateSelectionCounter: function () {
-            const counter = this.$('.selection-counter');
-            if (counter.length > 0) {
-                counter.text(`Prendas seleccionadas: ${this.selectionCount}`);
+            const $counter = this.$('.selection-counter');
+            if ($counter.length > 0) {
+                $counter.text(`Prendas seleccionadas: ${this.selectionCount}`);
+            } else {
+                console.warn("⚠️ .selection-counter no encontrado en el DOM.");
             }
         },
 
@@ -56,7 +58,6 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         _createToast: function () {
-            // Elimina toasts previos si existieran
             $('#arriendoToast').remove();
 
             const toastHtml = `
@@ -71,29 +72,27 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
             $('body').append(toastHtml);
 
             this.toastElement = document.getElementById('arriendoToast');
-            if (this.toastElement) {
+            this.toastMsgElement = document.getElementById('arriendo-toast-msg');
+
+            if (this.toastElement && typeof bootstrap !== 'undefined' && bootstrap.Toast) {
                 this.bsToast = new bootstrap.Toast(this.toastElement);
+            } else {
+                console.error("❌ Bootstrap Toast no disponible o no inicializado.");
             }
         },
 
         _showToast: function (type, message) {
-            if (!this.toastElement || !this.bsToast) {
-                console.warn("❗ Toast no está inicializado correctamente.");
+            if (!this.toastElement || !this.bsToast || !this.toastMsgElement) {
+                console.warn("❗ No se puede mostrar el toast. Elementos faltantes.");
                 return;
             }
 
-            // Actualiza clases y texto de mensaje
             $(this.toastElement)
                 .removeClass('bg-success bg-danger bg-warning bg-info text-white')
                 .addClass(`bg-${type} text-white`);
 
-            const msgEl = document.getElementById('arriendo-toast-msg');
-            if (msgEl) {
-                msgEl.textContent = message;
-                this.bsToast.show();
-            } else {
-                console.warn("❗ Elemento del cuerpo del toast no encontrado.");
-            }
+            this.toastMsgElement.textContent = message;
+            this.bsToast.show();
         },
     });
 
