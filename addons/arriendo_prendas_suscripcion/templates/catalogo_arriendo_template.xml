@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <template id="portal_catalogo_arriendo" name="Catálogo de Arriendo">
         <t t-call="portal.portal_layout">
-            <t t-set="title">Catálogo de Prendas Disponibles</t> <!-- Título de la página -->
+            <t t-set="title">Catálogo de Prendas Disponibles</t>
 
-            <div class="container o_portal_fullwidth_touch"> <!-- Añadido para responsividad -->
-                <h2 class="text-center mb-4">Catálogo de Prendas Disponibles</h2> <!-- Centrar título -->
+            <div class="container o_portal_fullwidth_touch">
+                <h2 class="text-center mb-4">Catálogo de Prendas Disponibles</h2>
 
-                <!-- Sección para mostrar mensajes de éxito o error (desde request.session) -->
+                <!-- Mensajes -->
                 <t t-if="request.session.get('rental_success_message')">
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <t t-esc="request.session.pop('rental_success_message')"/>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                     </div>
                 </t>
                 <t t-if="request.session.get('rental_error_message')">
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <t t-esc="request.session.pop('rental_error_message')"/>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
                     </div>
                 </t>
 
-                <!-- Formulario principal para la selección de prendas -->
-                <!-- Importante: data-max-allowed para el JS y csrf_token para seguridad -->
+                <!-- Formulario de selección -->
                 <form id="rentForm" action="/my/rentals/request_rent" method="POST"
                       t-att-data-max-allowed="subscription.x_max_prendas_permitidas if subscription else 0">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token"/>
 
-                    <!-- Contador de selección y límites -->
+                    <!-- Indicador -->
                     <div class="selection-counter text-center mb-3">
                         <t t-if="subscription">
                             <span class="h5">
-                                <span class="text-primary" t-esc="current_prendas_en_posesion"/> / <span class="text-success" t-esc="max_prendas_permitidas"/> prendas en posesión.
+                                <span class="text-primary" t-esc="current_prendas_en_posesion"/> / 
+                                <span class="text-success" t-esc="max_prendas_permitidas"/> prendas en posesión.
                             </span><br/>
                             <span class="h6 text-muted">
-                                Puedes seleccionar <span class="text-info" t-esc="max_prendas_permitidas - current_prendas_en_posesion"/> prendas adicionales.
+                                Puedes seleccionar 
+                                <span class="text-info" t-esc="max_prendas_permitidas - current_prendas_en_posesion"/> adicionales.
                             </span>
                         </t>
                         <t t-else="">
@@ -43,31 +43,34 @@
                         </t>
                     </div>
 
+                    <!-- Grid de productos -->
                     <div class="row">
                         <t t-if="productos">
                             <t t-foreach="productos" t-as="producto">
-                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4"> <!-- Columnas responsivas -->
-                                    <div class="card h-100 shadow-sm"> <!-- Sombra suave para las tarjetas -->
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                    <div class="card h-100 shadow-sm">
                                         <t t-if="producto.image_1920">
                                             <img t-attf-src="/web/image/product.template/#{producto.id}/image_1920" class="card-img-top" alt="Imagen de Prenda"/>
                                         </t>
                                         <t t-else="">
-                                            <!-- Placeholder para productos sin imagen -->
-                                            <img t-attf-src="/web/image/product.template/0/image_1920?unique=1&amp;width=1920&amp;height=1920&amp;field=image_1920&amp;model=product.template&amp;id=0" class="card-img-top" alt="No Image"/>
+                                            <img t-attf-src="/web/image/product.template/0/image_1920?unique=1&amp;width=1920&amp;height=1920&amp;field=image_1920&amp;model=product.template&amp;id=0" class="card-img-top" alt="Sin imagen"/>
                                         </t>
-                                        
-                                        <div class="card-body d-flex flex-column"> <!-- Flexbox para alinear contenido -->
-                                            <h5 class="card-title text-truncate" t-att-title="producto.display_name"><t t-esc="producto.display_name"/></h5>
+
+                                        <div class="card-body d-flex flex-column">
+                                            <h5 class="card-title text-truncate" t-att-title="producto.display_name">
+                                                <t t-esc="producto.display_name"/>
+                                            </h5>
                                             <p class="card-text mb-2">
                                                 <strong>Ref:</strong> <t t-esc="producto.default_code or 'N/A'"/>
                                             </p>
-                                            <!-- Aquí podrías añadir más detalles de la prenda si los tienes en el modelo -->
-                                            <!-- <p class="card-text">Talla: <t t-esc="producto.x_talla"/></p> -->
 
-                                            <div class="form-check mt-auto"> <!-- mt-auto empuja al final -->
-                                                <input class="form-check-input" type="checkbox" name="product_ids" t-att-value="producto.id"
-                                                       t-att-id="'product_checkbox_%s' % producto.id"/> <!-- Añadido ID para label -->
-                                                <label class="form-check-label" t-att-for="'product_checkbox_%s' % producto.id">Seleccionar</label>
+                                            <div class="form-check mt-auto">
+                                                <input class="form-check-input" type="checkbox" name="product_ids"
+                                                       t-att-value="producto.id"
+                                                       t-att-id="'product_checkbox_%s' % producto.id"/>
+                                                <label class="form-check-label" t-att-for="'product_checkbox_%s' % producto.id">
+                                                    Seleccionar
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -82,7 +85,8 @@
                         </t>
                     </div>
 
-                    <div class="mt-4 text-center d-flex justify-content-center"> <!-- Centrar botones -->
+                    <!-- Botones -->
+                    <div class="mt-4 text-center d-flex justify-content-center">
                         <button type="submit" class="btn btn-success me-2">Confirmar Solicitud de Arriendo</button>
                         <a href="/my/rentals" class="btn btn-secondary">Cancelar</a>
                     </div>
@@ -90,5 +94,4 @@
             </div>
         </t>
     </template>
-
 </odoo>
