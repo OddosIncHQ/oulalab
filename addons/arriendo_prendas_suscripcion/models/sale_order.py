@@ -58,3 +58,98 @@ class SaleOrder(models.Model):
                 subtype_xmlid="mail.mt_note"
             )
         _logger.info("Cron 'action_reset_monthly_changes' finalizado.")
+
+    def _create_rental_picking(self, picking_type, product_ids=None, lot_ids=None):
+        """
+        Crea un picking de salida (arriendo) o entrada (devolución) para la suscripción.
+        picking_type: 'outgoing' o 'incoming'
+        """
+        self.ensure_one()
+        Picking = self.env['stock.picking']
+        Move = self.env['stock.move']
+        Lot = self.env['stock.production.lot']
+        Product = self.env['product.product']
+
+        # Selección de tipo de operación
+        picking_type_ref = 'stock.picking_type_out' if picking_type == 'outgoing' else 'stock.picking_type_in'
+        picking_type_obj = self.env.ref(picking_type_ref)
+
+        # Crear el picking
+        picking = Picking.create({
+            'partner_id': self.partner_id.id,
+            'picking_type_id': picking_type_obj.id,
+            'origin': self.name,
+            'location_id': picking_type_obj.default_location_src_id.id,
+            'location_dest_id': picking_type_obj.default_location_dest_id.id,
+        })
+
+        if picking_type == 'outgoing' and product_ids:
+            for product_id in product_ids:
+                # Buscar un número de serie disponible
+                available_lot = Lot.search([
+                    ('product_id', '=', product_id),
+                    ('quant_ids.quantity', '>', 0),
+                    ('quant_ids.location_id.usage', '=', 'internal'),
+                    ('id', 'not in', self.env['arriendo.prenda.linea'].search([
+                        ('estado', '=', 'arrendada'),
+                        ('active', '=', True)
+                    ]).mapped('numero_serie_id').ids)
+                ], limit=1)
+
+                if not available_lot:
+                    raise ValidationError(_("No hay stock disponible para el producto ID %s") % product_id)
+
+                Move.create({
+                    'name': self.name,
+                    'product_id': product_id,
+                    'product_uom_qty': 1,
+                    'product_uom': available_lot.product_id.uom_id.id,
+                    'location_id': picking.location_id.id,
+                    'location_dest_id': picking.location_dest_id.id,
+                    'picking_id': picking.id,
+                    'restrict_lot_id': available_lot.id,
+                })
+
+                # Registrar línea de arriendo
+                self.env['arriendo.prenda.linea'].create({
+                    'suscripcion_id': self.id,
+                    'prenda_id': available_lot.product_id.id,
+                    'numero_serie_id': available_lot.id,
+                    'fecha_arriendo': fields.Datetime.now(),
+                    'estado': 'arrendada',
+                })
+
+                # Incrementar contador de cambios
+                self.x_cambios_usados_mes += 1
+
+        elif picking_type == 'incoming' and lot_ids:
+            for lot_id in lot_ids:
+                lot = Lot.browse(lot_id)
+                Move.create({
+                    'name': self.name,
+                    'product_id': lot.product_id.id,
+                    'product_uom_qty': 1,
+                    'product_uom': lot.product_id.uom_id.id,
+                    'location_id': picking.location_id.id,
+                    'location_dest_id': picking.location_dest_id.id,
+                    'picking_id': picking.id,
+                    'restrict_lot_id': lot.id,
+                })
+
+                # Actualizar línea de arriendo
+                linea = self.env['arriendo.prenda.linea'].search([
+                    ('numero_serie_id', '=', lot.id),
+                    ('suscripcion_id', '=', self.id),
+                    ('estado', '=', 'arrendada'),
+                    ('active', '=', True)
+                ], limit=1)
+
+                if linea:
+                    linea.write({
+                        'estado': 'devuelta',
+                        'fecha_devolucion': fields.Datetime.now(),
+                        'active': False
+                    })
+
+        return picking
+
