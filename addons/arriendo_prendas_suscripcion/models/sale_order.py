@@ -120,13 +120,13 @@ class SaleOrder(models.Model):
                 })
 
                 # Incrementar contador de cambios
-                self.x_cambios_usados_mes += 1
+                # self.x_cambios_usados_mes += 1
 
         elif picking_type == 'incoming' and lot_ids:
             for lot_id in lot_ids:
                 lot = Lot.browse(lot_id)
                 Move.create({
-                    'name': self.name,
+                    'name': f'Arriendo de suscripción {self.name}',
                     'product_id': lot.product_id.id,
                     'product_uom_qty': 1,
                     'product_uom': lot.product_id.uom_id.id,
