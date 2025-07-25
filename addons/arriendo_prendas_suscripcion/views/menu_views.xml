@@ -67,13 +67,12 @@
         <menuitem id="menu_arriendo_entradas" name="Devoluciones de Arriendo" parent="menu_arriendo_inventario_root" action="action_arriendo_entradas" sequence="20"/>
         <menuitem id="menu_arriendo_stock_picking_all" name="Todos los Traslados" parent="menu_arriendo_inventario_root" action="stock.action_picking_tree_all" sequence="30"/>
 
-    <!-- Menú para Productos -->
+    <!-- Menú para Productos (CORREGIDO: Sin grupo de seguridad) -->
     <menuitem
         id="menu_arriendo_productos_root"
         name="Productos"
         parent="menu_arriendo_root"
         sequence="40"
-        groups="product.group_product_user"
     />
         <!-- Acción para Prendas Arrendables -->
         <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
@@ -88,17 +87,16 @@
             </field>
         </record>
 
-        <!-- Submenús de Productos -->
-        <menuitem id="menu_arriendo_productos_arrendables" name="Prendas Arrendables" parent="menu_arriendo_productos_root" action="action_ver_prendas_arrendables" sequence="10"/>
-        <menuitem id="menu_arriendo_productos_todos" name="Todos los Productos" parent="menu_arriendo_productos_root" action="product.product_template_action_all" sequence="20"/>
+        <!-- Submenús de Productos (Aquí sí se aplican los grupos) -->
+        <menuitem id="menu_arriendo_productos_arrendables" name="Prendas Arrendables" parent="menu_arriendo_productos_root" action="action_ver_prendas_arrendables" sequence="10" groups="product.group_product_user"/>
+        <menuitem id="menu_arriendo_productos_todos" name="Todos los Productos" parent="menu_arriendo_productos_root" action="product.product_template_action_all" sequence="20" groups="product.group_product_user"/>
 
-    <!-- Menú para Clientes -->
+    <!-- Menú para Clientes (CORREGIDO: Sin grupo de seguridad) -->
     <menuitem
         id="menu_arriendo_clientes_root"
         name="Clientes"
         parent="menu_arriendo_root"
         sequence="50"
-        groups="sales_team.group_sale_salesman"
     />
         <!-- Acción para Clientes con Suscripción -->
         <record id="action_clientes_con_suscripcion" model="ir.actions.act_window">
@@ -111,7 +109,7 @@
             </field>
         </record>
 
-        <!-- Submenú de Clientes -->
-        <menuitem id="menu_arriendo_clientes_con_suscripcion" name="Clientes con Suscripción" parent="menu_arriendo_clientes_root" action="action_clientes_con_suscripcion" sequence="10"/>
+        <!-- Submenú de Clientes (Aquí sí se aplica el grupo) -->
+        <menuitem id="menu_arriendo_clientes_con_suscripcion" name="Clientes con Suscripción" parent="menu_arriendo_clientes_root" action="action_clientes_con_suscripcion" sequence="10" groups="sales_team.group_sale_salesman"/>
 
 </odoo>
