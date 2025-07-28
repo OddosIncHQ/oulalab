@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <!--
     1. Añade la tarjeta de "Mis Arriendos" al panel principal del portal ("Mi Cuenta").
     Hereda del template estándar de Odoo para asegurar la compatibilidad.
