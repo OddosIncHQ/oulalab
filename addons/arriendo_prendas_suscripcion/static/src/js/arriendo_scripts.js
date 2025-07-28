@@ -17,16 +17,14 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
             this.$counter = this.$('.selection-counter');
             this.$submitButton = this.$('button[type="submit"]');
             this.$checkboxes = this.$('.product-selector-checkbox');
-
             this.selectionLimit = parseInt(this.$el.data('selection-limit') || '0', 10);
 
-            if (!this.$counter.length || !this.$submitButton.length) {
-                console.warn("[Arriendo Catalog] Elementos requeridos no encontrados: .selection-counter o botón de envío.");
-                return this._super.apply(this, arguments);
+            if (!this.$counter.length || !this.$submitButton.length || !this.$checkboxes.length) {
+                console.warn("[RentalCatalogWidget] DOM incompleto. Widget no iniciado.");
+                return Promise.resolve();
             }
 
             this._updateUI();
-
             return this._super.apply(this, arguments);
         },
 
