@@ -12,7 +12,7 @@
                 <group string="Arriendo">
                     <field name="x_suscripcion_id"
                            options="{'no_create': True, 'no_create_edit': True}"
-                           domain="[('partner_id', '=', partner_id), ('is_subscription', '=', True), ('stage_category', '=', 'progress')]"/>
+                           domain="[('partner_id', '=', partner_id), ('is_subscription', '=', True), ('state', '=', 'sale')]"/>
                     <field name="x_es_cambio_prenda"
                            string="¿Cambio de Prenda?"
                            modifiers='{"invisible": [["x_suscripcion_id", "=", false]]}'/>
