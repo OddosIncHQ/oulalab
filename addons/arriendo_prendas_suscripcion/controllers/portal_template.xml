@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!--
-    1. Añade la tarjeta de "Mis Arriendos" al panel principal del portal ("Mi Cuenta").
-    Hereda del template estándar de Odoo para asegurar la compatibilidad.
-    -->
+    <!-- 1. Tarjeta de acceso en "Mi Cuenta" -->
     <template id="portal_my_home_rental" name="Portal My Home: Rental" inherit_id="portal.portal_my_home" priority="30">
         <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <!-- La tarjeta solo aparece si el contador 'rental_count' existe (definido en el controlador) -->
             <t t-if="rental_count is not None">
-                 <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="/my/rentals">
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="/my/rentals">
                     <div class="flex-grow-1">
                         <h5 class="mb-1">Mis Arriendos</h5>
                         <p class="mb-0 text-muted">
@@ -22,16 +18,14 @@
         </xpath>
     </template>
 
-    <!--
-    2. Panel de control principal de arriendos.
-    Esta es la página que ve el cliente al hacer clic en "Mis Arriendos".
-    -->
+    <!-- 2. Página principal de arriendos -->
     <template id="portal_dashboard" name="Portal de Arriendos">
         <t t-call="portal.portal_layout">
             <t t-set="title">Mis Arriendos</t>
 
             <div class="container py-4">
-                <!-- Mensajes de éxito o error pasados por la URL -->
+
+                <!-- Mensajes de resultado (éxito/error) -->
                 <t t-if="request.params.get('success_message')">
                     <div class="alert alert-success" role="alert"><t t-esc="request.params.get('success_message')"/></div>
                 </t>
@@ -46,41 +40,66 @@
                     </div>
                     <div class="card-body">
                         <div class="row text-center">
-                            <div class="col-md-3 col-6 mb-3"><strong>Prendas en Posesión:</strong> <span class="text-primary fw-bold"><t t-esc="subscription.x_cantidad_prendas_en_posesion"/></span></div>
-                            <div class="col-md-3 col-6 mb-3"><strong>Máximo Permitido:</strong> <span class="text-success fw-bold"><t t-esc="subscription.x_max_prendas_permitidas"/></span></div>
-                            <div class="col-md-3 col-6 mb-3"><strong>Cambios Usados:</strong> <span class="text-warning fw-bold"><t t-esc="subscription.x_cambios_usados_mes"/></span></div>
-                            <div class="col-md-3 col-6 mb-3"><strong>Cambios Permitidos:</strong> <span class="text-info fw-bold"><t t-esc="subscription.x_cambios_permitidos_mes"/></span></div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <strong>Prendas en Posesión:</strong>
+                                <span class="text-primary fw-bold"><t t-esc="subscription.x_cantidad_prendas_en_posesion or 0"/></span>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <strong>Máximo Permitido:</strong>
+                                <span class="text-success fw-bold"><t t-esc="subscription.x_max_prendas_permitidas or 0"/></span>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <strong>Cambios Usados:</strong>
+                                <span class="text-warning fw-bold"><t t-esc="subscription.x_cambios_usados_mes or 0"/></span>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <strong>Cambios Permitidos:</strong>
+                                <span class="text-info fw-bold"><t t-esc="subscription.x_cambios_permitidos_mes or 0"/></span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Acciones Principales -->
+                <!-- CTA -->
                 <div class="text-center mb-4">
                     <a href="/my/rentals/catalog" class="btn btn-primary btn-lg">Arrendar Nuevas Prendas</a>
                 </div>
 
-                <!-- Lista de Prendas en Posesión -->
+                <!-- Lista de prendas actuales -->
                 <h4>Prendas que tienes en casa</h4>
                 <form action="/my/rentals/return" method="POST">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token() or ''"/>
+
                     <t t-if="prendas_arrendadas">
                         <ul class="list-group">
                             <t t-foreach="prendas_arrendadas" t-as="linea">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <input type="checkbox" class="form-check-input me-2" name="lot_ids" t-att-value="linea.numero_serie_id.id"/>
-                                        <img t-attf-src="/web/image/product.product/#{linea.prenda_id.id}/image_64" class="rounded me-3" style="width: 64px; height: 64px; object-fit: cover;"/>
+                                        <input type="checkbox" class="form-check-input me-2" name="lot_ids"
+                                               t-att-value="linea.numero_serie_id.id"/>
+                                        <img t-attf-src="/web/image/product.product/#{linea.prenda_id.id}/image_64"
+                                             class="rounded me-3"
+                                             style="width: 64px; height: 64px; object-fit: cover;"/>
                                         <span class="fw-bold"><t t-esc="linea.prenda_id.name"/></span>
-                                        <small class="text-muted">(Serie: <t t-esc="linea.numero_serie_id.name"/>)</small>
+                                        <small class="text-muted">
+                                            (Serie: <t t-esc="linea.numero_serie_id.name"/>)
+                                        </small>
                                     </div>
-                                    <span class="text-muted">Enviado el: <span t-field="linea.fecha_arriendo" t-options='{"widget": "date"}'/></span>
+                                    <span class="text-muted">
+                                        Enviado el: 
+                                        <t t-esc="linea.fecha_arriendo.strftime('%d/%m/%Y') if linea.fecha_arriendo else 'N/A'"/>
+                                    </span>
                                 </li>
                             </t>
                         </ul>
+
                         <div class="text-center mt-3">
-                            <button type="submit" class="btn btn-outline-danger">Solicitar Devolución de Seleccionadas</button>
+                            <button type="submit" class="btn btn-outline-danger">
+                                Solicitar Devolución de Seleccionadas
+                            </button>
                         </div>
                     </t>
+
                     <t t-else="">
                         <div class="alert alert-secondary text-center" role="alert">
                             No tienes ninguna prenda en casa. ¡Es hora de elegir algo nuevo!
@@ -91,16 +110,13 @@
         </t>
     </template>
 
-    <!--
-    3. Plantilla para cuando el cliente no tiene una suscripción activa.
-    -->
+    <!-- 3. Plantilla sin suscripción -->
     <template id="portal_no_subscription" name="Sin Suscripción">
         <t t-call="portal.portal_layout">
             <div class="container text-center py-5">
                 <h2 class="mb-3">¡Ups! Aún no tienes una suscripción.</h2>
                 <p class="lead text-muted">Para comenzar a arrendar prendas, necesitas una suscripción activa.</p>
                 <div class="mt-4">
-                    <!-- Este enlace debería llevar a tu página de planes de suscripción -->
                     <a href="/shop" class="btn btn-primary btn-lg">Ver Planes de Suscripción</a>
                     <a href="/my/home" class="btn btn-secondary btn-lg">Volver al Portal</a>
                 </div>
