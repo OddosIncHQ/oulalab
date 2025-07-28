@@ -4,7 +4,7 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
     var publicWidget = require('web.public.widget');
 
     publicWidget.registry.RentalCatalogWidget = publicWidget.Widget.extend({
-        // Este widget solo se activará en elementos con esta clase, que pondremos en la plantilla.
+        // El widget solo se activará en elementos con esta clase, que pondremos en la plantilla.
         selector: '.o_rental_catalog', 
         
         events: {
