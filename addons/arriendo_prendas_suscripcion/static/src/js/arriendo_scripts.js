@@ -11,49 +11,73 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         /**
-         * Se ejecuta cuando el widget inicia y el selector está presente.
+         * Called when widget is initialized and selector is matched in DOM
          */
         start: function () {
-            // Cache DOM elements
             this.$counter = this.$('.selection_counter');
             this.$submitButton = this.$('button[type="submit"]');
+            this.$checkboxes = this.$('.product-selector-checkbox');
 
-            // Validación: asegúrate de que ambos elementos existen
+            // Selection limit comes from a data attribute on the main container
+            this.selectionLimit = parseInt(this.$el.data('selection-limit') || '0', 10);
+
             if (!this.$counter.length || !this.$submitButton.length) {
-                console.warn("Widget del Catálogo de Arriendo: Faltan elementos HTML requeridos. El widget no se activará en esta página.");
+                console.warn("[Arriendo Catalog] HTML elements missing: .selection_counter or submit button not found.");
                 return this._super.apply(this, arguments);
             }
-
-            // Obtiene el límite de selección desde un atributo data
-            this.selectionLimit = parseInt(this.$el.data('selection-limit') || '0', 10);
 
             this._updateUI();
 
             return this._super.apply(this, arguments);
         },
 
-        _onSelectionChange: function () {
+        /**
+         * Triggered when checkbox selection changes
+         */
+        _onSelectionChange: function (ev) {
+            const selectedCount = this.$checkboxes.filter(':checked').length;
+
+            if (selectedCount > this.selectionLimit) {
+                // If limit is exceeded, deselect the newly checked box and show alert
+                $(ev.currentTarget).prop('checked', false);
+                this._flashLimitWarning();
+                return;
+            }
+
             this._updateUI();
         },
 
+        /**
+         * Update selection counter and button state
+         */
         _updateUI: function () {
-            const selectedCount = this.$('.product-selector-checkbox:checked').length;
+            const selectedCount = this.$checkboxes.filter(':checked').length;
 
-            // Verifica si el contador existe y no es null
-            if (this.$counter && this.$counter.length && this.$counter.get(0)) {
-                this.$counter.text(`${selectedCount} / ${this.selectionLimit} seleccionadas`);
-                this.$counter.toggleClass('text-danger', selectedCount > this.selectionLimit);
-            } else {
-                console.warn("Elemento '.selection_counter' no disponible en este momento.");
+            // Update text counter
+            if (this.$counter.length) {
+                this.$counter
+                    .text(`${selectedCount} / ${this.selectionLimit} seleccionadas`)
+                    .toggleClass('text-danger', selectedCount > this.selectionLimit);
             }
 
-            // Verifica si el botón de envío existe y no es null
-            if (this.$submitButton && this.$submitButton.length && this.$submitButton.get(0)) {
-                const isDisabled = selectedCount === 0 || selectedCount > this.selectionLimit;
-                this.$submitButton.prop('disabled', isDisabled);
-            } else {
-                console.warn("Elemento 'submit button' no disponible en este momento.");
+            // Enable or disable submit button
+            if (this.$submitButton.length) {
+                const disable = selectedCount === 0 || selectedCount > this.selectionLimit;
+                this.$submitButton.prop('disabled', disable);
             }
+        },
+
+        /**
+         * Simple visual alert when selection exceeds the limit
+         */
+        _flashLimitWarning: function () {
+            const $warning = $('<div class="alert alert-warning text-center mt-3">Has alcanzado el límite de selección.</div>');
+            this.$el.find('.alert').remove(); // remove previous alerts
+            this.$el.prepend($warning);
+
+            setTimeout(() => {
+                $warning.fadeOut(500, () => $warning.remove());
+            }, 2500);
         },
     });
 
