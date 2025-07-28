@@ -1,19 +1,14 @@
 <odoo>
     <data noupdate="1">
-        <!--
-        Categoría de Aplicación para agrupar los permisos.
-        Esto hace que aparezcan en una sección dedicada en la configuración de usuarios.
-        -->
+
+        <!-- Categoría de Aplicación -->
         <record model="ir.module.category" id="module_category_arriendo">
             <field name="name">Arriendo de Prendas</field>
             <field name="description">Permisos para la aplicación de Arriendo de Prendas.</field>
             <field name="sequence">26</field>
         </record>
 
-        <!--
-        Grupo de Usuario: Permisos básicos de lectura.
-        Este es el grupo que faltaba y causaba el error.
-        -->
+        <!-- Grupo: Usuario -->
         <record id="group_arriendo_user" model="res.groups">
             <field name="name">Arriendos: Usuario</field>
             <field name="category_id" ref="module_category_arriendo"/>
@@ -23,10 +18,7 @@
             </field>
         </record>
 
-        <!--
-        Grupo de Manager: Permisos completos de gestión.
-        Hereda los permisos del grupo de Usuario.
-        -->
+        <!-- Grupo: Manager -->
         <record id="group_arriendo_manager" model="res.groups">
             <field name="name">Arriendos: Manager</field>
             <field name="category_id" ref="module_category_arriendo"/>
@@ -35,5 +27,18 @@
                 El manager tiene acceso completo para crear, editar y eliminar todos los registros de la aplicación de Arriendos.
             </field>
         </record>
+
+        <!-- 🔐 REGLA DE ACCESO PARA USUARIOS PORTAL -->
+        <record id="rule_arriendo_prenda_linea_portal_read_own" model="ir.rule">
+            <field name="name">Portal: Ver solo sus prendas arrendadas</field>
+            <field name="model_id" ref="model_arriendo_prenda_linea"/>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
     </data>
 </odoo>
