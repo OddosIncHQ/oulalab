@@ -11,18 +11,17 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         /**
-         * Called when widget is initialized and selector is matched in DOM
+         * Se ejecuta al iniciar el widget cuando encuentra el selector.
          */
         start: function () {
-            this.$counter = this.$('.selection_counter');
+            this.$counter = this.$('.selection-counter');  // ← corregido el nombre de la clase
             this.$submitButton = this.$('button[type="submit"]');
             this.$checkboxes = this.$('.product-selector-checkbox');
 
-            // Selection limit comes from a data attribute on the main container
             this.selectionLimit = parseInt(this.$el.data('selection-limit') || '0', 10);
 
             if (!this.$counter.length || !this.$submitButton.length) {
-                console.warn("[Arriendo Catalog] HTML elements missing: .selection_counter or submit button not found.");
+                console.warn("[Arriendo Catalog] No se encontraron los elementos esperados (.selection-counter o botón de envío).");
                 return this._super.apply(this, arguments);
             }
 
@@ -32,13 +31,12 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         /**
-         * Triggered when checkbox selection changes
+         * Llamado cada vez que cambia un checkbox de selección.
          */
         _onSelectionChange: function (ev) {
             const selectedCount = this.$checkboxes.filter(':checked').length;
 
             if (selectedCount > this.selectionLimit) {
-                // If limit is exceeded, deselect the newly checked box and show alert
                 $(ev.currentTarget).prop('checked', false);
                 this._flashLimitWarning();
                 return;
@@ -48,19 +46,17 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         /**
-         * Update selection counter and button state
+         * Actualiza el contador y estado del botón.
          */
         _updateUI: function () {
             const selectedCount = this.$checkboxes.filter(':checked').length;
 
-            // Update text counter
             if (this.$counter.length) {
                 this.$counter
                     .text(`${selectedCount} / ${this.selectionLimit} seleccionadas`)
                     .toggleClass('text-danger', selectedCount > this.selectionLimit);
             }
 
-            // Enable or disable submit button
             if (this.$submitButton.length) {
                 const disable = selectedCount === 0 || selectedCount > this.selectionLimit;
                 this.$submitButton.prop('disabled', disable);
@@ -68,15 +64,19 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         /**
-         * Simple visual alert when selection exceeds the limit
+         * Muestra una advertencia cuando se supera el límite.
          */
         _flashLimitWarning: function () {
-            const $warning = $('<div class="alert alert-warning text-center mt-3">Has alcanzado el límite de selección.</div>');
-            this.$el.find('.alert').remove(); // remove previous alerts
-            this.$el.prepend($warning);
+            const $warning = $('<div class="alert alert-warning text-center mt-2" role="alert">Has alcanzado el límite de selección.</div>');
+            
+            // Eliminar cualquier mensaje previo
+            this.$el.find('.alert.alert-warning').remove();
+            
+            // Mostrar nuevo mensaje
+            this.$el.find('.selection-counter-bar').after($warning);
 
             setTimeout(() => {
-                $warning.fadeOut(500, () => $warning.remove());
+                $warning.fadeOut(400, () => $warning.remove());
             }, 2500);
         },
     });
