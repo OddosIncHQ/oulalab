@@ -6,99 +6,114 @@
 }
 
 .card-img-top {
-    /* Asegura que la imagen de la tarjeta ocupe todo el ancho y mantenga proporción */
     width: 100%;
-    height: auto; /* Mantener la proporción */
-    object-fit: cover; /* Recorta la imagen para cubrir el área sin distorsionar */
+    height: auto;
+    object-fit: cover;
     border-bottom: 1px solid #ddd;
-    /* Añadir un poco de padding o margen si es necesario para separar del contenido */
-    padding-bottom: 10px; /* Ejemplo */
+    padding-bottom: 10px;
 }
 
 .card-title {
     font-size: 1.1rem;
     font-weight: bold;
-    /* Añadir margen inferior para separar del texto */
     margin-bottom: 5px;
 }
 
 .card-text {
     font-size: 0.9rem;
     color: #555;
-    /* Asegurar que el texto no se desborde en tarjetas pequeñas */
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* Limita a 3 líneas, ajusta según necesidad */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
-/* Estilos generales para contenedores y títulos */
 .container h2 {
     margin-top: 30px;
     margin-bottom: 20px;
-    /* Centrar si es un título principal del dashboard/catálogo */
-    text-align: center; /* Opcional, si quieres centrar todos los h2 en contenedores */
+    text-align: center;
 }
 
-/* Contador de selección (ej. "3 de 5 prendas seleccionadas") */
 .selection-counter {
     font-weight: bold;
-    color: #007bff; /* Color primario de Bootstrap */
+    color: #007bff;
     margin-bottom: 15px;
-    text-align: center; /* A menudo, estos contadores van centrados */
-    font-size: 1.1rem; /* Hacerlo un poco más grande */
+    text-align: center;
+    font-size: 1.1rem;
 }
 
-/* Estilos para mensajes Toast (notificaciones emergentes) */
-/* Asegúrate de que tu JS los genere con la clase 'toast' */
+/* Toasts */
 .toast {
     position: fixed;
     top: 1rem;
     right: 1rem;
-    z-index: 1055; /* Asegura que esté por encima de la mayoría de los elementos */
-    min-width: 250px; /* Ancho mínimo para que el mensaje sea legible */
-    border-radius: 0.5rem; /* Bordes redondeados */
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); /* Sombra suave */
+    z-index: 1055;
+    min-width: 250px;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
 }
-/* Estilos específicos para el cuerpo del toast */
 .toast-body {
     padding: 1rem;
 }
-/* Estilos para el encabezado del toast (si lo usas) */
 .toast-header {
-    background-color: #f8f9fa; /* Color de fondo claro */
+    background-color: #f8f9fa;
     border-bottom: 1px solid rgba(0,0,0,.05);
     padding: 0.75rem 1rem;
-    color: #6c757d; /* Color de texto gris */
+    color: #6c757d;
 }
 
-
-/* Efecto hover para las tarjetas (ej. en el catálogo) */
+/* Hover efecto para tarjetas */
 .card:hover {
     box-shadow: 0 0 8px rgba(0,0,0,0.1);
     transform: scale(1.01);
     transition: all 0.2s ease-in-out;
-    cursor: pointer; /* Indica que es interactuable */
+    cursor: pointer;
 }
 
-/* Estilos para los selectores de múltiples opciones en los modales */
-/* Esto es solo un ejemplo, Odoo y Bootstrap ya tienen estilos para select */
+/* Select múltiple en modales */
 .modal-body select[multiple] {
-    height: auto; /* Permite que el select crezca con más opciones */
-    min-height: 150px; /* Altura mínima para que sea usable */
+    height: auto;
+    min-height: 150px;
 }
 
-/* Opcional: Estilos para el botón de "Añadir a Selección" en las tarjetas */
+/* Botón para añadir a selección */
 .card .btn-add-to-selection {
-    width: 100%; /* Ocupa todo el ancho de la tarjeta */
-    margin-top: 10px; /* Espacio superior */
+    width: 100%;
+    margin-top: 10px;
 }
 
-/* Opcional: Estilos para la galería de imágenes de productos (si se implementa) */
+/* Galería de imágenes */
 .product-gallery img {
     max-width: 100%;
     height: auto;
     border-radius: 0.5rem;
     margin-bottom: 10px;
+}
+
+/* ========= NUEVOS ESTILOS PARA SELECCIÓN DE PRODUCTOS ========== */
+
+/* Asegura que las tarjetas tengan posición relativa para el checkbox flotante */
+.card.position-relative {
+    position: relative;
+}
+
+/* Checkbox visible sobre la tarjeta */
+.product-selector-checkbox {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    transform: scale(1.4);
+    z-index: 10;
+    background: white;
+    padding: 3px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+/* Checkbox seleccionado: borde más marcado */
+.product-selector-checkbox:checked {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
