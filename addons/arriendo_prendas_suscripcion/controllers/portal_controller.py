@@ -51,7 +51,7 @@ class ArriendoCustomerPortal(CustomerPortal):
         if not subscription:
             return request.redirect('/my/rentals?error_message=' + _("Necesitas una suscripción activa para ver el catálogo."))
 
-        # Lógica mejorada para encontrar productos realmente disponibles
+        # Productos arrendables y disponibles en stock interno
         available_lots = request.env['stock.lot'].sudo().search([
             ('product_id.x_es_prenda_arrendable', '=', True),
             ('quant_ids.quantity', '>', 0),
@@ -60,17 +60,26 @@ class ArriendoCustomerPortal(CustomerPortal):
         rented_lots = request.env['arriendo.prenda.linea'].sudo().search([
             ('estado', '=', 'arrendada'), ('active', '=', True)
         ]).mapped('numero_serie_id')
-        
+    
         final_available_lots = available_lots - rented_lots
-        available_products = final_available_lots.mapped('product_id')
+
+        # Eliminar duplicados correctamente
+        product_ids = list(set(final_available_lots.mapped('product_id').ids))
+        available_products = request.env['product.product'].browse(product_ids)
+
+        # Validación segura del límite de prendas restantes
+        max_allowed = subscription.x_max_prendas_permitidas or 0
+        currently_held = subscription.x_cantidad_prendas_en_posesion or 0
+        limit_remaining = max(0, max_allowed - currently_held)
 
         values = {
             'productos': available_products,
             'subscription': subscription,
-            'prendas_disponibles_para_seleccionar': subscription.x_max_prendas_permitidas - subscription.x_cantidad_prendas_en_posesion,
+            'prendas_disponibles_para_seleccionar': limit_remaining,
             'page_name': 'catalog',
         }
         return request.render("arriendo_prendas_suscripcion.portal_catalogo_arriendo", values)
+
 
     @http.route('/my/rentals/request', type='http', auth='user', methods=['POST'], website=True)
     def portal_request_rental(self, **post):
