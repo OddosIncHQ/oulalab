@@ -9,11 +9,14 @@
 
             <!-- Campos de arriendo insertados después de partner_id -->
             <xpath expr="//group/field[@name='partner_id']" position="after">
-                <field name="x_suscripcion_id"
-                       options="{'no_create': True, 'no_create_edit': True}"
-                       domain="[('partner_id', '=', partner_id), ('state', '=', 'open')]"/>
-                <field name="x_es_cambio_prenda"
-                       modifiers='{"invisible": [["x_suscripcion_id", "=", false]]}'/>
+                <group string="Arriendo">
+                    <field name="x_suscripcion_id"
+                           options="{'no_create': True, 'no_create_edit': True}"
+                           domain="[('partner_id', '=', partner_id), ('is_subscription', '=', True), ('stage_category', '=', 'progress')]"/>
+                    <field name="x_es_cambio_prenda"
+                           string="¿Cambio de Prenda?"
+                           modifiers='{"invisible": [["x_suscripcion_id", "=", false]]}'/>
+                </group>
             </xpath>
 
         </field>
