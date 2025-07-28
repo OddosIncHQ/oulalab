@@ -4,7 +4,7 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
     var publicWidget = require('web.public.widget');
 
     publicWidget.registry.RentalCatalogWidget = publicWidget.Widget.extend({
-        // CORRECCIÓN: Usamos una clase contenedora. El widget solo se activará en la página del catálogo.
+        // Este widget solo se activará en elementos con esta clase, que pondremos en la plantilla.
         selector: '.o_rental_catalog', 
         
         events: {
@@ -12,23 +12,21 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         },
 
         /**
-         * El método start solo es llamado por Odoo si el 'selector' se encuentra en la página actual.
+         * El método start se ejecuta solo si el 'selector' se encuentra en la página.
          */
         start: function () {
-            // Guardamos referencias a los elementos que vamos a manipular.
             this.$counter = this.$('.selection_counter');
             this.$submitButton = this.$('button[type="submit"]');
 
-            // CORRECCIÓN: Comprobamos si los elementos necesarios están presentes antes de continuar.
-            // Esto previene errores si el script se carga en una página incorrecta.
+            // Comprobación de seguridad para evitar errores.
             if (!this.$counter.length || !this.$submitButton.length) {
-                console.warn("Widget del Catálogo de Arriendo: No se encontró un elemento requerido (.selection_counter o el botón de envío). El widget no se activará.");
+                console.warn("Widget del Catálogo de Arriendo: Faltan elementos requeridos.");
                 return this._super.apply(this, arguments);
             }
 
+            // Lee el límite de prendas que puede seleccionar el cliente.
             this.selectionLimit = parseInt(this.$el.data('selection-limit') || '0', 10);
             
-            // Actualización inicial del contador y del estado del botón.
             this._updateUI();
             
             return this._super.apply(this, arguments);
@@ -38,10 +36,6 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         // Manejadores de Eventos
         //--------------------------------------------------------------------------
 
-        /**
-         * Se llama cada vez que un checkbox de selección de producto cambia.
-         * @private
-         */
         _onSelectionChange: function () {
             this._updateUI();
         },
@@ -50,26 +44,18 @@ odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) 
         // Métodos Privados
         //--------------------------------------------------------------------------
 
-        /**
-         * CORRECCIÓN: Método centralizado para actualizar la interfaz de usuario.
-         * Esto hace el código más limpio y seguro.
-         * @private
-         */
         _updateUI: function () {
             const selectedCount = this.$('.product-selector-checkbox:checked').length;
             
-            // --- Actualizar Texto del Contador ---
-            // Esta comprobación previene el error "Cannot set properties of null".
+            // Actualiza el texto del contador.
             if (this.$counter.length) {
                 this.$counter.text(selectedCount + ' / ' + this.selectionLimit + ' seleccionadas');
-
-                // Añade o quita una clase de advertencia según el límite de selección.
                 this.$counter.toggleClass('text-danger', selectedCount > this.selectionLimit);
             }
 
-            // --- Actualizar Estado del Botón de Envío ---
+            // CORRECCIÓN CLAVE: Habilita o deshabilita el botón.
             if (this.$submitButton.length) {
-                // Deshabilita el botón si no hay nada seleccionado o si se excede el límite.
+                // El botón se habilita si se ha seleccionado al menos 1 prenda y no se ha superado el límite.
                 const isDisabled = selectedCount === 0 || selectedCount > this.selectionLimit;
                 this.$submitButton.prop('disabled', isDisabled);
             }
