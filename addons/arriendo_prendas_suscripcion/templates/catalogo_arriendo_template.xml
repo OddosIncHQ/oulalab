@@ -4,38 +4,44 @@
         <t t-call="portal.portal_layout">
             <t t-set="title">Catálogo de Prendas</t>
 
-            <!-- 
-                CORRECCIÓN CLAVE: 
-                1. Se añade la clase 'o_rental_catalog' para que el widget de JS se active.
-                2. El atributo 'data-selection-limit' pasa el límite de prendas al script.
-            -->
-            <div class="o_rental_catalog" t-att-data-selection-limit="prendas_disponibles_para_seleccionar">
-                <form action="/my/rentals/request" method="POST">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <!-- Mostrar solo si hay productos disponibles -->
+            <t t-if="productos">
+                <!-- 
+                    Widget selector: 'o_rental_catalog' 
+                    data-selection-limit: el límite que controla el JS
+                -->
+                <div class="o_rental_catalog" t-att-data-selection-limit="prendas_disponibles_para_seleccionar or productos|length">
+                    <form action="/my/rentals/request" method="POST">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
-                    <!-- Barra superior fija para una mejor experiencia de usuario -->
-                    <div class="selection-counter-bar text-center sticky-top bg-light py-2 border-bottom">
-                        <div class="container">
-                            <!-- CORRECCIÓN: La clase ahora es 'selection_counter' -->
-                            <span class="fw-bold selection_counter">0 / <t t-esc="prendas_disponibles_para_seleccionar"/> seleccionadas</span>
-                            <button type="submit" class="btn btn-primary ms-3" disabled="1">Solicitar Arriendo</button>
-                            <a href="/my/rentals" class="btn btn-secondary ms-2">Cancelar</a>
+                        <!-- Barra de selección superior -->
+                        <div class="selection-counter-bar text-center sticky-top bg-light py-2 border-bottom">
+                            <div class="container">
+                                <span class="fw-bold selection_counter">
+                                    0 / <t t-esc="prendas_disponibles_para_seleccionar or productos|length"/> seleccionadas
+                                </span>
+                                <button type="submit" class="btn btn-primary ms-3" disabled="1">Solicitar Arriendo</button>
+                                <a href="/my/rentals" class="btn btn-secondary ms-2">Cancelar</a>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="container mt-4">
-                        <div class="row">
-                            <t t-if="productos">
+                        <!-- Catálogo de productos -->
+                        <div class="container mt-4">
+                            <div class="row">
                                 <t t-foreach="productos" t-as="product">
                                     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                                         <div class="card h-100 rental-catalog-card">
-                                            <img t-attf-src="/web/image/product.product/#{product.id}/image_256" class="card-img-top" alt="Prenda"/>
+                                            <img t-attf-src="/web/image/product.product/#{product.id}/image_256"
+                                                 class="card-img-top" alt="Prenda"/>
                                             <div class="card-body text-center d-flex flex-column">
                                                 <h5 class="card-title" t-field="product.name"/>
                                                 <div class="form-check mt-auto">
-                                                    <!-- CORRECCIÓN: Se añade la clase 'product-selector-checkbox' -->
-                                                    <input class="form-check-input product-selector-checkbox" type="checkbox" name="product_ids" t-att-value="product.id" t-att-id="'product_%s' % product.id"/>
-                                                    <label class="form-check-label" t-att-for="'product_%s' % product.id">
+                                                    <input class="form-check-input product-selector-checkbox"
+                                                           type="checkbox" name="product_ids"
+                                                           t-att-value="product.id"
+                                                           t-att-id="'product_%s' % product.id"/>
+                                                    <label class="form-check-label"
+                                                           t-att-for="'product_%s' % product.id">
                                                         Seleccionar
                                                     </label>
                                                 </div>
@@ -43,18 +49,20 @@
                                         </div>
                                     </div>
                                 </t>
-                            </t>
-                            <t t-else="">
-                                <div class="col-12 text-center">
-                                    <div class="alert alert-info" role="alert">
-                                        No hay prendas disponibles en este momento. ¡Vuelve a intentarlo más tarde!
-                                    </div>
-                                </div>
-                            </t>
+                            </div>
                         </div>
+                    </form>
+                </div>
+            </t>
+
+            <!-- Mensaje cuando no hay productos -->
+            <t t-else="">
+                <div class="container mt-4">
+                    <div class="alert alert-info text-center" role="alert">
+                        No hay prendas disponibles en este momento. ¡Vuelve a intentarlo más tarde!
                     </div>
-                </form>
-            </div>
+                </div>
+            </t>
         </t>
     </template>
 </odoo>
