@@ -5,8 +5,9 @@
             <t t-set="title">Catálogo de Prendas</t>
 
             <!-- 
-                Se añade la clase 'o_rental_catalog' para que el widget de JS se active.
-                El atributo 'data-selection-limit' pasa el límite de prendas al script.
+                CORRECCIÓN CLAVE: 
+                1. Se añade la clase 'o_rental_catalog' para que el widget de JS se active.
+                2. El atributo 'data-selection-limit' pasa el límite de prendas al script.
             -->
             <div class="o_rental_catalog" t-att-data-selection-limit="prendas_disponibles_para_seleccionar">
                 <form action="/my/rentals/request" method="POST">
@@ -15,7 +16,7 @@
                     <!-- Barra superior fija para una mejor experiencia de usuario -->
                     <div class="selection-counter-bar text-center sticky-top bg-light py-2 border-bottom">
                         <div class="container">
-                            <!-- La clase ahora es 'selection_counter' (con guion bajo) -->
+                            <!-- CORRECCIÓN: La clase ahora es 'selection_counter' -->
                             <span class="fw-bold selection_counter">0 / <t t-esc="prendas_disponibles_para_seleccionar"/> seleccionadas</span>
                             <button type="submit" class="btn btn-primary ms-3" disabled="1">Solicitar Arriendo</button>
                             <a href="/my/rentals" class="btn btn-secondary ms-2">Cancelar</a>
@@ -32,7 +33,7 @@
                                             <div class="card-body text-center d-flex flex-column">
                                                 <h5 class="card-title" t-field="product.name"/>
                                                 <div class="form-check mt-auto">
-                                                    <!-- Se añade la clase 'product-selector-checkbox' -->
+                                                    <!-- CORRECCIÓN: Se añade la clase 'product-selector-checkbox' -->
                                                     <input class="form-check-input product-selector-checkbox" type="checkbox" name="product_ids" t-att-value="product.id" t-att-id="'product_%s' % product.id"/>
                                                     <label class="form-check-label" t-att-for="'product_%s' % product.id">
                                                         Seleccionar
