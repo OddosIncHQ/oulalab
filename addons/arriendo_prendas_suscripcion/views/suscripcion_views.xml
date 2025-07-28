@@ -7,18 +7,23 @@
         <field name="inherit_id" ref="sale_subscription.sale_subscription_order_view_form"/>
         <field name="arch" type="xml">
 
-            <!-- Añadir grupo con los campos de límites -->
+            <!-- Grupo: Límites de Arriendo -->
             <xpath expr="//sheet/group" position="after">
                 <group string="Límites de Arriendo">
-                    <field name="x_max_prendas_permitidas"/>
-                    <field name="x_cambios_permitidos_mes"/>
-                    <field name="x_cambios_usados_mes" readonly="1"/>
-                    <field name="x_proxima_fecha_reseteo_cambios" readonly="1"/>
-                    <field name="x_cantidad_prendas_en_posesion" readonly="1"/>
+                    <field name="x_max_prendas_permitidas"
+                           help="Máximo de prendas que puede tener el cliente al mismo tiempo."/>
+                    <field name="x_cambios_permitidos_mes"
+                           help="Cantidad máxima de cambios de prenda permitidos por mes."/>
+                    <field name="x_cambios_usados_mes" readonly="1"
+                           help="Cambios ya realizados este mes por el cliente."/>
+                    <field name="x_proxima_fecha_reseteo_cambios" readonly="1"
+                           help="Próxima fecha en que se reinicia el contador de cambios."/>
+                    <field name="x_cantidad_prendas_en_posesion" readonly="1"
+                           help="Cantidad actual de prendas en posesión del cliente."/>
                 </group>
             </xpath>
 
-            <!-- Añadir pestaña con prendas arrendadas -->
+            <!-- Pestaña: Prendas Arrendadas -->
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Prendas Arrendadas" name="prendas_arrendadas_page">
                     <field name="x_prendas_en_posesion_ids"
@@ -29,8 +34,8 @@
                         <list>
                             <field name="prenda_id"/>
                             <field name="numero_serie_id"/>
-                            <field name="fecha_arriendo"/>
-                            <field name="fecha_devolucion"/>
+                            <field name="fecha_arriendo" widget="date" string="Fecha de Envío"/>
+                            <field name="fecha_devolucion" widget="date" string="Fecha de Devolución"/>
                             <field name="estado"/>
                             <field name="active" invisible="1"/>
                         </list>
