@@ -26,6 +26,7 @@
     ],
     'assets': {
         'web.assets_frontend': [
+            'web.public.widget', 
             'arriendo_prendas_suscripcion/static/src/css/arriendo_styles.css',
             'arriendo_prendas_suscripcion/static/src/js/arriendo_scripts.js',
         ],
