@@ -5,8 +5,9 @@
             <t t-set="title">Catálogo de Prendas</t>
 
             <!-- 
-                CORRECCIÓN: Se añade la clase 'o_rental_catalog' para que el widget de JS se active.
-                El atributo 'data-selection-limit' pasa el límite de prendas al script.
+                CORRECCIÓN: 
+                1. Se añade la clase 'o_rental_catalog' para que el widget de JS se active.
+                2. El atributo 'data-selection-limit' pasa el límite de prendas al script.
             -->
             <div class="o_rental_catalog" t-att-data-selection-limit="prendas_disponibles_para_seleccionar">
                 <form action="/my/rentals/request" method="POST">
