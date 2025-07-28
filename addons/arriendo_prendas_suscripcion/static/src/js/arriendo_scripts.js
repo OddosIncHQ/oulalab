@@ -1,100 +1,80 @@
 odoo.define('arriendo_prendas_suscripcion.arriendo_scripts', function (require) {
     'use strict';
 
-    const publicWidget = require('web.public.widget');
+    var publicWidget = require('web.public.widget');
 
-    publicWidget.registry.ArriendoCatalogo = publicWidget.Widget.extend({
-        selector: '#rentForm',
-
+    publicWidget.registry.RentalCatalogWidget = publicWidget.Widget.extend({
+        // CORRECCIÓN: Usamos una clase contenedora. El widget solo se activará en la página del catálogo.
+        selector: '.o_rental_catalog', 
+        
         events: {
-            'change input[type="checkbox"][name="product_ids"]': '_onToggleProduct',
-            'submit': '_onSubmitForm',
+            'change .product-selector-checkbox': '_onSelectionChange',
         },
 
+        /**
+         * El método start solo es llamado por Odoo si el 'selector' se encuentra en la página actual.
+         */
         start: function () {
-            const res = this._super.apply(this, arguments);
+            // Guardamos referencias a los elementos que vamos a manipular.
+            this.$counter = this.$('.selection_counter');
+            this.$submitButton = this.$('button[type="submit"]');
 
-            this.selectionCount = this.$('input[type="checkbox"][name="product_ids"]:checked').length;
-            this.maxAllowed = parseInt(this.$el.attr('data-max-allowed')) || 0;
+            // CORRECCIÓN: Comprobamos si los elementos necesarios están presentes antes de continuar.
+            // Esto previene errores si el script se carga en una página incorrecta.
+            if (!this.$counter.length || !this.$submitButton.length) {
+                console.warn("Widget del Catálogo de Arriendo: No se encontró un elemento requerido (.selection_counter o el botón de envío). El widget no se activará.");
+                return this._super.apply(this, arguments);
+            }
 
-            this._createToast();
-            this._updateSelectionCounter();
-
-            return res;
+            this.selectionLimit = parseInt(this.$el.data('selection-limit') || '0', 10);
+            
+            // Actualización inicial del contador y del estado del botón.
+            this._updateUI();
+            
+            return this._super.apply(this, arguments);
         },
 
-        _onToggleProduct: function (ev) {
-            const checkbox = $(ev.currentTarget);
+        //--------------------------------------------------------------------------
+        // Manejadores de Eventos
+        //--------------------------------------------------------------------------
 
-            if (checkbox.prop('checked')) {
-                this.selectionCount++;
-            } else {
-                this.selectionCount--;
-            }
-
-            if (this.selectionCount > this.maxAllowed) {
-                this._showToast('danger', `Has superado el máximo de ${this.maxAllowed} prendas permitidas.`);
-                checkbox.prop('checked', false);
-                this.selectionCount--;
-            }
-
-            this._updateSelectionCounter();
+        /**
+         * Se llama cada vez que un checkbox de selección de producto cambia.
+         * @private
+         */
+        _onSelectionChange: function () {
+            this._updateUI();
         },
 
-        _updateSelectionCounter: function () {
-            const $counter = this.$('.selection-counter');
-            if ($counter.length > 0) {
-                $counter.text(`Prendas seleccionadas: ${this.selectionCount}`);
-            } else {
-                console.warn("⚠️ .selection-counter no encontrado en el DOM.");
-            }
-        },
+        //--------------------------------------------------------------------------
+        // Métodos Privados
+        //--------------------------------------------------------------------------
 
-        _onSubmitForm: function (ev) {
-            if (this.selectionCount === 0) {
-                ev.preventDefault();
-                this._showToast('warning', 'Debes seleccionar al menos una prenda para arrendar.');
-            }
-        },
+        /**
+         * CORRECCIÓN: Método centralizado para actualizar la interfaz de usuario.
+         * Esto hace el código más limpio y seguro.
+         * @private
+         */
+        _updateUI: function () {
+            const selectedCount = this.$('.product-selector-checkbox:checked').length;
+            
+            // --- Actualizar Texto del Contador ---
+            // Esta comprobación previene el error "Cannot set properties of null".
+            if (this.$counter.length) {
+                this.$counter.text(selectedCount + ' / ' + this.selectionLimit + ' seleccionadas');
 
-        _createToast: function () {
-            $('#arriendoToast').remove();
-
-            const toastHtml = `
-                <div id="arriendoToast" class="toast position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-                    <div class="toast-header">
-                        <strong class="me-auto">Notificación</strong>
-                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="toast-body" id="arriendo-toast-msg">Mensaje</div>
-                </div>`;
-
-            $('body').append(toastHtml);
-
-            this.toastElement = document.getElementById('arriendoToast');
-            this.toastMsgElement = document.getElementById('arriendo-toast-msg');
-
-            if (this.toastElement && typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-                this.bsToast = new bootstrap.Toast(this.toastElement);
-            } else {
-                console.error("❌ Bootstrap Toast no disponible o no inicializado.");
-            }
-        },
-
-        _showToast: function (type, message) {
-            if (!this.toastElement || !this.bsToast || !this.toastMsgElement) {
-                console.warn("❗ No se puede mostrar el toast. Elementos faltantes.");
-                return;
+                // Añade o quita una clase de advertencia según el límite de selección.
+                this.$counter.toggleClass('text-danger', selectedCount > this.selectionLimit);
             }
 
-            $(this.toastElement)
-                .removeClass('bg-success bg-danger bg-warning bg-info text-white')
-                .addClass(`bg-${type} text-white`);
-
-            this.toastMsgElement.textContent = message;
-            this.bsToast.show();
+            // --- Actualizar Estado del Botón de Envío ---
+            if (this.$submitButton.length) {
+                // Deshabilita el botón si no hay nada seleccionado o si se excede el límite.
+                const isDisabled = selectedCount === 0 || selectedCount > this.selectionLimit;
+                this.$submitButton.prop('disabled', isDisabled);
+            }
         },
     });
 
-    return publicWidget.registry.ArriendoCatalogo;
+    return publicWidget.registry.RentalCatalogWidget;
 });
