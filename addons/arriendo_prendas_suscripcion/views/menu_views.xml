@@ -86,4 +86,25 @@
     <record id="action_ver_prendas_arrendables" model="ir.actions.act_window">
         <field name="name">Prendas Arrendables</field>
         <field name="res_model">product.template</field>
-        <field name="view_mode"_
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_x_es_prenda_arrendable': 1, 'default_x_es_prenda_arrendable': 1}</field>
+        <field name="domain">[('x_es_prenda_arrendable', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No se encontraron productos marcados como "Prenda Arrendable".</p>
+            <p>Puedes crear uno nuevo o editar un producto y activar la opción "Es prenda arrendable".</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_arriendo_productos_arrendables"
+              name="Prendas Arrendables"
+              parent="menu_arriendo_productos_root"
+              action="action_ver_prendas_arrendables"
+              sequence="10"/>
+
+    <menuitem id="menu_arriendo_productos_todos"
+              name="Todos los Productos"
+              parent="menu_arriendo_productos_root"
+              action="product.product_template_action_all"
+              sequence="20"/>
+
+</odoo>
