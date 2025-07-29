@@ -1,6 +1,6 @@
 {
     'name': 'Arriendos por Suscripción',
-    'version': '2.0.0',
+    'version': '2.0.1',
     'summary': 'Aplicación para la gestión integral del modelo de arriendo de prendas.',
     'author': 'Tu Nombre/Empresa',
     'category': 'Sales/Subscription',
