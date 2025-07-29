@@ -26,7 +26,7 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'arriendo_prendas_suscripcion/static/src/css/arriendo_styles.css',
+            'arriendo_prendas_suscripcion/static/src/css/arriendo_styles.scss',
             'arriendo_prendas_suscripcion/static/src/js/rental_catalog_component.js',
             'arriendo_prendas_suscripcion/static/src/xml/rental_templates.xml',
         ],
