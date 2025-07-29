@@ -1,129 +1,121 @@
 /** @odoo-module **/
 
-// Import Odoo web variables if needed (optional but good practice)
-// @import 'web.assets_frontend'; // Already bundled in most cases
+.o_rental_catalog {
+  // === Card layout ===
+  .card {
+    .form-check {
+      margin-top: 1rem;
+    }
 
-// === Card layout improvements ===
+    .btn-add-to-selection {
+      width: 100%;
+      margin-top: 1rem;
+    }
 
-.card {
-  .form-check {
-    margin-top: 1rem;
+    &.position-relative {
+      position: relative;
+    }
+
+    &:hover {
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      transform: scale(1.01);
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+    }
+
+    .card-img-top {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-bottom: 1px solid $border-color;
+      padding-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: $font-weight-bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-text {
+      font-size: 0.9rem;
+      color: $text-muted;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
   }
 
-  .btn-add-to-selection {
-    width: 100%;
-    margin-top: 1rem;
-  }
-
-  &.position-relative {
-    position: relative;
-  }
-
-  &:hover {
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    transform: scale(1.01);
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-  }
-
-  .card-img-top {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-bottom: 1px solid $border-color;
-    padding-bottom: 10px;
-  }
-
-  .card-title {
-    font-size: 1.1rem;
+  // === Selection counter ===
+  .selection-counter {
     font-weight: $font-weight-bold;
-    margin-bottom: 0.5rem;
+    color: $primary;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1.1rem;
   }
 
-  .card-text {
-    font-size: 0.9rem;
-    color: $text-muted;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-  }
-}
+  // === Checkbox styling ===
+  .product-selector-checkbox {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    transform: scale(1.4);
+    z-index: 10;
+    background: $white;
+    padding: 3px;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+    cursor: pointer;
 
-// === Selection counter bar ===
-
-.selection-counter {
-  font-weight: $font-weight-bold;
-  color: $primary;
-  margin-bottom: 1rem;
-  text-align: center;
-  font-size: 1.1rem;
-}
-
-// === Product selector checkbox ===
-
-.product-selector-checkbox {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  transform: scale(1.4);
-  z-index: 10;
-  background: $white;
-  padding: 3px;
-  border-radius: $border-radius;
-  border: 1px solid $border-color;
-  cursor: pointer;
-
-  &:checked {
-    border-color: $primary;
-    box-shadow: 0 0 0 2px rgba($primary, 0.25);
-  }
-}
-
-// === Modal multi-selects ===
-
-.modal-body select[multiple] {
-  height: auto;
-  min-height: 150px;
-}
-
-// === Image gallery ===
-
-.product-gallery img {
-  max-width: 100%;
-  height: auto;
-  border-radius: $border-radius;
-  margin-bottom: 10px;
-}
-
-// === Toast ===
-
-.toast {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1055;
-  min-width: 250px;
-  border-radius: $border-radius;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-
-  .toast-body {
-    padding: 1rem;
+    &:checked {
+      border-color: $primary;
+      box-shadow: 0 0 0 2px rgba($primary, 0.25);
+    }
   }
 
-  .toast-header {
-    background-color: $gray-100;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 0.75rem 1rem;
-    color: $gray-600;
+  // === Multi-select modal fields ===
+  .modal-body select[multiple] {
+    height: auto;
+    min-height: 150px;
   }
-}
 
-// === Section headings ===
+  // === Product image gallery ===
+  .product-gallery img {
+    max-width: 100%;
+    height: auto;
+    border-radius: $border-radius;
+    margin-bottom: 10px;
+  }
 
-.container h2 {
-  margin-top: 2rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
+  // === Toast messages ===
+  .toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1055;
+    min-width: 250px;
+    border-radius: $border-radius;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+    .toast-body {
+      padding: 1rem;
+    }
+
+    .toast-header {
+      background-color: $gray-100;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 0.75rem 1rem;
+      color: $gray-600;
+    }
+  }
+
+  // === Heading spacing ===
+  h2 {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
 }
