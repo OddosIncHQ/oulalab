@@ -21,7 +21,7 @@
         'views/stock_picking_views.xml',
         'views/product_views.xml',
         'views/menu_views.xml',
-        'templates/portal_template.xml',
+        'controllers/portal_template.xml',
         'templates/catalogo_arriendo_template.xml',
     ],
     'assets': {
