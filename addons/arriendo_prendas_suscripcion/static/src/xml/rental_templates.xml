@@ -2,7 +2,45 @@
 <odoo>
   <templates xml:space="preserve">
     <t t-name="arriendo_prendas_suscripcion.RentalCatalog">
-      <!-- your component template (from earlier) goes here -->
+      <form t-on-change="onChange" action="/my/rentals/request" method="POST">
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+        <div class="selection-counter-bar text-center sticky-top bg-light py-2 border-bottom">
+          <div class="container">
+            <span class="fw-bold selection-counter"
+                  t-attf-class="{{ state.selectionCount > state.selectionLimit ? 'text-danger' : '' }}">
+              <t t-esc="state.selectionCount"/> / <t t-esc="state.selectionLimit"/> seleccionadas
+            </span>
+            <button type="submit" class="btn btn-primary ms-3"
+                    t-att-disabled="disableSubmit">Solicitar Arriendo</button>
+            <a href="/my/rentals" class="btn btn-secondary ms-2">Cancelar</a>
+          </div>
+        </div>
+
+        <div class="container mt-4">
+          <div class="row">
+            <t t-foreach="productos" t-as="product">
+              <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100 rental-catalog-card">
+                  <img t-att-src="'/web/image/product.product/%s/image_256' % product.id"
+                       class="card-img-top" alt="Prenda"/>
+                  <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title" t-field="product.name"/>
+                    <div class="form-check mt-auto">
+                      <input class="form-check-input product-selector-checkbox"
+                             type="checkbox" name="product_ids"
+                             t-att-value="product.id"
+                             t-att-id="'product_%s' % product.id"/>
+                      <label class="form-check-label"
+                             t-att-for="'product_%s' % product.id">Seleccionar</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </t>
+          </div>
+        </div>
+      </form>
     </t>
   </templates>
 </odoo>
