@@ -1,37 +1,61 @@
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-import odoo.addons.decimal_precision as dp
 
-class hr_contract(models.Model):
+
+class HrContract(models.Model):
     _inherit = 'hr.contract'
     _description = 'Employee Contract'
 
-    afp_id = fields.Many2one('hr.afp', 'AFP')
-    anticipo_sueldo = fields.Float('Anticipo de Sueldo',help="Anticipo De Sueldo Realizado Contablemente")
-    carga_familiar = fields.Integer('Carga Simple',help="Carga familiar para el cálculo de asignación familiar simple")
-    carga_familiar_maternal = fields.Integer('Carga Maternal',help="Carga familiar para el cálculo de asignación familiar maternal")
-    carga_familiar_invalida = fields.Integer('Carga Inválida',help="Carga familiar para el cálculo de asignación familiar inválida")            
-    colacion = fields.Float('Asig. Colación', help="Colación")
-    isapre_id = fields.Many2one('hr.isapre', 'Nombre')
-    isapre_cotizacion_uf = fields.Float('Cotización', digits=(6, 4),  help="Cotización Pactada")  
-    isapre_fun = fields.Char('Número de FUN',  help="Indicar N° Contrato de Salud a Isapre") 
-    isapre_cuenta_propia = fields.Boolean('Isapre Cuenta Propia')   
-    movilizacion = fields.Float('Asig. Movilización', help="Movilización")
-    mutual_seguridad = fields.Boolean('Mutual Seguridad', default=True)
-    otro_no_imp = fields.Float('Otros No Imponible', help="Otros Haberes No Imponibles")
-    otros_imp = fields.Float('Otros Imponible', help="Otros Haberes Imponibles")
-    pension = fields.Boolean('Pensionado')
-    sin_afp = fields.Boolean('No Calcula AFP')
-    sin_afp_sis = fields.Boolean('No Calcula AFP SIS')
-    seguro_complementario_id = fields.Many2one('hr.seguro.complementario', 'Nombre')
-    seguro_complementario = fields.Float('Cotización',  help="Seguro Complementario")
-    viatico_santiago = fields.Float('Asig. Viático',  help="Asignación de Viático")
-    complete_name = fields.Char(related='employee_id.firstname')
-    last_name = fields.Char(related='employee_id.last_name')
-    gratificacion_legal = fields.Boolean('Gratificación L. Manual')
-    isapre_moneda= fields.Selection((('uf', 'UF'), ('clp', 'Pesos')), 'Tipo de Moneda', default="uf")
-    apv_id = fields.Many2one('hr.apv', 'Nombre')
-    aporte_voluntario = fields.Float('Ahorro Previsional Voluntario (APV)', help="Ahorro Previsional Voluntario (APV)")
-    aporte_voluntario_moneda= fields.Selection((('uf', 'UF'), ('clp', 'Pesos')), 'Tipo de Moneda', default="uf")
-    forma_pago_apv = fields.Selection((('1', 'Directa'), ('2', 'Indirecta')), 'Forma de Pago', default="1")
-    seguro_complementario_moneda= fields.Selection((('uf', 'UF'), ('clp', 'Pesos')), 'Tipo de Moneda', default="uf")
+    afp_id = fields.Many2one('hr.afp', string='AFP')
+    isapre_id = fields.Many2one('hr.isapre', string='ISAPRE')
+    seguro_complementario_id = fields.Many2one('hr.seguro.complementario', string='Seguro Complementario')
+    apv_id = fields.Many2one('hr.apv', string='APV')
+
+    anticipo_sueldo = fields.Float(string='Anticipo de Sueldo', help="Anticipo realizado contablemente")
+    carga_familiar = fields.Integer(string='Carga Simple', help="Asignación familiar simple")
+    carga_familiar_maternal = fields.Integer(string='Carga Maternal', help="Asignación familiar maternal")
+    carga_familiar_invalida = fields.Integer(string='Carga Inválida', help="Asignación familiar inválida")
+
+    colacion = fields.Float(string='Asig. Colación', help="Monto asignado por colación")
+    movilizacion = fields.Float(string='Asig. Movilización', help="Monto asignado por movilización")
+    viatico_santiago = fields.Float(string='Asig. Viático', help="Monto asignado por viático en Santiago")
+    otro_no_imp = fields.Float(string='Otros No Imponible', help="Otros haberes no imponibles")
+    otros_imp = fields.Float(string='Otros Imponible', help="Otros haberes imponibles")
+
+    seguro_complementario = fields.Float(string='Cotización', help="Monto cotizado por seguro complementario")
+    isapre_cotizacion_uf = fields.Float(string='Cotización Isapre', digits=(6, 4), help="Monto pactado en UF")
+    isapre_fun = fields.Char(string='Número de FUN', help="Número de contrato de salud con Isapre")
+    isapre_cuenta_propia = fields.Boolean(string='Isapre Cuenta Propia')
+    mutual_seguridad = fields.Boolean(string='Mutual Seguridad', default=True)
+    pension = fields.Boolean(string='Pensionado')
+    sin_afp = fields.Boolean(string='No Calcula AFP')
+    sin_afp_sis = fields.Boolean(string='No Calcula AFP SIS')
+    gratificacion_legal = fields.Boolean(string='Gratificación L. Manual')
+
+    isapre_moneda = fields.Selection(
+        [('uf', 'UF'), ('clp', 'Pesos')],
+        string='Moneda Isapre',
+        default='uf'
+    )
+    aporte_voluntario = fields.Float(
+        string='Ahorro Previsional Voluntario (APV)',
+        help="Monto mensual pactado como APV"
+    )
+    aporte_voluntario_moneda = fields.Selection(
+        [('uf', 'UF'), ('clp', 'Pesos')],
+        string='Moneda APV',
+        default='uf'
+    )
+    forma_pago_apv = fields.Selection(
+        [('1', 'Directa'), ('2', 'Indirecta')],
+        string='Forma de Pago APV',
+        default='1'
+    )
+    seguro_complementario_moneda = fields.Selection(
+        [('uf', 'UF'), ('clp', 'Pesos')],
+        string='Moneda Seguro Complementario',
+        default='uf'
+    )
+
+    complete_name = fields.Char(related='employee_id.firstname', readonly=True, store=True)
+    last_name = fields.Char(related='employee_id.last_name', readonly=True, store=True)
