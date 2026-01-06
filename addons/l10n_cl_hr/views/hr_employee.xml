@@ -1,57 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_employee_form" model="ir.ui.view">
+    <record id="view_employee_form_l10n_cl" model="ir.ui.view">
+        <field name="name">hr.employee.form.l10n.cl</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
+
             <xpath expr="//field[@name='department_id']" position="before">
-                <field name="type_id" required="1"/>
+                <field name="type_id" required="1" placeholder="Tipo de Trabajador (Previred)"/>
             </xpath>
 
-            <xpath expr="//label[@for='name']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//field[@name='name']" position="attributes">
-                <attribute name="invisible">1</attribute>
-                <attribute name="no_label">1</attribute>
-                <attribute name="required">0</attribute>
-            </xpath>
-
-            <xpath expr="//field[@name='name']/.." position="after">
-                <label for="firstname" class="oe_edit_only"/>
-                    <h1>
-                        <field name="firstname" required="1"/>
-                    </h1>
-                <label for="middle_name" class="oe_edit_only"/>
-                	<h1>
-                    	<field name="middle_name"/>
-                 	</h1>
-                <label for="last_name" class="oe_edit_only"/>
-                	<h1>
-                    	<field name="last_name" required="1"/>
-                 	</h1>
-                <label for="mothers_name" class="oe_edit_only"/>
-                	<h1>
-                    	<field name="mothers_name"/>
-                 	</h1>
-            </xpath>
-            <xpath expr="//field[@name='resource_calendar_id']" position="replace">
-                <field name="resource_calendar_id" select="hr_resource_monthly_cl"/>
+            <xpath expr="//div[hasclass('oe_title')]/h1" position="replace">
+                <h1 class="d-flex flex-column">
+                    <field name="name" invisible="1" required="0"/>
+                    
+                    <div class="o_row">
+                        <field name="firstname" placeholder="Nombres" required="1"/>
+                        <field name="middle_name" placeholder="Segundo Nombre"/>
+                    </div>
+                    
+                    <div class="o_row">
+                        <field name="last_name" placeholder="Apellido Paterno" required="1"/>
+                        <field name="mothers_name" placeholder="Apellido Materno"/>
+                    </div>
+                </h1>
             </xpath>
 
             <xpath expr="//field[@name='identification_id']" position="attributes">
                 <attribute name="required">1</attribute>
+                <attribute name="placeholder">12.345.678-9</attribute>
             </xpath>
+
             <xpath expr="//field[@name='country_id']" position="attributes">
                 <attribute name="required">1</attribute>
             </xpath>
+
             <xpath expr="//field[@name='gender']" position="attributes">
                 <attribute name="required">1</attribute>
             </xpath>
+            
+            <xpath expr="//field[@name='identification_id']" position="after">
+                <field name="formated_vat" invisible="1"/>
+            </xpath>
+
         </field>
     </record>
-
-
 
 </odoo>
