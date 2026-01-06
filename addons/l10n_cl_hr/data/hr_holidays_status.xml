@@ -1,37 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>						
-<odoo>						
-    <data>						
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
 
-
-     <!-- Tipos de Faltas -->
-     <!-- Caso is continued cuenta los fines de semana -->
-        <record id="hr_holidays_status_licencia" model="hr.leave.type">
+        <record id="hr_leave_type_licencia_medica" model="hr.leave.type">
             <field name="name">Licencia Médica</field>
+            <field name="code">LIC</field>
+            <field name="color">1</field> <field name="is_continued">True</field> <field name="requires_allocation">no</field>
+            <field name="leave_validation_type">hr</field> <field name="request_unit">day</field>
+            <field name="unpaid">True</field> </record>
+
+        <record id="hr_leave_type_ausentismo" model="hr.leave.type">
+            <field name="name">Ausentismo / Falla</field>
+            <field name="code">AUS</field>
+            <field name="color">2</field>
             <field name="is_continued">True</field>
+            <field name="requires_allocation">no</field>
+            <field name="leave_validation_type">hr</field>
+            <field name="request_unit">day</field>
+            <field name="unpaid">True</field>
         </record>
 
-        <record id="hr_holidays_sin_pago" model="hr.leave.type">
-            <field name="name">Ausentismo</field>
-            <field name="is_continued">True</field>
-        </record>
-
-        <record id="hr_holidays_permission" model="hr.leave.type">
+        <record id="hr_leave_type_permiso_con_goce" model="hr.leave.type">
             <field name="name">Permiso con Goce de Sueldo</field>
+            <field name="code">PCG</field>
+            <field name="color">3</field>
             <field name="is_continued">True</field>
+            <field name="requires_allocation">no</field>
+            <field name="leave_validation_type">manager</field>
+            <field name="request_unit">day</field>
+            <field name="unpaid">False</field>
         </record>
 
-        <record id="hr_holidays_permission" model="hr.leave.type">
+        <record id="hr_leave_type_permiso_sin_goce" model="hr.leave.type">
             <field name="name">Permiso sin Goce de Sueldo</field>
+            <field name="code">PSG</field>
+            <field name="color">4</field>
             <field name="is_continued">True</field>
+            <field name="requires_allocation">no</field>
+            <field name="leave_validation_type">manager</field>
+            <field name="request_unit">day</field>
+            <field name="unpaid">True</field>
         </record>
 
-        <record id="hr_holidays_vacations" model="hr.leave.type">
-            <field name="name">Vacaciones</field>
+        <record id="hr_leave_type_vacaciones" model="hr.leave.type">
+            <field name="name">Vacaciones Legales</field>
+            <field name="code">VAC</field>
+            <field name="color">5</field>
+            <field name="is_continued">False</field> <field name="requires_allocation">yes</field> <field name="leave_validation_type">manager</field>
+            <field name="request_unit">day</field>
+            <field name="unpaid">False</field>
         </record>
 
-         <record id="hr_holidays_progressive_vacations" model="hr.leave.type">
-            <field name="name">Vacaciones (Progresivas)</field>
+        <record id="hr_leave_type_vacaciones_progresivas" model="hr.leave.type">
+            <field name="name">Vacaciones Progresivas</field>
+            <field name="code">VPR</field>
+            <field name="color">6</field>
+            <field name="is_continued">False</field>
+            <field name="requires_allocation">yes</field>
+            <field name="leave_validation_type">manager</field>
+            <field name="request_unit">day</field>
+            <field name="unpaid">False</field>
         </record>
 
     </data>
-</odoo>                     
+</odoo>
