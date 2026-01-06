@@ -1,13 +1,13 @@
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, _
 
 
-class hr_afp(models.Model):
+class HrAFP(models.Model):
     _name = 'hr.afp'
-    _description = 'Fondos de Pension'
+    _description = 'Fondos de Pensiones'
 
-    codigo = fields.Char('Codigo', required=True)
-    name = fields.Char('Nombre', required=True)
-    rut = fields.Char('RUT', required=True)
-    rate = fields.Float('Tasa', required=True)
-    sis = fields.Float('Aporte Empresa', required=True)
-    independiente = fields.Float('Independientes', required=True)
+    codigo = fields.Char(string='Código', required=True)
+    name = fields.Char(string='Nombre', required=True)
+    rut = fields.Char(string='RUT', required=True)
+    rate = fields.Float(string='Tasa', required=True, help="Tasa de cotización obligatoria")
+    sis = fields.Float(string='Aporte Empresa', required=True, help="Seguro de Invalidez y Sobrevivencia")
+    independiente = fields.Float(string='Independientes', required=True, help="Tasa para trabajadores independientes")
