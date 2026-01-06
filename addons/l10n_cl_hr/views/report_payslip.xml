@@ -1,306 +1,260 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-	<template id="hr_payroll.report_payslip">
-	<t t-call="web.html_container">
-        <t t-foreach="docs" t-as="o">
-			<t t-call="web.external_layout">
-            <div class="page small">
-                <h5 align="center">
-					<span t-field="o.name" />
-				</h5>
-                <table class="table table-sm" style="border-top: 2px solid black; margin-bottom: 0px;">
-                  <thead>
-                     <tr>
-                        <th><strong>RAZON SOCIAL:</strong></th>
-                        <th><strong class="float-right">RUT EMPRESA:</strong></th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                      <tr>
-                          <th><span t-field="res_company.name"/></th>
-                         <th><span class="float-right" t-esc="res_company.vat and res_company.vat.replace('CL', ' ') or '55.555.555-5'"/></th>
-                      </tr>
-                  </tbody>
-                </table>
-                <table class="table table-sm" style="border-top: 2px solid black; margin-bottom: 0px;" name="datos_trabajador">
-                  <thead>
-                    <tr>
-                        <th><strong>Nombre Trabajador</strong></th>
-                        <th><strong>Fecha Ingreso</strong></th>
-                        <th><strong class="float-right">RUT Trabajador</strong></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                        <td><span t-field="o.employee_id.name"/></td>
-                        <td><span t-field="o.contract_id.date_start" /></td>
-                        <td><span t-field="o.employee_id.identification_id" class="float-right"/></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-sm" name="puesto_trabajador" style="border-top: 2px solid black; margin-bottom: 0px;">
-                   <thead>
-                      <tr>
-                          <th width="31%"><strong>Departamento</strong></th>
-                          <th width="22%"><strong>Cargo</strong></th>
-                          <th width="22%"><strong>Tipo Contrato</strong></th>
-                          <th width="25%"><strong class="float-right">Centro Costo</strong></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                      	  <td><span t-field="o.contract_id.department_id" /></td>
-                          <td><span t-field="o.contract_id.job_id"/></td>
-                          <td><span t-field="o.contract_id.type_id"/></td>
-                          <td><span t-esc="o.contract_id.analytic_account_id.code or '001'" class="float-right"/></td>
-                      </tr>
-                    </tbody>
-                </table>
-                <table class="table table-sm" style="border-top: 2px solid black; margin-bottom: 0px;" name="prevision">
-                    <thead>
-                      <tr>
-                      	<th width="17%"><strong>Nombre AFP</strong></th>
-						<th width="14%"><strong>Tasa AFP</strong></th>
-						<th width="22%"><strong>Nombre ISAPRE</strong></th>
-						<th width="18%"><strong>FUN ISAPRE</strong></th>
-						<th width="14%" style="text-align:left"><strong>Cotiz. UF</strong></th>
-						<th width="15%" style="text-align:right"><strong>Cotiz. CLP</strong></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                      	<td><span t-field="o.contract_id.afp_id"/></td>
-                        <td>
-                        	<t t-if="('MODELO' == o.contract_id.afp_id.name)">
-								<span t-raw="o.indicadores_id.tasa_afp_modelo" />
-							</t>
-							<t t-if="('CUPRUM' == o.contract_id.afp_id.name)">
-								<span t-raw="o.indicadores_id.tasa_afp_cuprum" />
-							</t>
-							<t t-if="('HABITAT' == o.contract_id.afp_id.name)">
-								<span t-raw="o.indicadores_id.tasa_afp_habitat" />
-							</t>
-							<t t-if="('PLANVITAL' == o.contract_id.afp_id.name)">
-								<span t-raw="o.indicadores_id.tasa_afp_planvital" />
-							</t>
-							<t t-if="('PROVIDA' == o.contract_id.afp_id.name)">
-								<span t-raw="o.indicadores_id.tasa_afp_provida" />
-							</t>
-							<t t-if="('CAPITAL' == o.contract_id.afp_id.name)">
-								<span t-raw="o.indicadores_id.tasa_afp_capital" />
-							</t>
-							%
-                        </td>
-                        <td><span t-field="o.contract_id.isapre_id"/></td>
-                        <td><span t-field="o.contract_id.isapre_fun"/></td>
-                        <td>UF <strong t-field="o.contract_id.isapre_cotizacion_uf"/></td>
-                        <td style="text-align:right">
-                          <t t-if="('FONASA' == o.contract_id.isapre_id.name)">
-                              <t t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p"><t t-if="('SALUD' == p.code)"><span t-esc="round(p.amount)" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></t></t>
-                          </t>
-                          <t t-if="('FONASA' != o.contract_id.isapre_id.name)" >
-                              <span t-esc="round(o.indicadores_id.uf*o.contract_id.isapre_cotizacion_uf)" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-                          </t>
-                        </td>
-                      </tr>
-                  </tbody>
-                </table>
-                <table class="table table-sm" style="border-top: 2px solid black; margin-bottom: 0px;" name="jornada">
-                  <thead>
-                    <tr>
-                      <th width="17%"><strong>DIAS</strong></th>
-                      <th width="14%"><strong>H.EXTRA</strong></th>
-                      <th width="22%"><strong>DESCUENTOS</strong></th>
-                      <th width="18%"><strong>CARGAS</strong></th>
-                      <th width="14%" style="text-align:left"><strong>Imponible</strong></th>
-                      <th width="15%" style="text-align:right"><strong>Tributable</strong></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <t t-set="f" t-value="0"/>
-                        <t t-foreach="o.worked_days_line_ids" t-as="p">
-                          <t t-if="('WORK100' == p.code)">
-                            <t t-set= "f" t-value="f+p.number_of_days"/>
-                          </t>
-                        </t>
-                        <span><t t-esc="str(int(f))"/></span>
-                      </td>
-                      <td align="center">
-                        <t t-foreach="o.input_line_ids" t-as="p">
-                          <t t-if="(p.code in ['HEX50', 'HEX100'])">
-                            <span t-raw="p.amount"/>
-                          </t>
-                        </t>
-                      </td>
-                      <td>
-                        <t t-foreach="o.input_line_ids" t-as="p">
-                          <t t-if="('HEXDE' == p.code)">
-                            <span t-raw="p.amount"/>
-                          </t>
-                        </t>
-                      </td>
-                      <td>
-                        <span t-field="o.contract_id.carga_familiar"/>/
-                        <span t-field="o.contract_id.carga_familiar_maternal"/>/
-                        <span t-field="o.contract_id.carga_familiar_invalida"/>
-                      </td>
-                      <td>
-                        <t t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p">
-                          <t t-if="('TOTIM' == p.code)">
-                            <span t-esc="p.amount" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-                          </t>
-                        </t>
-                      </td>
-                      <td style="text-align:right">
-                        <t t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p">
-                          <t t-if="'TRIBU' == p.code">
-                            <span t-esc="p.amount" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-                          </t>
-                        </t>
-                      </td>
-                    </tr>
-                  </tbody>
-               </table>
-               <br />
-              <table class="table table-sm" style="border-top: 1px solid black; margin-bottom: 0px;">
-                  <thead>
-                     <tr>
-                        <th align="center"><strong>HABERES</strong></th>
-                        <th align="center"><strong>DESCUENTOS</strong></th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                   <tr>
-                       <td style="vertical-align:top;">
-                         <table class="table table-sm" width="95%">
-                           <tr t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p">
-                               <t t-if=" ('No Imponible' ==p.category_id.name) or ('No Imponible - Otros' ==p.category_id.name) or ('Imponible' ==p.category_id.name) or ('TOTIM' == p.code) or ('TOTNOI' == p.code)">
-                                   <td>
-                                     <t t-if=" ('Subtotal' ==p.category_id.name)">
-                                       <strong><span t-field="p.name"/></strong>
-                                     </t>
+    <template id="hr_payroll.report_payslip">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page small">
+                        <h5 class="text-center mb-3">
+                            <strong>LIQUIDACIÓN DE SUELDO</strong><br/>
+                            <small><span t-field="o.name"/></small>
+                        </h5>
 
-                                     <t t-if=" ('Subtotal' !=p.category_id.name)">
-                                       <span t-field="p.name"/>
-                                     </t>
-                                   </td>
-                                    <td style="text-align:right">
-                                     <t t-if=" ('Subtotal' ==p.category_id.name)">
-                                       <strong><span t-esc="p.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></strong>
-                                     </t>
-                                     <t t-if=" ('Subtotal' !=p.category_id.name)">
-                                       <span t-esc="p.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-                                     </t>
-                                   </td>
-                               </t>
-                           </tr>
-                         </table>
-                       </td>
-                       <td style="vertical-align:top;">
-                          <table class="table table-sm" width="95%">
-                             <tr t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p">
-                                <t t-if="('Prevision' ==p.category_id.name) or ('Previsión' ==p.category_id.name) or ('Salud' ==p.category_id.name) or ('Descuentos' ==p.category_id.name) or ('Otros Descuentos' ==p.category_id.name) or ('TOD' == p.code) or ('TODELE' == p.code)">
-                                   <td>
-                                       <t t-if=" ('Subtotal' ==p.category_id.name)">
-                                         <strong><span t-field="p.name"/></strong>
-                                       </t>
+                        <table class="table table-sm table-bordered border-dark mb-0">
+                            <thead>
+                                <tr class="table-light">
+                                    <th><strong>RAZON SOCIAL</strong></th>
+                                    <th class="text-end"><strong>RUT EMPRESA</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span t-field="o.company_id.name"/></td>
+                                    <td class="text-end"><span t-esc="o.company_id.vat"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                                       <t t-if=" ('Subtotal' !=p.category_id.name)">
-                                         <span t-field="p.name"/>
-                                       </t>
+                        <table class="table table-sm table-bordered border-dark mb-0 mt-0" style="border-top:0;">
+                            <thead>
+                                <tr class="table-light">
+                                    <th><strong>TRABAJADOR</strong></th>
+                                    <th><strong>FECHA INGRESO</strong></th>
+                                    <th class="text-end"><strong>RUT</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span t-field="o.employee_id.name"/></td>
+                                    <td><span t-field="o.contract_id.date_start"/></td>
+                                    <td class="text-end"><span t-field="o.employee_id.identification_id"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border-dark mb-2 mt-0" style="border-top:0;">
+                            <thead>
+                                <tr class="table-light">
+                                    <th style="width:30%;"><strong>DEPARTAMENTO</strong></th>
+                                    <th style="width:25%;"><strong>CARGO</strong></th>
+                                    <th style="width:20%;"><strong>TIPO CONTRATO</strong></th>
+                                    <th style="width:25%;" class="text-end"><strong>CENTRO COSTO</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span t-field="o.contract_id.department_id"/></td>
+                                    <td><span t-field="o.contract_id.job_id"/></td>
+                                    <td><span t-field="o.contract_id.contract_type_id.name"/></td>
+                                    <td class="text-end">
+                                        <span t-esc="o.contract_id.analytic_account_id.code or '000'"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border-dark mb-3">
+                            <thead>
+                                <tr class="table-light">
+                                    <th><strong>AFP</strong></th>
+                                    <th><strong>TASA</strong></th>
+                                    <th><strong>SALUD</strong></th>
+                                    <th><strong>FUN</strong></th>
+                                    <th class="text-end"><strong>COTIZ. UF</strong></th>
+                                    <th class="text-end"><strong>COTIZ. CLP</strong></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span t-field="o.contract_id.afp_id.name"/></td>
+                                    <td>
+                                        <t t-if="o.contract_id.afp_id.name == 'MODELO'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_modelo"/></t>
+                                        <t t-if="o.contract_id.afp_id.name == 'CUPRUM'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_cuprum"/></t>
+                                        <t t-if="o.contract_id.afp_id.name == 'HABITAT'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_habitat"/></t>
+                                        <t t-if="o.contract_id.afp_id.name == 'PLANVITAL'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_planvital"/></t>
+                                        <t t-if="o.contract_id.afp_id.name == 'PROVIDA'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_provida"/></t>
+                                        <t t-if="o.contract_id.afp_id.name == 'CAPITAL'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_capital"/></t>
+                                        <t t-if="o.contract_id.afp_id.name == 'UNO'"><span t-field="o.l10n_cl_indicadores_id.tasa_afp_uno"/></t>
+                                        %
+                                    </td>
+                                    <td><span t-field="o.contract_id.isapre_id.name"/></td>
+                                    <td><span t-field="o.contract_id.isapre_fun"/></td>
+                                    <td class="text-end">
+                                        <span t-if="o.contract_id.isapre_id.name != 'FONASA'" t-field="o.contract_id.isapre_cotizacion_uf"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-foreach="o.line_ids" t-as="line">
+                                            <t t-if="line.code == 'SALUD'">
+                                                <span t-esc="abs(line.total)" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                                            </t>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border-dark mb-2">
+                            <thead class="table-light">
+                                <tr class="text-center">
+                                    <th>DIAS TRAB.</th>
+                                    <th>H. EXTRA</th>
+                                    <th>CARGAS</th>
+                                    <th>IMPONIBLE</th>
+                                    <th>TRIBUTABLE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="text-center">
+                                    <td>
+                                        <t t-set="days" t-value="sum(line.number_of_days for line in o.worked_days_line_ids if line.code == 'WORK100')"/>
+                                        <span t-esc="int(days)"/>
+                                    </td>
+                                    
+                                    <td>
+                                        <t t-set="hex_amount" t-value="sum(line.amount for line in o.input_line_ids if line.code in ['HEX50', 'HEX100'])"/>
+                                        <span t-esc="hex_amount"/>
                                     </td>
 
-                                    <td style="text-align:right">
-                                     <t t-if=" ('Subtotal' ==p.category_id.name)">
-                                       <strong><span t-esc="p.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></strong>
-                                     </t>
-                                     <t t-if=" ('Subtotal' !=p.category_id.name)">
-                                       <span t-esc="p.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
-                                     </t>
+                                    <td>
+                                        <span t-esc="o.contract_id.carga_familiar + o.contract_id.carga_familiar_maternal + o.contract_id.carga_familiar_invalida"/>
+                                    </td>
 
-                                   </td>
-                                </t>
-                             </tr>
-                          </table>
-                      </td>
-                    </tr>
-                    <tr>
-						<td><h5><strong>TOTAL HABERES</strong>
-								<t t-foreach="o.line_ids.filtered('appears_on_payslip')" t-as="p">
-									<t t-if="('HAB' == p.code)">
-										<span class="float-right" t-field="p.amount" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
-									</t>
-								</t>
-							</h5>
-						</td>
-						<td><h5><strong class="ml32">TOTAL DESCUENTOS</strong>
-								<t t-foreach="o.line_ids.filtered('appears_on_payslip')" t-as="p">
-									<t t-if="('TDE' == p.code)">
-										<span class="float-right" t-field="p.amount" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}' />
-									</t>
-								</t>
-							</h5>
-						</td>
-					</tr>
-                 </tbody>
-              </table>
-              <table class="table table-sm" style="margin-top:20px; border-top:1px 0px solid black;">
-                <thead>
-                  <tr>
-                    <td><strong>Fecha</strong></td>
-                    <td style="text-align:right"><span t-field="o.date_to"/></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Alcance Líquido</strong></td>
-                    <td style="text-align:right"> <t t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p"><t t-if="('LIQ' == p.code)"> <span t-esc="p.amount" class="float-right" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></t></t></td>
-                  </tr>
-                  <tr>
-                  	<td><strong>Alcance Líquido (en palabras):</strong></td>
-                    <td style="text-align:right"><t t-foreach="o.line_ids.filtered(lambda line: line.appears_on_payslip)" t-as="p"><t t-if="('LIQ' == p.code) and (p.amount>0)"> <span t-esc="o.company_id.currency_id.amount_to_text(p.amount)" /></t></t></td>
-                  </tr>
-                </thead>
-              </table>
-              <br />
-              <table class="table table-sm">
-                <tr>
-                  	<td colspan="3">
-						Certifico que recibí de
-						<span t-field="res_company.name" />
-						a mi entera satisifación el saldo líquido de la presente
-						liquidación, no teniendo cobro alguno que hacer o reclamar por
-						los conceptos correspondientes a ella.
-						<br></br>
-					</td>
-                </tr>
-                <tr>
-                  <td colspan="3"></td><td/>
-                </tr>
-              </table>
-              <br /><br /><br />
-              <table class="table table-sm text-center"
-				style="margin-top: 1px; border-bottom:3px 1px solid black;">
-				<tr>
-					<th colspan="4">
-						<strong>FIRMA DEL EMPLEADOR</strong>
-					</th>
-					<th>
-						<strong>FIRMA DEL TRABAJADOR</strong>
-					</th>
-				</tr>
-				<tr>
-					<th colspan="4">
-						<span t-field="res_company.name" />
-					</th>
-					<th>
-						<span t-field="o.employee_id.name" />
-					</th>
-				</tr>
-			</table>
-            </div>
-		</t>
+                                    <td class="text-end">
+                                        <t t-foreach="o.line_ids" t-as="line">
+                                            <t t-if="line.code == 'TOTIM'">
+                                                <span t-field="line.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                                            </t>
+                                        </t>
+                                    </td>
+
+                                    <td class="text-end">
+                                        <t t-foreach="o.line_ids" t-as="line">
+                                            <t t-if="line.code == 'TRIBU'">
+                                                <span t-field="line.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                                            </t>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border-dark mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width:50%;">HABERES</th>
+                                    <th class="text-center" style="width:50%;">DESCUENTOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="vertical-align:top; padding:0;">
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <t t-foreach="o.line_ids.filtered(lambda l: l.category_id.code in ['BASIC', 'ALW', 'GROSS'] and l.total > 0)" t-as="line">
+                                                <tr>
+                                                    <td><span t-field="line.name"/></td>
+                                                    <td class="text-end"><span t-field="line.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
+                                                </tr>
+                                            </t>
+                                        </table>
+                                    </td>
+
+                                    <td style="vertical-align:top; padding:0;">
+                                        <table class="table table-sm table-borderless mb-0">
+                                            <t t-foreach="o.line_ids.filtered(lambda l: l.category_id.code in ['DED'] and l.total != 0)" t-as="line">
+                                                <tr>
+                                                    <td><span t-field="line.name"/></td>
+                                                    <td class="text-end"><span t-esc="abs(line.total)" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
+                                                </tr>
+                                            </t>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td class="fw-bold">
+                                        TOTAL HABERES
+                                        <span class="float-end">
+                                            <t t-foreach="o.line_ids" t-as="line">
+                                                <t t-if="line.code == 'HAB'">
+                                                    <span t-field="line.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                                                </t>
+                                            </t>
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold">
+                                        TOTAL DESCUENTOS
+                                        <span class="float-end">
+                                            <t t-foreach="o.line_ids" t-as="line">
+                                                <t t-if="line.code == 'TDE'">
+                                                    <span t-esc="abs(line.total)" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                                                </t>
+                                            </t>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div class="row mt-3 p-2 border border-dark mx-0 bg-light">
+                            <div class="col-8">
+                                <strong>ALCANCE LÍQUIDO (A PAGAR):</strong><br/>
+                                <span class="small fst-italic">
+                                    SON: 
+                                    <t t-foreach="o.line_ids" t-as="line">
+                                        <t t-if="line.code == 'LIQ'">
+                                            <span t-esc="o.company_id.currency_id.amount_to_text(line.total)"/>
+                                        </t>
+                                    </t>
+                                </span>
+                            </div>
+                            <div class="col-4 text-end">
+                                <h4 class="mb-0 fw-bold">
+                                    <t t-foreach="o.line_ids" t-as="line">
+                                        <t t-if="line.code == 'LIQ'">
+                                            <span t-field="line.total" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
+                                        </t>
+                                    </t>
+                                </h4>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 mb-5 small text-justify">
+                            Certifico que recibí de <strong><span t-field="o.company_id.name"/></strong>, 
+                            a mi entera satisfacción el saldo líquido indicado en la presente liquidación, 
+                            no teniendo cobro alguno posterior que hacer o reclamar por los conceptos 
+                            correspondientes a este periodo.
+                        </div>
+
+                        <div class="row mt-5" style="page-break-inside: avoid;">
+                            <div class="col-6 text-center">
+                                <div style="border-top: 1px solid black; width: 80%; margin: 0 auto; padding-top:5px;">
+                                    <strong>FIRMA EMPLEADOR</strong><br/>
+                                    <span t-field="o.company_id.name"/>
+                                </div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div style="border-top: 1px solid black; width: 80%; margin: 0 auto; padding-top:5px;">
+                                    <strong>FIRMA TRABAJADOR</strong><br/>
+                                    <span t-field="o.employee_id.name"/><br/>
+                                    <span t-field="o.employee_id.identification_id"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
         </t>
-      </t>
     </template>
 </odoo>
