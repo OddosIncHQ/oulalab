@@ -1,11 +1,11 @@
 {
     'name': 'Chilean Payroll & Human Resources',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',  # <--- CAMBIO PARA ODOO 19
     'category': 'Human Resources/Payroll',
     'author': 'Konos',
     'website': 'http://konos.cl',
-    'license': 'AGPL-3',
-    'summary': 'Localización de Nómina y RRHH para Chile',
+    'license': 'OEEL-1',  # Odoo Enterprise Edition License (Recomendado si es para Enterprise, sino AGPL-3)
+    'summary': 'Localización de Nómina y RRHH para Chile (Enterprise)',
     'contributors': [
         "Nelson Ramirez <info@konos.cl>",
         "Daniel Blanco Martin <daniel@blancomartin.com>",
@@ -15,9 +15,9 @@
     'depends': [
         'hr',
         'hr_contract',
-        'hr_payroll',         # Odoo Enterprise. Si usas Community, cambia por 'om_hr_payroll'
-        'hr_payroll_account', # Para contabilizar la nómina
-        'l10n_cl',            # REQUERIDO en Odoo 18 para datos chilenos (RUT, Comunas)
+        'hr_payroll',         # CORRECTO para Odoo Enterprise
+        'hr_payroll_account', # CORRECTO para Odoo Enterprise (Contabilidad)
+        'l10n_cl',            # Localización base chilena (RUT, etc.)
     ],
     'external_dependencies': {
         'python': [
@@ -59,17 +59,9 @@
         'demo/l10n_cl_hr_payroll_demo.xml'
     ],
     'description': """
-Chilean Payroll & Human Resources (Odoo 18 Migration)
-=====================================================
-Payroll configuration for Chile localization.
-Includes rules for:
-* Employee Basic Info & Contracts (RUT, AFP, Isapre)
-* Attendance, Holidays and Sick License
-* Employee PaySlip & Salary Rules
-* Allowances / Deductions / Company Inputs
-* Chilean Indicators (UF, UTM)
-* Payroll Books (Libro de Remuneraciones)
-* Previred Plain Text Generation
+Chilean Payroll & Human Resources (Odoo 19 Enterprise)
+======================================================
+Payroll configuration for Chile localization compatible with Odoo 19 Enterprise.
     """,
     'installable': True,
     'application': True,
