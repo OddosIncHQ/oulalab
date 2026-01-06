@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>						
-<odoo>						
-    <data>						
-
-
- <!-- Tipo de empleado -->
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
 
         <record id="hr_type_employee_active" model="hr.type.employee">
-            <field name="name">Activo</field>
+            <field name="name">Activo (No Pensionado)</field>
             <field name="id_type">0</field>
         </record>
 
@@ -21,11 +18,9 @@
         </record>
 
         <record id="hr_type_employee_activo_sixty_five" model="hr.type.employee">
-            <field name="name">Activo Mayor a 65</field>
+            <field name="name">Activo > 65 años (nunca pensionado)</field>
             <field name="id_type">3</field>
         </record>
 
- 
-       
     </data>
-</odoo>                     
+</odoo>
