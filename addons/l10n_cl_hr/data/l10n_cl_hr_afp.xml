@@ -1,71 +1,76 @@
-<?xml version="1.0" encoding="utf-8"?>						
-<odoo>						
-    <data>						
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
 
-
-              <!-- AFP -->
-
-        <record id="hr_afp_modelo" model="hr.afp">
-            <field name="codigo">34</field>
-            <field name="rut"> </field>
-            <field name="name">MODELO</field>
-            <field name="rate">10.77</field>
-            <field name="sis">1.15</field>
-            <field name="independiente">11.92</field>
+        <record id="hr_afp_capital" model="hr.afp">
+            <field name="name">CAPITAL</field>
+            <field name="code">33</field>
+            <field name="rut">76.240.079-0</field>
+            <field name="rate">11.44</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">11.44</field>
         </record>
 
         <record id="hr_afp_cuprum" model="hr.afp">
-            <field name="codigo">03</field>
-            <field name="rut"> </field>
             <field name="name">CUPRUM</field>
-            <field name="rate">11.48</field>
-            <field name="sis">1.15</field>
-            <field name="independiente">12.63</field>
+            <field name="code">03</field>
+            <field name="rut">98.001.000-8</field>
+            <field name="rate">11.44</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">11.44</field>
         </record>
 
         <record id="hr_afp_habitat" model="hr.afp">
-            <field name="codigo">05</field>
-            <field name="rut"> </field>
             <field name="name">HABITAT</field>
+            <field name="code">05</field>
+            <field name="rut">98.000.100-9</field>
             <field name="rate">11.27</field>
-            <field name="sis">1.15</field>
-            <field name="independiente">12.42</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">11.27</field>
         </record>
 
         <record id="hr_afp_plan_vital" model="hr.afp">
-            <field name="codigo">29</field>
-            <field name="rut"> </field>
             <field name="name">PLANVITAL</field>
-            <field name="rate">10.47</field>
-            <field name="sis">1.15</field>
-            <field name="independiente">11.62</field>
+            <field name="code">29</field>
+            <field name="rut">96.906.640-5</field>
+            <field name="rate">11.16</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">11.16</field>
         </record>
 
         <record id="hr_afp_provida" model="hr.afp">
-            <field name="codigo">08</field>
-            <field name="rut"> </field>
             <field name="name">PROVIDA</field>
-            <field name="rate">11.54</field>
-            <field name="sis">1.15</field>
-            <field name="independiente">12.69</field>
+            <field name="code">08</field>
+            <field name="rut">98.000.000-2</field>
+            <field name="rate">11.45</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">11.45</field>
         </record>
 
-        <record id="hr_afp_capital" model="hr.afp">
-            <field name="codigo">33</field>
-            <field name="rut"> </field>
-            <field name="name">CAPITAL</field>
-            <field name="rate">11.44</field>
-            <field name="sis">1.15</field>
-            <field name="independiente">12.59</field>
+        <record id="hr_afp_modelo" model="hr.afp">
+            <field name="name">MODELO</field>
+            <field name="code">34</field>
+            <field name="rut">76.068.172-5</field>
+            <field name="rate">10.58</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">10.58</field>
+        </record>
+
+        <record id="hr_afp_uno" model="hr.afp">
+            <field name="name">UNO</field>
+            <field name="code">35</field>
+            <field name="rut">76.886.720-3</field>
+            <field name="rate">10.49</field> <field name="sis">1.49</field>
+            <field name="independiente">10.49</field>
         </record>
 
         <record id="hr_afp_no" model="hr.afp">
-            <field name="codigo">00</field>
-            <field name="rut"> </field>
-            <field name="name">NO ESTA</field>
+            <field name="name">NO ESTA (Exento/IPS)</field>
+            <field name="code">00</field>
             <field name="rate">0.0</field>
             <field name="sis">0.0</field>
             <field name="independiente">0.0</field>
         </record>
+
     </data>
-</odoo>                     
+</odoo>
