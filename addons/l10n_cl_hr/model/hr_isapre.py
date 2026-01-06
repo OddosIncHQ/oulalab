@@ -1,10 +1,8 @@
-from odoo import api, fields, models, _
-
+from odoo import models, fields
 
 class HrIsapre(models.Model):
     _name = 'hr.isapre'
-    _description = 'Isapres'
+    _description = 'Isapre'
 
-    codigo = fields.Char(string='Código', required=True)
     name = fields.Char(string='Nombre', required=True)
-    rut = fields.Char(string='RUT', required=True)
+    code = fields.Char(string='Código')
