@@ -4,13 +4,20 @@
         <record id="l10n_cl_hr_salary_rule_view" model="ir.ui.view">
             <field name="name">l10n.cl.hr.salary.rule.view</field>
             <field name="model">hr.salary.rule</field>
-            <field name="inherit_id" ref="hr_payroll.hr_salary_rule_form"/>	
-            <field name="arch" type="xml">	
-            	<field name="code" position="before">	
-            		<field name="date_start"/>
-            		<field name="date_end" />
-            	</field>	
-		    </field>
-		</record>	
-	</data>
+            <field name="inherit_id" ref="hr_payroll.hr_salary_rule_form"/>    
+            <field name="arch" type="xml">    
+                
+                <field name="code" position="before">    
+                    <field name="date_start" placeholder="Fecha Inicio (Opcional)"/>
+                    <field name="date_end" placeholder="Fecha Fin (Opcional)"/>
+                </field>    
+
+                <field name="code" position="after">
+                    <field name="l10n_cl_previred_code" 
+                           placeholder="Ej: P1 (Para Haberes) o Código columna CSV"/>
+                </field>
+
+            </field>
+        </record>    
+    </data>
 </odoo>
