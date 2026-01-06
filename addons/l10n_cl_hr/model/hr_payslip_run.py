@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+
 
 class HrPayslipRun(models.Model):
     _inherit = 'hr.payslip.run'
@@ -24,15 +24,15 @@ class HrPayslipRun(models.Model):
         ('12', 'Reliquidación, Premio, Bono')
     ], string='Movimiento Personal', default='0')
 
-    @api.model
-    def create(self, vals):
-        if 'indicadores_id' not in vals:
-            indicadores = self.env['hr.indicadores'].search([], order='id desc', limit=1)
-            vals['indicadores_id'] = indicadores.id if indicadores else False
-        return super(HrPayslipRun, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if 'indicadores_id' not in vals:
+                indicadores = self.env['hr.indicadores'].search([], order='id desc', limit=1)
+                vals['indicadores_id'] = indicadores.id if indicadores else False
+        return super().create(vals_list)
 
     def compute_sheet_all(self):
         for rec in self:
             slips = rec.slip_ids.filtered(lambda s: s.state in ['draft', 'verify'])
-            for slip in slips:
-                slip.compute_sheet()
+            slips.compute_sheet()
