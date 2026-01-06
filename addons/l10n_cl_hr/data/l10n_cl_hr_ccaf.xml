@@ -1,8 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>						
-<odoo>						
-    <data>						
-
-       <!-- CCAF     -->
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
 
         <record id="hr_ccaf_sin" model="hr.ccaf">
             <field name="codigo">00</field>
@@ -11,28 +9,28 @@
 
         <record id="hr_ccaf_andes" model="hr.ccaf">
             <field name="codigo">01</field>
-            <field name="name">LOS ANDES</field>
+            <field name="name">C.C.A.F. DE LOS ANDES</field>
         </record> 
 
         <record id="hr_ccaf_araucana" model="hr.ccaf">
             <field name="codigo">02</field>
-            <field name="name">LA ARAUCANA</field>
+            <field name="name">C.C.A.F. LA ARAUCANA</field>
         </record>        
 
         <record id="hr_ccaf_los_heroes" model="hr.ccaf">
             <field name="codigo">03</field>
-            <field name="name">LOS HEROES</field>
+            <field name="name">C.C.A.F. LOS HEROES</field>
         </record> 
 
         <record id="hr_ccaf_gabriela_mistral" model="hr.ccaf">
             <field name="codigo">05</field>
-            <field name="name">GABRIEL MISTRAL</field>
+            <field name="name">C.C.A.F. GABRIELA MISTRAL</field>
         </record> 
 
         <record id="hr_ccaf_18" model="hr.ccaf">
             <field name="codigo">06</field>
-            <field name="name">18 DE SEPTIEMBRE</field>
+            <field name="name">C.C.A.F. 18 DE SEPTIEMBRE</field>
         </record> 
-       
+        
     </data>
-</odoo>                     
+</odoo>
