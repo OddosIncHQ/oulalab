@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="hr_payslip_run_form_inherit5" model="ir.ui.view">
-            <field name="name">hr.payslip.run.form.inherit5</field>
+        <record id="hr_payslip_run_form_inherit_l10n_cl" model="ir.ui.view">
+            <field name="name">hr.payslip.run.form.l10n.cl</field>
             <field name="model">hr.payslip.run</field>
             <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
             <field name="arch" type="xml">
-                <field name="credit_note" position="before">
-                    <field name="indicadores_id"/>  
-                    <field name="movimientos_personal" invisible="1"/>
-                </field>
+                
+                <xpath expr="//field[@name='date_end']" position="after">
+                    
+                    <separator string="Localización Chilena" colspan="2"/>
+                    
+                    <field name="l10n_cl_indicadores_id" 
+                           options="{'no_create': True, 'no_open': True}"
+                           placeholder="Indicadores Previsionales (Auto)"/>
+                           
+                    <field name="movimientos_personal" 
+                           widget="selection"
+                           placeholder="Movimiento Global (opcional)"/>
+                           
+                    <field name="l10n_cl_period" invisible="1"/>
+                </xpath>
+
             </field>
         </record>
     </data>
