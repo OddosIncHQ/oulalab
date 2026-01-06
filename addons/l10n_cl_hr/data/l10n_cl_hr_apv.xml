@@ -1,10 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>						
-<odoo>						
-    <data>						
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
 
-
-              <!-- Institución Autorizada APV - APVC : Cias Seguros de Vida -->
-        <record id="hr_apv_metlife" model="hr.apv">
+        <record id="hr_apv_abn_amro" model="hr.apv">
             <field name="codigo">100</field>
             <field name="name">ABN AMRO (CHILE) SEGUROS DE VIDA S.A</field>
         </record>
@@ -89,7 +87,6 @@
             <field name="name">SEGUROS DE VIDA SURA S.A.</field>
         </record>
 
-
         <record id="hr_apv_metlife" model="hr.apv">
             <field name="codigo">121</field>
             <field name="name">METLIFE CHILE SEGUROS DE VIDA S.A</field>
@@ -124,7 +121,8 @@
             <field name="codigo">129</field>
             <field name="name">PRINCIPAL COMPAÑIA DE SEGUROS DE VIDA CHILE S.A.</field>
         </record>
-                <record id="hr_apv_renta" model="hr.apv">
+
+        <record id="hr_apv_renta" model="hr.apv">
             <field name="codigo">130</field>
             <field name="name">RENTA NACIONAL COMPAÑIA DE SEGUROS DE VIDA S.A.</field>
         </record>
@@ -140,22 +138,3 @@
         </record>
 
         <record id="hr_apv_pentavida" model="hr.apv">
-            <field name="codigo">135</field>
-            <field name="name">PENTA VIDA COMPAÑIA DE SEGUROS DE VIDA S.A.</field>
-        </record>
-
-        <record id="hr_apv_ace" model="hr.apv">
-            <field name="codigo">136</field>
-            <field name="name">ACE SEGUROS S.A.</field>
-        </record>
-
-
-
-
-
-
-
-
-
-    </data>
-</odoo>                     
