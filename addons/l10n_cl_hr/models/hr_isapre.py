@@ -7,7 +7,18 @@ class HrIsapre(models.Model):
     _order = 'name asc'
 
     name = fields.Char(string='Nombre', required=True)
-    code = fields.Char(string='Código', help="Código oficial para archivo de Previred")
     
-    # Campo estándar para archivar registros sin borrarlos (Best Practice Odoo)
+    code = fields.Char(
+        string='Código Previred', 
+        required=True,
+        help="Código oficial para archivo de Previred (ej: 07, 01)"
+    )
+    
+    # Campo obligatorio para que cargue el XML de datos
+    rut = fields.Char(
+        string='RUT', 
+        help="RUT de la Isapre"
+    )
+    
+    # Campo estándar para archivar registros sin borrarlos
     active = fields.Boolean(default=True, string="Activo")
