@@ -8,10 +8,13 @@ class HrMutual(models.Model):
 
     name = fields.Char(string='Nombre', required=True)
     
-    # Se estandariza a 'code' para consistencia con el resto de modelos (AFP, Isapre)
-    code = fields.Char(string='Código Previred', required=True, help="Código oficial para archivo de Previred (ej: 1)")
+    # Coincide con <field name="code"> en el XML de datos
+    code = fields.Char(
+        string='Código Previred', 
+        required=True, 
+        help="Código oficial para archivo de Previred (ej: 01, 02)"
+    )
     
     rut = fields.Char(string='RUT', help="RUT de la institución")
     
-    # Campo estándar para archivar
     active = fields.Boolean(default=True, string="Activo")
