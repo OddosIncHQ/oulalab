@@ -1,9 +1,8 @@
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, _
 
-
-class hr_seguro_complementario(models.Model):
+class HrSeguroComplementario(models.Model):
     _name = 'hr.seguro.complementario'
     _description = 'Seguro Complementario'
-    
-    codigo = fields.Char('Codigo', required=True)
+
+    codigo = fields.Char('Código', required=True)
     name = fields.Char('Nombre', required=True)
