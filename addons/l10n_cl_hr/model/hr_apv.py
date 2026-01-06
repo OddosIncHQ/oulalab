@@ -1,9 +1,8 @@
-from odoo import api, fields, models, _
-
+from odoo import models, fields
 
 class HrAPV(models.Model):
     _name = 'hr.apv'
-    _description = 'Institución Autorizada APV - APVC : Compañías de Seguros de Vida'
+    _description = 'Institución APV'
 
-    codigo = fields.Char(string='Código', required=True)
     name = fields.Char(string='Nombre', required=True)
+    code = fields.Char(string='Código')
