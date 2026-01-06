@@ -1,228 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-	<record id="hr_indicadores_previsionales_view"
-		model="ir.ui.view">
-		<field name="name">hr.indicadores.view</field>
-		<field name="model">hr.indicadores</field>
-		<field name="arch" type="xml">
-			<form string="Indicadores Previsionales">
-				<header>
-					<button string="Validar" type="object" name="action_done" states="draft" class="oe_highlight"
-						groups="hr_payroll.group_hr_payroll_user" />
-					<button string="Volver a borrador" type="object" name="action_draft" states="done" 
-						groups="hr_payroll.group_hr_payroll_manager" />
-					<button string="Update" type="object" name="update_document"
-						context="{'force_update':True}" states="draft" />
-					<field name="state" widget="statusbar" />
-				</header>
-				<sheet>
-					<div class="oe_button_box" name="button_box">
-						<a
-							href="https://www.previred.com/web/previred/indicadores-previsionales"
-							class="rounded-circle btn btn-beta" role="button" target="_blank">Ir a
-							Previred</a>
-					</div>
-					<div>
-						<group>
-							<group string="Período">
-								<field name="month" />
-								<field name="year" />
-							</group>
-							<group>
-							</group>
-						</group>
-						<field name="name" invisible="1" />
-						<notebook>
-							<page string="Previred" name="previred">
-								<table>
-									<tr>
-										<td width="40%">
-											<group col="2" name="uf" string="Valor UF">
-												<field name="uf" string="UF Previred">
-												</field>
-											</group>
-											<group col="2" name="utm" string="Otros Valores">
-												<field name="utm">
-												</field>
-												<field name="uta" />
-											</group>
-										</td>
-										<td width="60%">
-											<group col="4" name="mandatory_quotations"
-												string="Tasa Cotización Obligatorio AFP">
-												<field name="tasa_afp_capital" />
-												<field name="tasa_sis_capital" nolabel="1" />
-												<field name="tasa_independiente_capital" nolabel="1" />
-												<field name="tasa_afp_cuprum" />
-												<field name="tasa_sis_cuprum" nolabel="1" />
-												<field name="tasa_independiente_cuprum" nolabel="1" />
-												<field name="tasa_afp_habitat" />
-												<field name="tasa_sis_habitat" nolabel="1" />
-												<field name="tasa_independiente_habitat" nolabel="1" />
-												<field name="tasa_afp_planvital" />
-												<field name="tasa_sis_planvital" nolabel="1" />
-												<field name="tasa_independiente_planvital" nolabel="1" />
-												<field name="tasa_afp_provida" />
-												<field name="tasa_sis_provida" nolabel="1" />
-												<field name="tasa_independiente_provida" nolabel="1" />
-												<field name="tasa_afp_modelo" />
-												<field name="tasa_sis_modelo" nolabel="1" />
-												<field name="tasa_independiente_modelo" nolabel="1" />
-											</group>
-										</td>
-									</tr>
-									<tr>
-										<td width="40%">
-											<group col="2" name="top"
-												string="Rentas Topes Imponibles">
-												<field name="tope_imponible_afp" string="Tope AFP">
-												</field>
-												<field name="tope_imponible_ips" string="Tope IPS">
-												</field>
-												<field name="tope_imponible_seguro_cesantia"
-													string="Seguro Censantía">
-												</field>
-											</group>
-										</td>
-										<td width="60%">
-											<group col="4" name="family_bonus"
-												string="Asignación Familiar">
-												<field name="asignacion_familiar_monto_a"
-													string="Tramo A">
-												</field>
-												<field name="asignacion_familiar_primer" string="Tope">
-												</field>
-												<field name="asignacion_familiar_monto_b"
-													string="Tramo B">
-												</field>
-												<field name="asignacion_familiar_segundo"
-													string="Tope">
-												</field>
-												<field name="asignacion_familiar_monto_c"
-													string="Tramo C">
-												</field>
-												<field name="asignacion_familiar_tercer" string="Tope">
-												</field>
-											</group>
-										</td>
-									</tr>
-									<tr>
-										<td>
-											<group col="2" name="minimum_rent"
-												string="Rentas Mínimas Imponibles">
-												<field name="sueldo_minimo" string="Sueldo Mínimo">
-												</field>
-												<field name="sueldo_minimo_otro"
-													string="Sueldo Mínimo Otro">
-												</field>
-											</group>
-											<group col="2" name="voluntary_saving"
-												string="Ahorro Previsional Voluntario">
-												<field name="tope_anual_apv" string="Tope Anual">
-												</field>
-												<field name="tope_mensual_apv" string="Tope Mensual">
-												</field>
-											</group>
-											<group col="2" name="unemployment_insurance"
-												string="Seguro de Cesantía AFC">
-												<field name="contrato_plazo_fijo_empleador"
-													string="Fijo Empleador">
-												</field>
-												<field name="contrato_plazo_indefinido_empleador"
-													string="I. Empleador">
-												</field>
-												<field name="contrato_plazo_indefinido_trabajador"
-													string="I. Trabajador">
-												</field>
-												<field name="contrato_plazo_indefinido_empleador_otro"
-													string="I. Empleador 11">
-												</field>
-											</group>
-											<group col="2" name="deposit_agreement"
-												string="Depósito Convenido">
-												<field name="deposito_convenido" string="Tope Anual">
-												</field>
-											</group>
-										</td>
-									</tr>
-								</table>
-							</page>
-							<page string="Instituciones Relacionadas">
-								<group col="2">
-									<group col="2" name="quotations" string="Cotizaciones">
-										<field name="ccaf_id" string="Caja de Compensación" />
-										<field name="caja_compensacion" string="Tasa">
-										</field>
-										<field name="fonasa">
-										</field>
-										<field name="pensiones_ips" string="Fondo de Pensiones">
-										</field>
-										<field name="tope_imponible_salud"
-											string="Tope Imponible Salud %">
-										</field>
-									</group>
-									<group col="2" name="mutual_insurance"
-										string="Instituciones de Seguridad">
-										<field name="mutual_seguridad_bool"
-											string="Tiene Mutual" />
-										<field name="mutualidad_id" string="Nombre"
-											attrs="{'invisible': [('mutual_seguridad_bool', '=', False)]}" />
-										<field name="mutual_seguridad"
-											attrs="{'invisible': [('mutual_seguridad_bool', '=', False)]}" />
-										<field name="isl"
-											attrs="{'invisible': [('mutual_seguridad_bool', '=', True)]}" />
-									</group>
-								</group>
-							</page>
-							<page string="Otros Indicadores">
-								<group col="2" name="ine"
-									string="Instituto Nacional de Estadísticas">
-									<field name="ipc" string="IPC" />
-								</group>
-							</page>
-						</notebook>
-					</div>
-				</sheet>
-			</form>
-		</field>
-	</record>
 
-	<!-- Menu View -->
-	<act_window id="hr_indicadores_previsionales_action"
-		name="Indicadores Previsionales" res_model="hr.indicadores"
-		view_type="form" view_mode="tree,form" />
+    <record id="view_hr_indicadores_tree" model="ir.ui.view">
+        <field name="name">hr.indicadores.tree</field>
+        <field name="model">hr.indicadores</field>
+        <field name="arch" type="xml">
+            <list string="Indicadores Previsionales" decoration-info="state == 'draft'">
+                <field name="name"/>
+                <field name="uf"/>
+                <field name="utm"/>
+                <field name="month"/>
+                <field name="year"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
 
-	<menuitem id="hr_indicadores_previsionales_menu"
-		parent="menu_cl_hr_payroll_indicators"
-		action="hr_indicadores_previsionales_action" sequence="10" />
+    <record id="view_hr_indicadores_form" model="ir.ui.view">
+        <field name="name">hr.indicadores.view</field>
+        <field name="model">hr.indicadores</field>
+        <field name="arch" type="xml">
+            <form string="Indicadores Previsionales">
+                <header>
+                    <button string="Validar" type="object" name="action_done" 
+                            class="oe_highlight" 
+                            invisible="state != 'draft'"
+                            groups="hr_payroll.group_hr_payroll_user"/>
+                            
+                    <button string="Volver a borrador" type="object" name="action_draft" 
+                            invisible="state == 'draft'"
+                            groups="hr_payroll.group_hr_payroll_manager"/>
+                            
+                    <button string="Actualizar desde Previred" type="object" name="update_document"
+                            context="{'force_update':True}" 
+                            invisible="state != 'draft'"
+                            class="btn-secondary"/>
+                            
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-globe">
+                            <div class="o_field_widget o_readonly_modifier o_required_modifier">
+                                <a href="https://www.previred.com/web/previred/indicadores-previsionales" 
+                                   target="_blank" style="font-weight:bold;">
+                                   Ir a Previred
+                                </a>
+                            </div>
+                        </button>
+                    </div>
 
-	<act_window id="hr_isapre_action" name="Isapres"
-		res_model="hr.isapre" view_type="form" view_mode="tree,form" />
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Ej: Enero 2025"/></h1>
+                    </div>
 
-	<menuitem id="hr_isapres_menu"
-		parent="menu_cl_hr_payroll_configuration" action="hr_isapre_action"
-		sequence="11" />
+                    <group>
+                        <group string="Periodo">
+                            <field name="month"/>
+                            <field name="year"/>
+                        </group>
+                        <group string="Valores Base">
+                            <field name="uf"/>
+                            <field name="utm"/>
+                            <field name="uta"/>
+                        </group>
+                    </group>
 
-	<act_window id="hr_ccaf_action" name="CCAF"
-		res_model="hr.ccaf" view_type="form" view_mode="tree,form" />
+                    <notebook>
+                        <page string="Tasas y Cotizaciones" name="previred">
+                            <group string="Tasa Cotización Obligatorio AFP">
+                                <group>
+                                    <field name="tasa_afp_capital"/>
+                                    <field name="tasa_afp_cuprum"/>
+                                    <field name="tasa_afp_habitat"/>
+                                    <field name="tasa_afp_planvital"/>
+                                    <field name="tasa_afp_provida"/>
+                                    <field name="tasa_afp_modelo"/>
+                                    <field name="tasa_afp_uno"/>
+                                </group>
+                                <group>
+                                    <field name="tasa_sis_capital" string="SIS Capital"/>
+                                    <field name="tasa_sis_cuprum" string="SIS Cuprum"/>
+                                    <field name="tasa_sis_habitat" string="SIS Habitat"/>
+                                    <field name="tasa_sis_planvital" string="SIS PlanVital"/>
+                                    <field name="tasa_sis_provida" string="SIS Provida"/>
+                                    <field name="tasa_sis_modelo" string="SIS Modelo"/>
+                                    <field name="tasa_sis_uno" string="SIS Uno"/>
+                                </group>
+                            </group>
 
-	<menuitem id="hr_ccaf_menu"
-		parent="menu_cl_hr_payroll_configuration" action="hr_ccaf_action"
-		sequence="12" />
+                            <group>
+                                <group string="Rentas Topes Imponibles">
+                                    <field name="tope_imponible_afp"/>
+                                    <field name="tope_imponible_ips"/>
+                                    <field name="tope_imponible_seguro_cesantia"/>
+                                </group>
+                                <group string="Rentas Mínimas">
+                                    <field name="sueldo_minimo"/>
+                                    <field name="sueldo_minimo_otro"/>
+                                </group>
+                            </group>
 
-	<act_window id="hr_mutual_action" name="Mutualidad"
-		res_model="hr.mutual" view_type="form" view_mode="tree,form" />
+                            <group string="Asignación Familiar">
+                                <group>
+                                    <field name="asignacion_familiar_monto_a"/>
+                                    <field name="asignacion_familiar_monto_b"/>
+                                    <field name="asignacion_familiar_monto_c"/>
+                                </group>
+                                <group>
+                                    <field name="asignacion_familiar_primer" string="Tope Tramo A"/>
+                                    <field name="asignacion_familiar_segundo" string="Tope Tramo B"/>
+                                    <field name="asignacion_familiar_tercer" string="Tope Tramo C"/>
+                                </group>
+                            </group>
 
-	<menuitem id="hr_mutual_menu"
-		parent="menu_cl_hr_payroll_configuration" action="hr_mutual_action"
-		sequence="13" />
+                            <group>
+                                <group string="Ahorro Previsional Voluntario (APV)">
+                                    <field name="tope_anual_apv"/>
+                                    <field name="tope_mensual_apv"/>
+                                    <field name="deposito_convenido"/>
+                                </group>
+                                <group string="Seguro de Cesantía (AFC)">
+                                    <field name="contrato_plazo_fijo_empleador"/>
+                                    <field name="contrato_plazo_indefinido_empleador"/>
+                                    <field name="contrato_plazo_indefinido_trabajador"/>
+                                    <field name="contrato_plazo_indefinido_empleador_otro" string="Indefinido 11 años+"/>
+                                </group>
+                            </group>
+                        </page>
 
-	<act_window id="hr_apv_action"
-		name="Institución Autorizada APV" res_model="hr.apv" view_type="form"
-		view_mode="tree,form" />
+                        <page string="Instituciones y Factores">
+                            <group>
+                                <group string="Salud y Pensiones">
+                                    <field name="fonasa" string="Tasa Fonasa"/>
+                                    <field name="pensiones_ips"/>
+                                    <field name="tope_imponible_salud"/>
+                                    <field name="ccaf_id"/>
+                                    <field name="caja_compensacion" string="Tasa CCAF"/>
+                                </group>
+                                <group string="Mutualidad (Seguridad Laboral)">
+                                    <field name="mutual_seguridad_bool"/>
+                                    
+                                    <field name="mutualidad_id" invisible="not mutual_seguridad_bool"/>
+                                    <field name="mutual_seguridad" invisible="not mutual_seguridad_bool"/>
+                                    <field name="isl" invisible="mutual_seguridad_bool"/>
+                                </group>
+                            </group>
+                            <group string="Estadísticas">
+                                <field name="ipc"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
-	<menuitem id="hr_apv_menu"
-		parent="menu_cl_hr_payroll_configuration" action="hr_apv_action"
-		sequence="14" />
+    <record id="action_hr_indicadores_previsionales" model="ir.actions.act_window">
+        <field name="name">Indicadores Previsionales</field>
+        <field name="res_model">hr.indicadores</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_hr_indicadores_previsionales"
+        parent="menu_cl_hr_payroll_configuration"
+        action="action_hr_indicadores_previsionales" 
+        sequence="10"/>
+
+    <record id="action_hr_isapre" model="ir.actions.act_window">
+        <field name="name">Instituciones de Salud (Isapre)</field>
+        <field name="res_model">hr.isapre</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_hr_isapre"
+        parent="menu_cl_hr_payroll_configuration" 
+        action="action_hr_isapre"
+        sequence="11"/>
+
+    <record id="action_hr_ccaf" model="ir.actions.act_window">
+        <field name="name">Cajas de Compensación (CCAF)</field>
+        <field name="res_model">hr.ccaf</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_hr_ccaf"
+        parent="menu_cl_hr_payroll_configuration" 
+        action="action_hr_ccaf"
+        sequence="12"/>
+
+    <record id="action_hr_mutual" model="ir.actions.act_window">
+        <field name="name">Mutualidades</field>
+        <field name="res_model">hr.mutual</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_hr_mutual"
+        parent="menu_cl_hr_payroll_configuration" 
+        action="action_hr_mutual"
+        sequence="13"/>
+
+    <record id="action_hr_apv" model="ir.actions.act_window">
+        <field name="name">Instituciones APV</field>
+        <field name="res_model">hr.apv</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_hr_apv"
+        parent="menu_cl_hr_payroll_configuration" 
+        action="action_hr_apv"
+        sequence="14"/>
 
 </odoo>
