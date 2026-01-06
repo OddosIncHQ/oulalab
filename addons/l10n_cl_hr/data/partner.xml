@@ -1,17 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="True">
-        <record model='res.partner' id='sii'>
-                <field name='name'>SII</field>
-                <field name='document_number'>60.803.000-K</field>
-        </record> 
-    
-        <record model='res.partner' id='previred'>
-                <field name='name'>PREVIRED</field>
-                <field name='document_number'>96.929.390-0</field>
-        </record> 
+    <data noupdate="1">
 
+        <record id="sii" model="res.partner">
+            <field name="name">Servicio de Impuestos Internos (SII)</field>
+            <field name="is_company">True</field>
+            <field name="vat">CL60803000K</field> <field name="country_id" ref="base.cl"/>
+            <field name="street">Teatinos 120</field>
+            <field name="city">Santiago</field>
+        </record>
 
+        <record id="previred" model="res.partner">
+            <field name="name">PREVIRED</field>
+            <field name="is_company">True</field>
+            <field name="vat">CL969293900</field> <field name="country_id" ref="base.cl"/>
+            <field name="street">Av. Providencia 1760</field>
+            <field name="city">Providencia</field>
+        </record>
 
     </data>
 </odoo>
