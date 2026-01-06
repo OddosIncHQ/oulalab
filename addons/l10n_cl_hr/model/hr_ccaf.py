@@ -1,9 +1,9 @@
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, _
 
 
-class hr_ccaf(models.Model):
+class HrCCAF(models.Model):
     _name = 'hr.ccaf'
-    _description = 'CCAF'
-    
-    codigo = fields.Char('Codigo', required=True)
-    name = fields.Char('Nombre', required=True)
+    _description = 'Caja de Compensación (CCAF)'
+
+    codigo = fields.Char(string='Código', required=True)
+    name = fields.Char(string='Nombre', required=True)
