@@ -1,39 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-	<data>
-		<record id="hr_afp_form" model="ir.ui.view">
-			<field name="name">hr.afp.form</field>
-			<field name="model">hr.afp</field>
-			<field name="arch" type="xml">
-				<form string="AFP">
-					<sheet>
-						<div class="oe_title">
-							<label for="name" string="FONDOS DE PENSION" />
-							<h1>
-								<field name="name" />
-							</h1>
-						</div>
-						<group>
-							<group>
-								<field name="codigo" string="Codigo" />
-								<field name="rut" string="RUT" />
-							</group>
-							<group>
-								<field name="rate" />
-								<field name="sis" />
-								<field name="independiente" />
-							</group>
-						</group>
-					</sheet>
-				</form>
-			</field>
-		</record>
+    <data>
 
+        <record id="view_hr_afp_tree" model="ir.ui.view">
+            <field name="name">hr.afp.tree</field>
+            <field name="model">hr.afp</field>
+            <field name="arch" type="xml">
+                <list string="Fondos de Pensión (AFP)">
+                    <field name="sequence" widget="handle"/>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="rate"/>
+                    <field name="sis"/>
+                </list>
+            </field>
+        </record>
 
-		<act_window id="hr_afp_action" name="Fondos de Pensión"
-			res_model="hr.afp" view_type="form" view_mode="tree,form" />
+        <record id="view_hr_afp_form" model="ir.ui.view">
+            <field name="name">hr.afp.form</field>
+            <field name="model">hr.afp</field>
+            <field name="arch" type="xml">
+                <form string="AFP">
+                    <sheet>
+                        <widget name="web_ribbon" title="Archivado" bg_color="bg-danger" invisible="active"/>
+                        <field name="active" invisible="1"/>
+                        
+                        <div class="oe_title">
+                            <label for="name" string="Fondo de Pensión (AFP)"/>
+                            <h1>
+                                <field name="name" placeholder="Ej: AFP Modelo"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="code"/>
+                                </group>
+                            <group>
+                                <field name="rate"/>
+                                <field name="sis"/>
+                                </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
-		<menuitem id="hr_afp_menu" parent="menu_cl_hr_payroll_configuration"
-			action="hr_afp_action" sequence="14" />
-	</data>
+        <record id="action_hr_afp" model="ir.actions.act_window">
+            <field name="name">Fondos de Pensión</field>
+            <field name="res_model">hr.afp</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Crea una nueva AFP
+              </p><p>
+                Define las Administradoras de Fondos de Pensiones y sus tasas.
+              </p>
+            </field>
+        </record>
+
+        <menuitem 
+            id="menu_hr_afp" 
+            parent="menu_cl_hr_payroll_configuration"
+            action="action_hr_afp" 
+            sequence="14" 
+        />
+
+    </data>
 </odoo>
