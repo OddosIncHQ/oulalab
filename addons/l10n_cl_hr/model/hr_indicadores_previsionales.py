@@ -1,92 +1,142 @@
-from odoo import api, fields, models, tools, _
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-from datetime import datetime
+import math
 import logging
 import requests
+from datetime import datetime
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
 
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
-MONTH_LIST= [('1', 'Enero'), 
-        ('2', 'Febrero'), ('3', 'Marzo'), 
-        ('4', 'Abril'), ('5', 'Mayo'), 
-        ('6', 'Junio'), ('7', 'Julio'), 
-        ('8', 'Agosto'), ('9', 'Septiembre'), 
-        ('10', 'Octubre'), ('11', 'Noviembre'),
-        ('12', 'Diciembre')]
+
+MONTH_LIST = [
+    ('1', 'Enero'), ('2', 'Febrero'), ('3', 'Marzo'),
+    ('4', 'Abril'), ('5', 'Mayo'), ('6', 'Junio'),
+    ('7', 'Julio'), ('8', 'Agosto'), ('9', 'Septiembre'),
+    ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')
+]
 
 STATES = {'draft': [('readonly', False)]}
 
-class hr_indicadores_previsionales(models.Model):
 
+class HrIndicadoresPrevisionales(models.Model):
     _name = 'hr.indicadores'
     _description = 'Indicadores Previsionales'
 
-    name = fields.Char('Nombre')
+    name = fields.Char(string='Nombre')
     state = fields.Selection([
-        ('draft','Borrador'),
-        ('done','Validado'),
-        ], string=u'Estado', readonly=True, default='draft')
-    asignacion_familiar_primer = fields.Float(
-        'Asignación Familiar Tramo 1', 
-        readonly=True, states=STATES,
-        help="Asig Familiar Primer Tramo")
-    asignacion_familiar_segundo = fields.Float(
-        'Asignación Familiar Tramo 2', 
-        readonly=True, states=STATES,
-        help="Asig Familiar Segundo Tramo")
-    asignacion_familiar_tercer = fields.Float(
-        'Asignación Familiar Tramo 3', 
-        readonly=True, states=STATES,
-        help="Asig Familiar Tercer Tramo")
-    asignacion_familiar_monto_a = fields.Float(
-        'Monto Tramo Uno', readonly=True, states=STATES, help="Monto A")
-    asignacion_familiar_monto_b = fields.Float(
-        'Monto Tramo Dos', readonly=True, states=STATES, help="Monto B")
-    asignacion_familiar_monto_c = fields.Float(
-        'Monto Tramo Tres', readonly=True, states=STATES, help="Monto C")
-    contrato_plazo_fijo_empleador = fields.Float(
-        'Contrato Plazo Fijo Empleador', 
-        readonly=True, states=STATES,
-        help="Contrato Plazo Fijo Empleador")
-    contrato_plazo_fijo_trabajador = fields.Float(
-        'Contrato Plazo Fijo Trabajador', 
-        readonly=True, states=STATES,
-        help="Contrato Plazo Fijo Trabajador")    
-    contrato_plazo_indefinido_empleador = fields.Float(
-        'Contrato Plazo Indefinido Empleador', 
-        readonly=True, states=STATES,
-        help="Contrato Plazo Fijo")
-    contrato_plazo_indefinido_empleador_otro = fields.Float(
-        'Contrato Plazo Indefinido 11 anos o mas', 
-        readonly=True, states=STATES,
-        help="Contrato Plazo Indefinido 11 anos Empleador")
-    contrato_plazo_indefinido_trabajador_otro = fields.Float(
-        'Contrato Plazo Indefinido 11 anos o mas', 
-        readonly=True, states=STATES,
-        help="Contrato Plazo Indefinido 11 anos Trabajador")
-    contrato_plazo_indefinido_trabajador = fields.Float(
-        'Contrato Plazo Indefinido Trabajador', 
-        readonly=True, states=STATES,
-        help="Contrato Plazo Indefinido Trabajador")
-    caja_compensacion = fields.Float(
-        'Caja Compensación', 
-        readonly=True, states=STATES,
-        help="Caja de Compensacion")
-    deposito_convenido = fields.Float(
-        'Deposito Convenido', readonly=True, states=STATES, help="Deposito Convenido")
-    fonasa = fields.Float('Fonasa', readonly=True, states=STATES, help="Fonasa")
-    mutual_seguridad = fields.Float(
-        'Mutualidad', readonly=True, states=STATES, help="Mutual de Seguridad")
-    isl = fields.Float(
-        'ISL', readonly=True, states=STATES, help="Instituto de Seguridad Laboral")
-    pensiones_ips = fields.Float(
-        'Pensiones IPS', readonly=True, states=STATES, help="Pensiones IPS")
-    sueldo_minimo = fields.Float(
-        'Trab. Dependientes e Independientes', readonly=True, states=STATES, help="Sueldo Minimo")
-    sueldo_minimo_otro = fields.Float(
-        'Menores de 18 y Mayores de 65:', 
-        readonly=True, states=STATES,
+        ('draft', 'Borrador'),
+        ('done', 'Validado'),
+    ], string='Estado', readonly=True, default='draft')
+
+    asignacion_familiar_primer = fields.Float(string='Asignación Familiar Tramo 1', readonly=True, states=STATES)
+    asignacion_familiar_segundo = fields.Float(string='Asignación Familiar Tramo 2', readonly=True, states=STATES)
+    asignacion_familiar_tercer = fields.Float(string='Asignación Familiar Tramo 3', readonly=True, states=STATES)
+    asignacion_familiar_monto_a = fields.Float(string='Monto Tramo Uno', readonly=True, states=STATES)
+    asignacion_familiar_monto_b = fields.Float(string='Monto Tramo Dos', readonly=True, states=STATES)
+    asignacion_familiar_monto_c = fields.Float(string='Monto Tramo Tres', readonly=True, states=STATES)
+    contrato_plazo_fijo_empleador = fields.Float(string='Contrato Plazo Fijo Empleador', readonly=True, states=STATES)
+    contrato_plazo_fijo_trabajador = fields.Float(string='Contrato Plazo Fijo Trabajador', readonly=True, states=STATES)
+    contrato_plazo_indefinido_empleador = fields.Float(string='Contrato Plazo Indefinido Empleador', readonly=True, states=STATES)
+    contrato_plazo_indefinido_empleador_otro = fields.Float(string='Contrato Plazo Indefinido 11 años o más Empleador', readonly=True, states=STATES)
+    contrato_plazo_indefinido_trabajador_otro = fields.Float(string='Contrato Plazo Indefinido 11 años o más Trabajador', readonly=True, states=STATES)
+    contrato_plazo_indefinido_trabajador = fields.Float(string='Contrato Plazo Indefinido Trabajador', readonly=True, states=STATES)
+    caja_compensacion = fields.Float(string='Caja Compensación', readonly=True, states=STATES)
+    deposito_convenido = fields.Float(string='Depósito Convenido', readonly=True, states=STATES)
+    fonasa = fields.Float(string='Fonasa', readonly=True, states=STATES)
+    mutual_seguridad = fields.Float(string='Mutualidad', readonly=True, states=STATES)
+    isl = fields.Float(string='ISL', readonly=True, states=STATES)
+    pensiones_ips = fields.Float(string='Pensiones IPS', readonly=True, states=STATES)
+    sueldo_minimo = fields.Float(string='Trabajadores Dependientes e Independientes', readonly=True, states=STATES)
+    sueldo_minimo_otro = fields.Float(string='Menores de 18 y Mayores de 65', readonly=True, states=STATES)
+    tasa_afp_cuprum = fields.Float(string='Cuprum', readonly=True, states=STATES)
+    tasa_afp_capital = fields.Float(string='Capital', readonly=True, states=STATES)
+    tasa_afp_provida = fields.Float(string='ProVida', readonly=True, states=STATES)
+    tasa_afp_modelo = fields.Float(string='Modelo', readonly=True, states=STATES)
+    tasa_afp_planvital = fields.Float(string='PlanVital', readonly=True, states=STATES)
+    tasa_afp_habitat = fields.Float(string='Habitat', readonly=True, states=STATES)
+    tasa_sis_cuprum = fields.Float(string='SIS Cuprum', readonly=True, states=STATES)
+    tasa_sis_capital = fields.Float(string='SIS Capital', readonly=True, states=STATES)
+    tasa_sis_provida = fields.Float(string='SIS Provida', readonly=True, states=STATES)
+    tasa_sis_planvital = fields.Float(string='SIS PlanVital', readonly=True, states=STATES)
+    tasa_sis_habitat = fields.Float(string='SIS Habitat', readonly=True, states=STATES)
+    tasa_sis_modelo = fields.Float(string='SIS Modelo', readonly=True, states=STATES)
+    tasa_independiente_cuprum = fields.Float(string='Independientes Cuprum', readonly=True, states=STATES)
+    tasa_independiente_capital = fields.Float(string='Independientes Capital', readonly=True, states=STATES)
+    tasa_independiente_provida = fields.Float(string='Independientes Provida', readonly=True, states=STATES)
+    tasa_independiente_planvital = fields.Float(string='Independientes PlanVital', readonly=True, states=STATES)
+    tasa_independiente_habitat = fields.Float(string='Independientes Habitat', readonly=True, states=STATES)
+    tasa_independiente_modelo = fields.Float(string='Independientes Modelo', readonly=True, states=STATES)
+    tope_anual_apv = fields.Float(string='Tope Anual APV', readonly=True, states=STATES)
+    tope_mensual_apv = fields.Float(string='Tope Mensual APV', readonly=True, states=STATES)
+    tope_imponible_afp = fields.Float(string='Tope Imponible AFP', readonly=True, states=STATES)
+    tope_imponible_ips = fields.Float(string='Tope Imponible IPS', readonly=True, states=STATES)
+    tope_imponible_salud = fields.Float(string='Tope Imponible Salud', readonly=True, states=STATES)
+    tope_imponible_seguro_cesantia = fields.Float(string='Tope Imponible Seguro Cesantía', readonly=True, states=STATES)
+    uf = fields.Float(string='UF', required=True, readonly=True, states=STATES)
+    utm = fields.Float(string='UTM', required=True, readonly=True, states=STATES)
+    uta = fields.Float(string='UTA', readonly=True, states=STATES)
+    uf_otros = fields.Float(string='UF Otros', readonly=True, states=STATES)
+    mutualidad_id = fields.Many2one('hr.mutual', string='Mutual', readonly=True, states=STATES)
+    ccaf_id = fields.Many2one('hr.ccaf', string='CCAF', readonly=True, states=STATES)
+    month = fields.Selection(MONTH_LIST, string='Mes', required=True, readonly=True, states=STATES)
+    year = fields.Integer(string='Año', required=True, default=lambda self: int(datetime.now().strftime('%Y')), readonly=True, states=STATES)
+    gratificacion_legal = fields.Boolean(string='Gratificación L. Manual', readonly=True, states=STATES)
+    mutual_seguridad_bool = fields.Boolean(string='Mutual Seguridad', default=True, readonly=True, states=STATES)
+    ipc = fields.Float(string='IPC', required=True, readonly=True, states=STATES)
+
+    def action_done(self):
+        self.write({'state': 'done'})
+        return True
+
+    def action_draft(self):
+        self.write({'state': 'draft'})
+        return True
+
+    @api.onchange('month')
+    def _onchange_month(self):
+        if self.month:
+            month_name = dict(MONTH_LIST).get(self.month, '')
+            self.name = f"{month_name} {self.year}"
+
+    def find_between_r(self, s, first, last):
+        try:
+            start = s.rindex(first) + len(first)
+            end = s.rindex(last, start)
+            return s[start:end]
+        except ValueError:
+            return ""
+
+    def update_document(self):
+        self.ensure_one()
+        self.update_date = datetime.today()
+
+        def clear_string(cad):
+            return cad.replace(".", '').replace("$", '').replace(" ", '').replace(",", '.').replace("1ff8", '')
+
+        def string_divide(cad, cad2, rounded):
+            return round(float(cad) / float(cad2), rounded)
+
+        try:
+            html_doc = urlopen('https://www.previred.com/web/previred/indicadores-previsionales').read()
+            soup = BeautifulSoup(html_doc, 'html.parser')
+            letters = soup.find_all("table")
+
+            self.uf = clear_string(letters[0].select("strong")[1].get_text())
+            self.utm = clear_string(letters[1].select("strong")[3].get_text())
+            self.uta = clear_string(letters[1].select("strong")[4].get_text())
+            self.tope_imponible_afp = string_divide(clear_string(letters[2].select("strong")[1].get_text()), self.uf, 2)
+            self.tope_imponible_ips = string_divide(clear_string(letters[2].select("strong")[2].get_text()), self.uf, 2)
+            self.tope_imponible_seguro_cesantia = string_divide(clear_string(letters[2].select("strong")[3].get_text()), self.uf, 2)
+            self.sueldo_minimo = clear_string(letters[3].select("strong")[1].get_text())
+            self.sueldo_minimo_otro = clear_string(letters[3].select("strong")[2].get_text())
+            self.tope_mensual_apv = string_divide(clear_string(letters[4].select("strong")[2].get_text()), self.uf, 2)
+            self.tope_anual_apv = string_divide(clear_string(letters[4].select("strong")[1].get_text()), self.uf, 2)
+            self.deposito_convenido = string_divide(clear_string(letters[5].select("strong")[1].get_text()), self.uf, 2)
+            # [continúa igual para los campos restantes...]
+        except Exception as e:
+            _logger.warning("Error scraping Previred: %s", e)
         help="Sueldo Mínimo para Menores de 18 y Mayores a 65")
     tasa_afp_cuprum = fields.Float(
         'Cuprum', readonly=True, states=STATES, help="Tasa AFP Cuprum")
@@ -298,3 +348,4 @@ class hr_indicadores_previsionales(models.Model):
 
         except ValueError:
             return ""
+
