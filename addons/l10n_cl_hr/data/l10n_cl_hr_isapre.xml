@@ -1,64 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>						
-<odoo>						
-    <data>						
-
-
-        <!-- ISAPRES     -->
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
 
         <record id="hr_isapre_fonasa" model="hr.isapre">
-            <field name="codigo">07</field>            
-            <field name="rut">61603000-0</field>
+            <field name="code">07</field>            
+            <field name="rut">61.603.000-0</field>
             <field name="name">FONASA</field>
         </record>
 
-        <record id="hr_isapre_colmena" model="hr.isapre">
-            <field name="codigo">04</field>
-            <field name="rut">94954000-6</field>
-            <field name="name">COLMENA GOLDEN CROSS</field>
-        </record>
-
         <record id="hr_isapre_banmedica" model="hr.isapre">
-            <field name="codigo">01</field>
-            <field name="rut">96572800-7</field>
+            <field name="code">01</field>
+            <field name="rut">96.572.800-7</field>
             <field name="name">BANMEDICA</field>
         </record>
 
         <record id="hr_isapre_consalud" model="hr.isapre">
-            <field name="codigo">02</field>
-            <field name="rut">96856780-2</field>
+            <field name="code">02</field>
+            <field name="rut">96.856.780-2</field>
             <field name="name">CONSALUD</field>
         </record>
 
-        <record id="hr_isapre_masvida" model="hr.isapre">
-            <field name="codigo">17</field>
-            <field name="rut"> </field>
-            <field name="name">MAS VIDA</field>
-        </record>
-
-        <record id="hr_isapre_nuevamasvida" model="hr.isapre">
-            <field name="codigo">10</field>
-            <field name="rut">96504160-5</field>
-            <field name="name">NUEVA MAS VIDA</field>
-        </record>
-     
-
         <record id="hr_isapre_vidatres" model="hr.isapre">
-            <field name="codigo">03</field>
-            <field name="rut"> </field>
+            <field name="code">03</field>
+            <field name="rut">96.541.040-6</field>
             <field name="name">VIDA TRES</field>
         </record>
 
+        <record id="hr_isapre_colmena" model="hr.isapre">
+            <field name="code">04</field>
+            <field name="rut">94.954.000-6</field>
+            <field name="name">COLMENA GOLDEN CROSS</field>
+        </record>
+
         <record id="hr_isapre_cruzblanca" model="hr.isapre">
-            <field name="codigo">05</field>
-            <field name="rut"> </field>
+            <field name="code">06</field>
+            <field name="rut">96.522.560-9</field>
             <field name="name">CRUZ BLANCA</field>
         </record>
 
+        <record id="hr_isapre_nuevamasvida" model="hr.isapre">
+            <field name="code">10</field>
+            <field name="rut">96.504.160-5</field>
+            <field name="name">NUEVA MAS VIDA</field>
+        </record>
+
+        <record id="hr_isapre_esencial" model="hr.isapre">
+            <field name="code">14</field>
+            <field name="rut">77.376.160-7</field>
+            <field name="name">ESENCIAL</field>
+        </record>
+
+        <record id="hr_isapre_masvida" model="hr.isapre">
+            <field name="code">17</field>
+            <field name="name">MAS VIDA (Antigua)</field>
+            <field name="active" eval="False"/>
+        </record>
+
         <record id="hr_isapre_bancoestado" model="hr.isapre">
-            <field name="codigo">12</field>
-            <field name="rut"> </field>
+            <field name="code">12</field>
             <field name="name">ISAPRE BCO. ESTADO</field>
+            <field name="active" eval="False"/>
         </record>
 
     </data>
-</odoo>                     
+</odoo>
