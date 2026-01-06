@@ -1,7 +1,7 @@
 from pytz import timezone
 from datetime import date, datetime, time
 
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -14,7 +14,7 @@ class HrPayslip(models.Model):
         string='Indicadores',
         readonly=True,
         states={'draft': [('readonly', False)]},
-        help='Defines Previred Forecast Indicators'
+        help='Define los indicadores previsionales Previred'
     )
 
     movimientos_personal = fields.Selection(
@@ -35,8 +35,8 @@ class HrPayslip(models.Model):
         default="0"
     )
 
-    date_start_mp = fields.Date('Fecha Inicio MP', help="Fecha de inicio del movimiento de personal")
-    date_end_mp = fields.Date('Fecha Fin MP', help="Fecha del fin del movimiento de personal")
+    date_start_mp = fields.Date(string='Fecha Inicio MP', help="Fecha de inicio del movimiento de personal")
+    date_end_mp = fields.Date(string='Fecha Fin MP', help="Fecha del fin del movimiento de personal")
 
     @api.model
     def create(self, vals):
@@ -63,19 +63,16 @@ class HrPayslip(models.Model):
         for leave in leaves:
             temp += leave.get('number_of_days') or 0
 
-        # Días laborados reales para calcular la semana corrida
+        # Días laborados reales para calcular semana corrida
         effective = attendances.copy()
         effective.update({
-            'name': _("Dias de trabajo efectivos"),
+            'name': _("Días de trabajo efectivos"),
             'sequence': 2,
             'code': 'EFF100',
         })
 
-        # Si trabajó menos de 5 días, se toma el número real, si no: 30 - ausencias
-        if (effective.get('number_of_days') or 0) < 5:
-            dias = effective.get('number_of_days')
-        else:
-            dias = 30 - temp
+        # Si trabajó menos de 5 días, se usa ese número. En caso contrario: 30 - ausencias.
+        dias = effective.get('number_of_days') if (effective.get('number_of_days') or 0) < 5 else 30 - temp
 
         attendances['number_of_days'] = dias
 
