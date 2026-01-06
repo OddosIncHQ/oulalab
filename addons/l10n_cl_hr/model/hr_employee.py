@@ -5,17 +5,27 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    firstname = fields.Char("Firstname")
-    last_name = fields.Char("Last Name")
-    middle_name = fields.Char("Middle Name", help='Employees middle name')
-    mothers_name = fields.Char("Mothers Name", help='Employees mothers name')
-    type_id = fields.Many2one('hr.type.employee', 'Tipo de Empleado')
-    formated_vat = fields.Char(translate=True, string='Printable VAT', store=True, help='Show formatted vat')
+    firstname = fields.Char(string="Nombre")
+    last_name = fields.Char(string="Apellido Paterno")
+    middle_name = fields.Char(string="Segundo Nombre", help='Segundo nombre del empleado')
+    mothers_name = fields.Char(string="Apellido Materno", help='Apellido materno del empleado')
+    type_id = fields.Many2one('hr.type.employee', string='Tipo de Empleado')
+    formated_vat = fields.Char(string='RUT Formateado', store=True, help='RUT formateado con puntos y guion')
 
-    @api.model
+    @api.depends('firstname', 'middle_name', 'last_name', 'mothers_name')
+    def _compute_name(self):
+        for rec in self:
+            rec.name = rec._get_computed_name(
+                rec.last_name,
+                rec.firstname,
+                rec.mothers_name,
+                rec.middle_name
+            )
+
     def _get_computed_name(self, last_name, firstname, last_name2=None, middle_name=None):
         names = []
         if firstname:
@@ -29,50 +39,51 @@ class HrEmployee(models.Model):
         return " ".join(names)
 
     @api.onchange('firstname', 'mothers_name', 'middle_name', 'last_name')
-    def get_name(self):
+    def _onchange_name_fields(self):
         if self.firstname and self.last_name:
-            self.name = self._get_computed_name(self.last_name, self.firstname, self.mothers_name, self.middle_name)
+            self.name = self._get_computed_name(
+                self.last_name,
+                self.firstname,
+                self.mothers_name,
+                self.middle_name
+            )
 
     @api.onchange('identification_id')
-    def onchange_document(self):
-        identification_id = (
-            re.sub('[^1234567890Kk]', '',
-                   str(self.identification_id))).zfill(9).upper()
-        self.identification_id = '%s.%s.%s-%s' % (
-            identification_id[0:2], identification_id[2:5], identification_id[5:8],
-            identification_id[-1])
+    def _onchange_document(self):
+        if self.identification_id:
+            clean_id = re.sub('[^1234567890Kk]', '', str(self.identification_id)).zfill(9).upper()
+            self.identification_id = '%s.%s.%s-%s' % (
+                clean_id[0:2], clean_id[2:5], clean_id[5:8], clean_id[-1]
+            )
 
     def check_identification_id_cl(self, identification_id):
         body, vdig = '', ''
         if len(identification_id) > 9:
             identification_id = identification_id.replace('-', '', 1).replace('.', '', 2)
         if len(identification_id) != 9:
-            raise UserError(u'El Rut no tiene formato')
+            raise UserError('El RUT no tiene formato válido')
         else:
             body, vdig = identification_id[:-1], identification_id[-1].upper()
         try:
-            # ✅ FIX para Python 3:
-            vali = list(range(2, 8)) + [2, 3]
+            vali = list(range(2, 8)) + [2, 3]  # ✅ Fix para Python 3
             operar = '0123456789K0'[11 - (
-                sum([int(digit) * factor for digit, factor in zip(
-                    body[::-1], vali)]) % 11)]
+                sum([int(d) * f for d, f in zip(body[::-1], vali)]) % 11)]
             if operar == vdig:
                 return True
             else:
-                raise UserError(u'El Rut no tiene formato')
+                raise UserError('El RUT no tiene formato válido')
         except IndexError:
-            raise UserError(u'El Rut no tiene formato')
+            raise UserError('El RUT no tiene formato válido')
 
     @api.constrains('identification_id')
     def _rut_unique(self):
-        for r in self:
-            if not r.identification_id:
+        for rec in self:
+            if not rec.identification_id:
                 continue
-            employee = self.env['hr.employee'].search(
-                [
-                    ('identification_id', '=', r.identification_id),
-                    ('id', '!=', r.id),
-                ])
-            if r.identification_id != "55.555.555-5" and employee:
-                raise UserError(u'El Rut debe ser único')
+            duplicate = self.env['hr.employee'].search([
+                ('identification_id', '=', rec.identification_id),
+                ('id', '!=', rec.id)
+            ])
+            if rec.identification_id != "55.555.555-5" and duplicate:
+                raise UserError('El RUT debe ser único')
 
