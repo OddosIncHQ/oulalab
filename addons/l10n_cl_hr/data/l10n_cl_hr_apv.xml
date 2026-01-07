@@ -138,3 +138,9 @@
         </record>
 
         <record id="hr_apv_pentavida" model="hr.apv">
+            <field name="codigo">135</field>
+            <field name="name">PENTA VIDA COMPAÑIA DE SEGUROS DE VIDA S.A.</field>
+        </record>
+
+    </data>
+</odoo>
