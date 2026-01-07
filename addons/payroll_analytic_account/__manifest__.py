@@ -1,46 +1,33 @@
-# -*- encoding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# -*- coding: utf-8 -*-
 {
     'name': 'Payroll Analytic Account',
-    'version': '1.0',
-    'description': """
-Payroll Analytic Account.
-============================
-
-
-    -When enable in an specific Salary Rule it uses the Analytic Account selected in the Employees Contract
-    
-    """,
-    'license': 'AGPL-3',
-    'category': 'Accounting',
+    'version': '19.0.1.0.0',
+    'category': 'Payroll/Accounting',
     'author': 'Konos',
     'website': 'http://konos.cl',
+    'license': 'AGPL-3',
+    'summary': 'Imputación automática de Cuentas Analíticas desde el Contrato en la Nómina',
+    'description': """
+Payroll Analytic Account (Odoo 19)
+==================================
+
+Este módulo permite distribuir los gastos de nómina a Centros de Costo (Cuentas Analíticas).
+
+Características:
+----------------
+* Agrega un campo "Cuenta Analítica" obligatorio en el Contrato del empleado.
+* Agrega una opción en las Reglas Salariales: "Usar Cuenta Analítica del Contrato".
+* Al confirmar la nómina, el asiento contable hereda la cuenta analítica del contrato para las líneas correspondientes.
+    """,
     'depends': [
-        'hr_payroll_account'
+        'hr_payroll_account', # Módulo base de contabilidad de nómina
+        'hr_contract',        # Modificamos la vista del contrato
+        'account',            # Necesario para el modelo de cuentas analíticas
     ],
     'data': [
         'views/hr_payroll_analytic_account_view.xml',
     ],
-   
     'installable': True,
     'auto_install': False,
+    'application': False,
 }
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
