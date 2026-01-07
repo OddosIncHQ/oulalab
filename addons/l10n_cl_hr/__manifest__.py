@@ -47,7 +47,7 @@
         'views/hr_employee.xml',
         'views/hr_payslip_view.xml',
         'views/hr_afp_view.xml',
-        'views/hr_payslip_run_view.xml',
+        #'views/hr_payslip_run_view.xml',
         'views/report_payslip.xml',
         'views/report_hrsalarybymonth.xml',
         'views/hr_salary_books.xml',
