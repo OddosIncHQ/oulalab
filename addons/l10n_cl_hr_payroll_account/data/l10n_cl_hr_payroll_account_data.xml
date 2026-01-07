@@ -2,44 +2,80 @@
 <odoo>
     <data noupdate="1">
 
-        <record id="l10n_cl_hr.hr_rule_44" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '210300'), ('company_id', '=', obj().env.company.id)]"/>
+        <record id="l10n_cl_hr.hr_rule_1" model="hr.salary.rule">
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
         </record>
 
-        <record id="l10n_cl_hr.hr_rule_23" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220102'), ('company_id', '=', obj().env.company.id)]"/>
+        <record id="l10n_cl_hr.hr_rule_6" model="hr.salary.rule">
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
         </record>
 
-        <record id="l10n_cl_hr.hr_rule_25" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220100'), ('company_id', '=', obj().env.company.id)]"/>
+        <record id="l10n_cl_hr.hr_rule_4" model="hr.salary.rule">
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
         </record>
 
-        <record id="l10n_cl_hr.hr_rule_28" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220101'), ('company_id', '=', obj().env.company.id)]"/>
+        <record id="l10n_cl_hr.hr_rule_3" model="hr.salary.rule">
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
+        </record>
+        <record id="l10n_cl_hr.hr_rule_7" model="hr.salary.rule"> <field name="account_debit" search="[('code', '=', '630000')]"/>
+        </record>
+        <record id="l10n_cl_hr.hr_rule_8" model="hr.salary.rule"> <field name="account_debit" search="[('code', '=', '630000')]"/>
         </record>
 
-        <record id="l10n_cl_hr.hr_rule_33" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220103'), ('company_id', '=', obj().env.company.id)]"/>
+        <record id="l10n_cl_hr.hr_rule_13" model="hr.salary.rule">
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
         </record>
-
-        <record id="l10n_cl_hr.hr_rule_34" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220101'), ('company_id', '=', obj().env.company.id)]"/>
-        </record>
-
-        <record id="l10n_cl_hr.hr_rule_36" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220202'), ('company_id', '=', obj().env.company.id)]"/>
-        </record>
-
-        <record id="l10n_cl_hr.hr_rule_45" model="hr.salary.rule">
-            <field name="account_credit" search="[('code', '=', '220102'), ('company_id', '=', obj().env.company.id)]"/>
-        </record>
-
-        <record id="l10n_cl_hr.hr_rule_40" model="hr.salary.rule">
-            <field name="account_debit" search="[('code', '=', '410200'), ('company_id', '=', obj().env.company.id)]"/>
+        <record id="l10n_cl_hr.hr_rule_14" model="hr.salary.rule">
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
         </record>
 
         <record id="l10n_cl_hr.hr_rule_43" model="hr.salary.rule">
-            <field name="account_debit" search="[('code', '=', '410204'), ('company_id', '=', obj().env.company.id)]"/>
+            <field name="account_debit" search="[('code', '=', '630000')]"/>
+        </record>
+
+
+        <record id="l10n_cl_hr.hr_rule_44" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230000')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_18" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230100')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_26" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230100')]"/>
+        </record>
+        
+        <record id="l10n_cl_hr.hr_rule_27" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230100')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_19" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230100')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_36" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '252000')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_23" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230200')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_22" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230200')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_21" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230200')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_45" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '230200')]"/>
+        </record>
+
+        <record id="l10n_cl_hr.hr_rule_38" model="hr.salary.rule">
+            <field name="account_credit" search="[('code', '=', '121000')]"/>
         </record>
 
     </data>
