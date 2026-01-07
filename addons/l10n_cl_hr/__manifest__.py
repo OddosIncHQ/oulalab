@@ -15,7 +15,6 @@
     ],
     'depends': [
         'hr',
-        'hr_contract',
         'hr_payroll',         # Trae hr_contract automáticamente
         'hr_payroll_account', # Contabilidad
         'l10n_cl',            # Localización base
