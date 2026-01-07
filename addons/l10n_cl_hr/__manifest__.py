@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 {
     'name': 'Chilean Payroll & Human Resources',
-    'version': '19.0.1.0.0',  # <--- CAMBIO PARA ODOO 19
+    'version': '19.0.1.0.0',
     'category': 'Human Resources/Payroll',
     'author': 'Konos',
     'website': 'http://konos.cl',
-    'license': 'OEEL-1',  # Odoo Enterprise Edition License (Recomendado si es para Enterprise, sino AGPL-3)
+    'license': 'OEEL-1',
     'summary': 'Localización de Nómina y RRHH para Chile (Enterprise)',
     'contributors': [
         "Nelson Ramirez <info@konos.cl>",
@@ -14,9 +15,9 @@
     ],
     'depends': [
         'hr',
-        'hr_payroll',         # CORRECTO para Odoo Enterprise
-        'hr_payroll_account', # CORRECTO para Odoo Enterprise (Contabilidad)
-        'l10n_cl',            # Localización base chilena (RUT, etc.)
+        'hr_payroll',         # Trae hr_contract automáticamente
+        'hr_payroll_account', # Contabilidad
+        'l10n_cl',            # Localización base
     ],
     'external_dependencies': {
         'python': [
@@ -26,7 +27,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/hr_salary_rule_category.xml',
-        'data/hr_centros_costos.xml',
+        # 'data/hr_centros_costos.xml', # REVISAR: Comentado por seguridad (verificar si existe el archivo)
         'data/l10n_cl_hr_indicadores.xml',
         'data/l10n_cl_hr_isapre.xml',
         'data/l10n_cl_hr_afp.xml',
@@ -47,11 +48,11 @@
         'views/hr_employee.xml',
         'views/hr_payslip_view.xml',
         'views/hr_afp_view.xml',
-        #'views/hr_payslip_run_view.xml',
+        # 'views/hr_payslip_run_view.xml', # COMENTADO: Wizard antiguo eliminado
         'views/report_payslip.xml',
         'views/report_hrsalarybymonth.xml',
         'views/hr_salary_books.xml',
-        'views/hr_holiday_views.xml',
+        # 'views/hr_holiday_views.xml',    # COMENTADO: Riesgo de incompatibilidad hr.holidays vs hr.leave
         'views/wizard_export_csv_previred_view.xml',
     ],
     'demo': [
