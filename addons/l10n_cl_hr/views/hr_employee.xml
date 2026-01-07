@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="view_employee_form_l10n_cl" model="ir.ui.view">
         <field name="name">hr.employee.form.l10n.cl</field>
         <field name="model">hr.employee</field>
@@ -8,7 +7,7 @@
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='department_id']" position="before">
-                <field name="type_id" required="1" placeholder="Tipo de Trabajador (Previred)"/>
+                <field name="type_id" placeholder="Tipo de Trabajador (Previred)" options="{'no_create': True}"/>
             </xpath>
 
             <xpath expr="//div[hasclass('oe_title')]/h1" position="replace">
@@ -46,5 +45,4 @@
 
         </field>
     </record>
-
 </odoo>
