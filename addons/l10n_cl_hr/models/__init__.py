@@ -5,7 +5,6 @@ from . import hr_contract_type
 from . import hr_indicadores_previsionales
 from . import hr_isapre
 from . import hr_payslip_run
-from . import hr_payslip_employees
 from . import hr_salary_rule
 from . import hr_type_employee
 from . import hr_mutual
