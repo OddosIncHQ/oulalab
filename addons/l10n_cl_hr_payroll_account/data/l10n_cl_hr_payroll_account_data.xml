@@ -1,57 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+    <data noupdate="1">
 
-        <!-- Alcance Líquido -->
         <record id="l10n_cl_hr.hr_rule_44" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210501')]"/>
+            <field name="account_credit" search="[('code', '=', '210300'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Mutual -->
+
         <record id="l10n_cl_hr.hr_rule_23" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210405')]"/>
+            <field name="account_credit" search="[('code', '=', '220102'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- AFP x Pagar -->
+
         <record id="l10n_cl_hr.hr_rule_25" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210401')]"/>
+            <field name="account_credit" search="[('code', '=', '220100'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Isapre x Pagar -->
+
         <record id="l10n_cl_hr.hr_rule_28" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210404')]"/>
+            <field name="account_credit" search="[('code', '=', '220101'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Caja de Compensación -->
+
         <record id="l10n_cl_hr.hr_rule_33" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210402')]"/>
+            <field name="account_credit" search="[('code', '=', '220103'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Fonasa x Pagar -->
+
         <record id="l10n_cl_hr.hr_rule_34" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210403')]"/>
+            <field name="account_credit" search="[('code', '=', '220101'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Impuesto Unico -->
+
         <record id="l10n_cl_hr.hr_rule_36" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210703')]"/>
+            <field name="account_credit" search="[('code', '=', '220202'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Cotización ISL -->
+
         <record id="l10n_cl_hr.hr_rule_45" model="hr.salary.rule">
-            <!-- Accounts Payable -->
-            <field name="account_credit" search="[('code', '=', '210405')]"/>
+            <field name="account_credit" search="[('code', '=', '220102'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
 
-
-        <!-- Total Gastos Remuneraciones -->
         <record id="l10n_cl_hr.hr_rule_40" model="hr.salary.rule">
-            <field name="account_debit" search="[('code', '=', '510101')]"/>
+            <field name="account_debit" search="[('code', '=', '410200'), ('company_id', '=', obj().env.company.id)]"/>
         </record>
-        <!-- Total Porte Patronal -->
+
         <record id="l10n_cl_hr.hr_rule_43" model="hr.salary.rule">
-            <field name="account_debit" search="[('code', '=', '510102')]"/>
-        </record>       
+            <field name="account_debit" search="[('code', '=', '410204'), ('company_id', '=', obj().env.company.id)]"/>
+        </record>
 
     </data>
 </odoo>
