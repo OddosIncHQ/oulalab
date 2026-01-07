@@ -14,7 +14,6 @@
     ],
     'depends': [
         'hr',
-        'hr_contract',
         'hr_payroll',         # CORRECTO para Odoo Enterprise
         'hr_payroll_account', # CORRECTO para Odoo Enterprise (Contabilidad)
         'l10n_cl',            # Localización base chilena (RUT, etc.)
