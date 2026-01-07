@@ -44,7 +44,7 @@
         'views/menu_root.xml',
         'views/hr_indicadores_previsionales_view.xml',
         'views/hr_salary_rule_view.xml',
-        'views/hr_contract_view.xml',
+        # 'views/hr_contract_view.xml',
         'views/hr_employee.xml',
         'views/hr_payslip_view.xml',
         'views/hr_afp_view.xml',
