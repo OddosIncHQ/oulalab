@@ -8,7 +8,7 @@ from . import hr_payslip_run
 from . import hr_payslip_employees
 from . import hr_salary_rule
 from . import hr_type_employee
-from . import hr_mutualidad
+from . import hr_mutual
 from . import hr_ccaf
 from . import hr_contract
 from . import hr_seguro_complementario
