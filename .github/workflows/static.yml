@@ -10,28 +10,39 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: webpage/package-lock.json # Indica dónde está el lock
+          cache-dependency-path: webpage/package-lock.json
+
       - name: Install dependencies
         run: npm install
-        working-directory: webpage # Entra a la carpeta para instalar
+        working-directory: webpage
+
       - name: Build
         run: npm run build
-        working-directory: webpage # Entra a la carpeta para compilar
+        working-directory: webpage
+        env:
+          # Aquí conectamos el secreto de GitHub con la variable que espera Vite
+          VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: webpage/dist # La carpeta dist ahora estará dentro de webpage
+          path: webpage/dist
 
   deploy:
     environment:
