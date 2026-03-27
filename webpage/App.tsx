@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
   Menu, 
@@ -235,7 +236,12 @@ const App: React.FC = () => {
             <button onClick={() => scrollToSection('how-it-works')} className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors">{t.nav_works}</button>
             <button onClick={() => scrollToSection('plans')} className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors">{t.nav_plans}</button>
             <button onClick={() => scrollToSection('team')} className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors">{t.nav_team}</button>
-            
+            <Link 
+              to="/about" 
+              className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors"
+            >
+              About
+            </Link>
             <div className="flex items-center space-x-2 ml-4">
               {/* Language Switcher */}
               <div className="flex items-center bg-gray-100/50 rounded-full p-1 border border-black/5">
@@ -278,6 +284,13 @@ const App: React.FC = () => {
           <button onClick={() => scrollToSection('how-it-works')} className="text-3xl font-black uppercase tracking-tighter">{t.nav_works}</button>
           <button onClick={() => scrollToSection('plans')} className="text-3xl font-black uppercase tracking-tighter">{t.nav_plans}</button>
           <button onClick={() => scrollToSection('team')} className="text-3xl font-black uppercase tracking-tighter">{t.nav_team}</button>
+          <Link 
+            to="/about" 
+            className="text-3xl font-black uppercase tracking-tighter"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            About
+          </Link>
           
           <div className="flex flex-col space-y-6 pt-10 border-t w-1/2 items-center">
             <div className="flex space-x-4">
@@ -286,6 +299,7 @@ const App: React.FC = () => {
                   key={l}
                   onClick={() => setLang(l)}
                   className={`w-12 h-12 rounded-full font-black text-xs border-2 transition-all uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}
+                  
                 >
                   {l}
                 </button>
