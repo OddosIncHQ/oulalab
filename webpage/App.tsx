@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -148,7 +147,7 @@ const UI_STRINGS = {
     deliver_title_2: 'Outfit Infinito',
     deliver_desc_2: 'Combinações que batem con quem eu preciso ser para aquela ocasião especial.',
     deliver_title_3: 'Budget Infinito',
-    deliver_desc_3: 'Acesso às melhores marcas sem pensar no preço. Aproveite o luxo hoje.',
+    deliver_desc_3: 'Acesso às mejores marcas sem pensar no preço. Aproveite o luxo hoje.',
     pricing_subtitle: 'Escolha seu estilo',
     pricing_title: 'Como funciona?',
     plans_title: 'Planos de Assinatura',
@@ -165,7 +164,7 @@ const UI_STRINGS = {
     launch_tag2: 'Luxo Sustentável',
     launch_tag3: 'Personal Shopper con IA',
     waitlist_title: 'Entre na lista de espera',
-    waitlist_subtitle: 'Seja a primeira a viver a experiência do closet dos seus sonhos em março.',
+    waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
     waitlist_email: 'E-mail',
     waitlist_phone: 'Telefone',
@@ -193,6 +192,7 @@ const App: React.FC = () => {
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   const BRAND_LOGO_URL = "https://i.imgur.com/4FHPaMb.png";
   const t = UI_STRINGS[lang];
@@ -624,6 +624,9 @@ const App: React.FC = () => {
                 className="space-y-8" 
                 onSubmit={async (e) => {
                   e.preventDefault();
+                  if (isSending) return;
+                  
+                  setIsSending(true);
                   const form = e.currentTarget;
                   
                   // Captura de datos
@@ -646,6 +649,8 @@ const App: React.FC = () => {
                   } catch (error) {
                     console.error("Error de envío:", error);
                     alert("Lo sentimos, hubo un problema técnico. Por favor, intenta más tarde.");
+                  } finally {
+                    setIsSending(false);
                   }
                 }}
               >
@@ -653,7 +658,7 @@ const App: React.FC = () => {
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-4 block">{t.waitlist_name}</label>
                     <input 
-                      name="nombre" // Identificador para el Script
+                      name="nombre"
                       type="text" 
                       className="w-full bg-gray-50 border-b-2 border-transparent focus:border-black rounded-2xl px-8 py-6 font-bold text-lg outline-none transition-all placeholder:text-black/10" 
                       placeholder="Jane Doe" 
@@ -663,7 +668,7 @@ const App: React.FC = () => {
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-4 block">{t.waitlist_email}</label>
                     <input 
-                      name="email" // Identificador para el Script
+                      name="email"
                       type="email" 
                       className="w-full bg-gray-50 border-b-2 border-transparent focus:border-black rounded-2xl px-8 py-6 font-bold text-lg outline-none transition-all placeholder:text-black/10" 
                       placeholder="jane@oulalab.com" 
@@ -673,9 +678,10 @@ const App: React.FC = () => {
                 </div>
                 <button 
                   type="submit" 
-                  className="w-full bg-black text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl text-lg"
+                  disabled={isSending}
+                  className={`w-full bg-black text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] transition-all shadow-2xl text-lg ${isSending ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
                 >
-                  {t.waitlist_button}
+                  {isSending ? "ENVIANDO..." : t.waitlist_button}
                 </button>
               </form>
             </div>
