@@ -156,7 +156,7 @@ const UI_STRINGS = {
     team_description: 'Líderes especialistas em indústria, branding, operações e tecnologia unidos para redefinir o futuro de la moda.',
     pricing_btn: 'Assinar',
     launch_countdown: 'Contagem regressiva iniciada',
-    launch_month: 'MAY',
+    launch_month: 'MAIO',
     launch_year: '2026',
     launch_description: 'O mes em que a Oulalab redefine a forma como você vive a moda. O lançamento oficial está próximo.',
     launch_waitlist: 'Entrar na lista de espera',
@@ -194,7 +194,11 @@ const App: React.FC = () => {
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
-  const BRAND_LOGO_URL = "https://i.imgur.com/4FHPaMb.png";
+  // 1. Configuración de Logos (basado en tus nuevos archivos)
+	const LOGO_DARK = "/Logo_Obispo.png";   // El color berenjena para fondos claros
+	const LOGO_LIGHT = "/Logo_Blanco.png";  // El blanco para el inicio (Hero)
+	const BRAND_LOGO_URL = LOGO_DARK;       // Para el Footer y Modales
+    
   const t = UI_STRINGS[lang];
 
   useEffect(() => {
@@ -226,9 +230,11 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
-              src={BRAND_LOGO_URL} 
-              alt="Oulalab Logo" 
-              className={`object-contain transition-all duration-500 group-hover:scale-105 mix-blend-multiply ${scrolled ? 'h-12' : 'h-16 md:h-24'}`}
+  						// Esto hace que el logo sea BLANCO arriba y OBISPO al bajar
+  						src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
+  						alt="Oulalab Logo" 
+  						// QUITAMOS 'mix-blend-multiply' para que los nuevos logos luzcan perfectos
+  						className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-12' : 'h-16 md:h-24'}`}
             />
           </div>
 
