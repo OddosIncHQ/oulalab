@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { CONTENT, PRICES } from './constants';
 import { TeamMember, Currency } from './types';
+import LogoObispo from './Logo_Obispo.png';
+import LogoBlanco from './Logo_Blanco.png';
+
 
 // --- Types ---
 type Language = 'es' | 'en' | 'pt';
@@ -193,12 +196,10 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-
-  // 1. Configuración de Logos (basado en tus nuevos archivos)
-	const LOGO_DARK = "Logo_Obispo.png";   // El color berenjena para fondos claros
-	const LOGO_LIGHT = "Logo_Blanco.png";  // El blanco para el inicio (Hero)
-	const BRAND_LOGO_URL = LOGO_DARK;       // Para el Footer y Modales
-    
+  const LOGO_DARK = LogoObispo;   
+  const LOGO_LIGHT = LogoBlanco;  
+  const BRAND_LOGO_URL = LOGO_DARK;
+	
   const t = UI_STRINGS[lang];
 
   useEffect(() => {
