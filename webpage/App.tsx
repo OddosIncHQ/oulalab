@@ -620,22 +620,61 @@ const App: React.FC = () => {
                 <p className="text-xl text-gray-500 font-medium leading-relaxed italic">{t.waitlist_subtitle}</p>
               </div>
               
-              <form className="space-y-8" onSubmit={(e) => {
-                e.preventDefault();
-                alert(t.waitlist_success);
-                setIsWaitlistOpen(false);
-              }}>
+              <form 
+                className="space-y-8" 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  
+                  // Captura de datos
+                  const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
+                  const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+
+                  try {
+                    // Envío a tu URL de Google Apps Script
+                    await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
+                      method: "POST",
+                      mode: 'no-cors', 
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ nombre, email })
+                    });
+
+                    // Feedback al usuario
+                    alert(t.waitlist_success);
+                    form.reset();
+                    setIsWaitlistOpen(false);
+                  } catch (error) {
+                    console.error("Error de envío:", error);
+                    alert("Lo sentimos, hubo un problema técnico. Por favor, intenta más tarde.");
+                  }
+                }}
+              >
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-4 block">{t.waitlist_name}</label>
-                    <input type="text" className="w-full bg-gray-50 border-b-2 border-transparent focus:border-black rounded-2xl px-8 py-6 font-bold text-lg outline-none transition-all placeholder:text-black/10" placeholder="Jane Doe" required />
+                    <input 
+                      name="nombre" // Identificador para el Script
+                      type="text" 
+                      className="w-full bg-gray-50 border-b-2 border-transparent focus:border-black rounded-2xl px-8 py-6 font-bold text-lg outline-none transition-all placeholder:text-black/10" 
+                      placeholder="Jane Doe" 
+                      required 
+                    />
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-black/20 mb-4 block">{t.waitlist_email}</label>
-                    <input type="email" className="w-full bg-gray-50 border-b-2 border-transparent focus:border-black rounded-2xl px-8 py-6 font-bold text-lg outline-none transition-all placeholder:text-black/10" placeholder="jane@oulalab.com" required />
+                    <input 
+                      name="email" // Identificador para el Script
+                      type="email" 
+                      className="w-full bg-gray-50 border-b-2 border-transparent focus:border-black rounded-2xl px-8 py-6 font-bold text-lg outline-none transition-all placeholder:text-black/10" 
+                      placeholder="jane@oulalab.com" 
+                      required 
+                    />
                   </div>
                 </div>
-                <button type="submit" className="w-full bg-black text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl text-lg">
+                <button 
+                  type="submit" 
+                  className="w-full bg-black text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl text-lg"
+                >
                   {t.waitlist_button}
                 </button>
               </form>
