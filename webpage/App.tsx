@@ -235,7 +235,7 @@ const App: React.FC = () => {
   						src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
   						alt="Oulalab Logo" 
   						// QUITAMOS 'mix-blend-multiply' para que los nuevos logos luzcan perfectos
-  						className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-12' : 'h-16 md:h-24'}`}
+						className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
             />
           </div>
 
