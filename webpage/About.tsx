@@ -1,8 +1,27 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 const About: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden relative">
+      
+      {/* Botón de Navegación Fijo */}
+      <nav className="absolute top-0 left-0 w-full p-8 z-50">
+        <Link 
+          to="/" 
+          className="inline-flex items-center space-x-3 text-black hover:text-[#DF3265] transition-colors duration-300 group"
+        >
+          <div className="p-2 bg-gray-50 rounded-full group-hover:bg-pink-50 transition-colors">
+            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          </div>
+          <span className="text-xs font-black tracking-[0.2em] uppercase">
+            Volver al inicio
+          </span>
+        </Link>
+      </nav>
+
+      {/* Hero Section */}
       <section className="pt-40 pb-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-5xl">
@@ -22,6 +41,7 @@ const About: React.FC = () => {
         </div>
       </section>
 
+      {/* Pilares Section */}
       <section className="pb-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-8">
@@ -76,6 +96,7 @@ const About: React.FC = () => {
         </div>
       </section>
 
+      {/* Propuesta Section */}
       <section className="py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-2 gap-20 items-center">
@@ -119,6 +140,7 @@ const About: React.FC = () => {
         </div>
       </section>
 
+      {/* Manifesto Section */}
       <section className="py-40 bg-black text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 skew-x-[-20deg] translate-x-1/2"></div>
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
