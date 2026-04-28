@@ -426,9 +426,10 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* NUEVA SECCIÓN AÑADIDA: CÓMO FUNCIONA */}
-      <ComoFunciona />
-      {/* -------------------------------------- */}
+      {/* SECCIÓN CÓMO FUNCIONA */}
+      <div id="how-it-works" className="scroll-mt-20">
+        <ComoFunciona lang={lang} />
+      </div>
 
       {/* Subscription Plans Section */}
       <section id="plans" className="py-32 bg-white scroll-mt-20">
