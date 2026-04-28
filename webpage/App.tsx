@@ -24,6 +24,8 @@ import LogoBlanco from './Logo_Blanco.png';
 
 // Importamos la nueva sección de "Cómo Funciona"
 import ComoFunciona from './components/ComoFunciona';
+import Planes from './components/Planes'; 
+
 
 // --- Types ---
 
