@@ -13,31 +13,33 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      # Soluciona el warning: Forzamos el uso de Node 24 para las acciones internas
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        
+        uses: actions/checkout@v4 # V4 es compatible, pero necesita Node actualizado abajo
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24 # Actualizamos a la versión recomendada para 2026
+          node-version: 24 # Forzamos explícitamente 24 para evitar el conflicto de "forzado"
           cache: 'npm'
           cache-dependency-path: webpage/package-lock.json
-          
+
       - name: Install dependencies
-        run: npm install
+        # Usamos --legacy-peer-deps por si alguna librería de lucide o react aún no se actualiza a Node 24
+        run: npm install --legacy-peer-deps
         working-directory: webpage
-        
+
       - name: Build
-        # Usamos CI=false para evitar que el build falle por warnings de linter o tipos
-        run: CI=false npm run build 
+        # CI=false evita que warnings de TypeScript/Lint rompan el despliegue
+        # NODE_OPTIONS ayuda si hay problemas de memoria con la nueva versión de Node
+        run: |
+          export CI=false
+          npm run build
         working-directory: webpage
         env:
           VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          
+          NODE_OPTIONS: "--max-old-space-size=4096"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
