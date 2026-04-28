@@ -36,11 +36,11 @@ const STRINGS = {
   pt: {
     tag: 'Seu closet infinito a um clique',
     title: 'Como funciona a Oulalab?',
-    desc: 'Redefinimos sua forma de consumir moda combinando tecnologia de ponta com as melhores marcas de alta-costura através de uma assinatura mensal.',
+    desc: 'Redefinimos sua forma de consumir moda combinando tecnologia de ponta com las melhores marcas de alta-costura através de uma assinatura mensal.',
     step1_title: 'Explore uma coleção exclusiva e da temporada',
     step1_desc: 'Esqueça comprar roupas que você só vai usar uma vez. Navegue pelo nosso extenso catálogo e descubra peças exclusivas de marcas como Zadig & Voltaire, Bimba y Lola, Sandro e muitas outras. Tudo o que você sempre quis usar, agora ao seu alcance.',
     step2_title: 'Experimente tudo com Inteligência Artificial',
-    step2_desc: 'Nossa tecnologia transforma seu celular em un provador virtual. Envie uma foto e veja como a peça ficará no seu corpo antes de fazer o pedido. Além disso, nosso recomendador analisa sua colorimetría e medidas para garantir um caimento perfeito.',
+    step2_desc: 'Nossa tecnología transforma seu celular em un provador virtual. Envie uma foto e veja como a peça ficará no seu corpo antes de fazer o pedido. Además, nosso recomendador analisa sua colorimetría y medidas para garantir um caimento perfeito.',
     step3_title: 'Assine, receba e renove seu estilo',
     step3_desc: 'Escolha seu plano, selecione suas roupas e receba na porta de casa. Após 15 dias, você pode fazer "swaps" para renovar seu look, e no final do mês coordenamos a retirada para que seu closet infinito possa recomeçar.'
   }
@@ -82,11 +82,11 @@ const ComoFunciona: React.FC<ComoFuncionaProps> = ({ lang }) => {
               </p>
             </div>
             <div className="mt-10 lg:mt-0 flex justify-center group">
-              {/* Actualización de las clases de tamaño de la imagen */}
               <img 
                 src={imgPaso1} 
                 alt="Catálogo Oulalab" 
-                className="rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                {/* CAMBIO: Se cambió object-top por object-center para mostrar la mitad de la imagen */}
+                className="rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover object-center transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </div>
@@ -94,11 +94,11 @@ const ComoFunciona: React.FC<ComoFuncionaProps> = ({ lang }) => {
           {/* PASO 2 */}
           <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="mt-10 lg:mt-0 flex justify-center group">
-              {/* Actualización de las clases de tamaño de la imagen */}
               <img 
                 src={imgPaso2} 
                 alt="Virtual Try-On Oulalab" 
-                className="rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                {/* CAMBIO: Se cambió object-top por object-center para mostrar la mitad de la imagen */}
+                className="rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover object-center transition-transform duration-500 group-hover:scale-105"
               />
             </div>
             <div className="relative">
@@ -128,10 +128,10 @@ const ComoFunciona: React.FC<ComoFuncionaProps> = ({ lang }) => {
               </p>
             </div>
             <div className="mt-10 lg:mt-0 flex justify-center group">
-              {/* Actualización de las clases de tamaño de la imagen */}
               <img 
                 src={imgPaso3} 
                 alt="Mis Alquileres Oulalab" 
+                {/* Nota: Este paso se mantiene object-top como estaba, ya que no se solicitó cambio */}
                 className="rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
             </div>
