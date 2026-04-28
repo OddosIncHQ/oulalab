@@ -1,9 +1,9 @@
 import React from 'react';
 
 // Importación de TODAS las imágenes (Respetando las extensiones exactas de tus últimos archivos)
-import imgPaso1 from '../src/assets/plp.jpg';
-import imgPaso2 from '../src/assets/pdp1.jpg'; // Nueva: Detalle de producto
-import imgTryOn from '../src/assets/virtual-try-on.jpg'; // Try-On Panorámico
+import imgPaso1 from '../src/assets/plp.png';
+import imgPaso2 from '../src/assets/pdp1.png'; // Nueva: Detalle de producto
+import imgTryOn from '../src/assets/virtual-try-on.png'; // Try-On Panorámico
 import imgPaso4 from '../src/assets/pdp2.png'; // Recomendador IA
 import imgPaso5 from '../src/assets/mis-alquileres-1.png';
 
