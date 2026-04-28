@@ -24,12 +24,16 @@ import { TeamMember, Currency } from './types';
 import LogoObispo from './Logo_Obispo.png';
 import LogoBlanco from './Logo_Blanco.png';
 
+// Importamos la nueva sección de "Cómo Funciona"
+// Asegúrate de haber guardado el archivo ComoFunciona.tsx en una carpeta "components"
+import ComoFunciona from './components/ComoFunciona';
 
 // --- Types ---
 type Language = 'es' | 'en' | 'pt';
 
 // --- Translations ---
 const UI_STRINGS = {
+  // ... (Tus traducciones se mantienen exactamente igual)
   es: {
     nav_works: 'Cómo funciona',
     nav_plans: 'Planes',
@@ -48,7 +52,7 @@ const UI_STRINGS = {
     deliver_title_3: 'Budget Infinito',
     deliver_desc_3: 'Acceso a las mejores marcas sin pensar en las lucas. Disfruta el lujo hoy.',
     pricing_subtitle: 'Elige tu estilo',
-    pricing_title: '¿Cómo funciona?',
+    pricing_title: '¿Por qué Oulalab?',
     plans_title: 'Planes de Suscripción',
     team_subtitle: 'Detrás de la marca',
     team_title: 'El Equipo Oulalab',
@@ -100,7 +104,7 @@ const UI_STRINGS = {
     deliver_title_3: 'Infinite Budget',
     deliver_desc_3: 'Access to the best brands without thinking about money. Enjoy luxury today.',
     pricing_subtitle: 'Choose your style',
-    pricing_title: 'How does it work?',
+    pricing_title: 'Why Oulalab?',
     plans_title: 'Subscription Plans',
     team_subtitle: 'Behind the brand',
     team_title: 'The Oulalab Team',
@@ -152,7 +156,7 @@ const UI_STRINGS = {
     deliver_title_3: 'Budget Infinito',
     deliver_desc_3: 'Acesso às mejores marcas sem pensar no preço. Aproveite o luxo hoje.',
     pricing_subtitle: 'Escolha seu estilo',
-    pricing_title: 'Como funciona?',
+    pricing_title: 'Por que Oulalab?',
     plans_title: 'Planos de Assinatura',
     team_subtitle: 'Por trás da marca',
     team_title: 'A Equipe Oulalab',
@@ -231,10 +235,8 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
-  						// Esto hace que el logo sea BLANCO arriba y OBISPO al bajar
   						src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
   						alt="Oulalab Logo" 
-  						// QUITAMOS 'mix-blend-multiply' para que los nuevos logos luzcan perfectos
 						className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
             />
           </div>
@@ -374,11 +376,12 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Intro Description Section (How it Works) */}
-      <section id="how-it-works" className="py-32 bg-gray-50 scroll-mt-20">
+      {/* Intro Description Section (Value Prop) */}
+      {/* NOTA: Cambié el ID a "value-prop" para que el botón de "Cómo funciona" del header lleve directo a la nueva sección */}
+      <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-24">
-            <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.nav_works}</span>
+            <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">Concepto Oulalab</span>
             <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase">{t.pricing_title}</h2>
           </div>
           
@@ -422,6 +425,10 @@ const App: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* NUEVA SECCIÓN AÑADIDA: CÓMO FUNCIONA */}
+      <ComoFunciona />
+      {/* -------------------------------------- */}
 
       {/* Subscription Plans Section */}
       <section id="plans" className="py-32 bg-white scroll-mt-20">
