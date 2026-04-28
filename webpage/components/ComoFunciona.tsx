@@ -1,9 +1,9 @@
-import React from 'react'; // "import" con i minúscula
+import React from 'react';
 
-// Importación de imágenes desde assets
-import imgPaso1 from '../assets/paso1.png';
-import imgPaso2 from '../assets/paso2.png';
-import imgPaso3 from '../assets/paso3.png'; // Cambiado de .jpg a .png
+// Importación de imágenes con la ruta corregida apuntando a src/assets
+import imgPaso1 from '../src/assets/paso1.png';
+import imgPaso2 from '../src/assets/paso2.png';
+import imgPaso3 from '../src/assets/paso3.png';
 
 const ComoFunciona: React.FC = () => {
   return (
