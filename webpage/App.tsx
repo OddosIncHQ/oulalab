@@ -7,7 +7,6 @@ import {
   ShoppingBag, 
   Clock, 
   RefreshCw, 
-  Sparkles, 
   Star,
   CheckCircle2,
   ChevronDown,
@@ -16,8 +15,7 @@ import {
   Linkedin,
   Rocket,
   Send,
-  Languages,
-  DollarSign
+  Languages
 } from 'lucide-react';
 import { CONTENT, PRICES } from './constants';
 import { TeamMember, Currency } from './types';
@@ -25,8 +23,10 @@ import LogoObispo from './Logo_Obispo.png';
 import LogoBlanco from './Logo_Blanco.png';
 
 // Importamos la nueva sección de "Cómo Funciona"
-// Asegúrate de haber guardado el archivo ComoFunciona.tsx en una carpeta "components"
 import ComoFunciona from './components/ComoFunciona';
+
+// --- Types ---
+
 
 // --- Types ---
 type Language = 'es' | 'en' | 'pt';
