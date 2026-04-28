@@ -1,8 +1,8 @@
 import React from 'react';
 
 // Importación de las nuevas imágenes con nombres optimizados para web
-import imgPaso1 from '../src/assets/plp.jpg';
-import imgPaso2 from '../src/assets/pdp.jpg';
+import imgPaso1 from '../src/assets/plp.png';
+import imgPaso2 from '../src/assets/pdp.png';
 import imgPaso3 from '../src/assets/mis-alquileres-1.png';
 
 const ComoFunciona: React.FC = () => {
