@@ -1,9 +1,9 @@
 import React from 'react';
 
-// Importación de imágenes con la ruta corregida apuntando a src/assets
-import imgPaso1 from '../src/assets/paso1.png';
-import imgPaso2 from '../src/assets/paso2.png';
-import imgPaso3 from '../src/assets/paso3.png';
+// Importación de las nuevas imágenes desde src/assets
+import imgPaso1 from '../src/assets/PLP.jpg';
+import imgPaso2 from '../src/assets/PDP.jpg';
+import imgPaso3 from '../src/assets/MIS ALQUILERES-1.png';
 
 const ComoFunciona: React.FC = () => {
   return (
@@ -12,14 +12,14 @@ const ComoFunciona: React.FC = () => {
         
         {/* Cabecera */}
         <div className="text-center mb-20">
-          <h2 className="text-base font-semibold text-[#E91E63] tracking-wide uppercase">
-            Proceso Simple
+          <h2 className="text-base font-black text-[#DF3265] tracking-widest uppercase">
+            Tu clóset infinito a un click
           </h2>
           <p className="mt-2 text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
             ¿Cómo funciona Oulalab?
           </p>
           <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
-            Automatiza la recolección de feedback y mejora la experiencia de tus clientes en tres pasos sencillos.
+            Redefinimos tu forma de consumir moda combinando tecnología de vanguardia con las mejores marcas de alta costura a través de una suscripción mensual.
           </p>
         </div>
 
@@ -28,43 +28,43 @@ const ComoFunciona: React.FC = () => {
           {/* PASO 1 */}
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-[#E91E63] font-bold text-xl mb-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">
                 1
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Configura tus reglas de envío
+              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">
+                Explora una colección exclusiva y de temporada
               </h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Desde tu panel de administración, conecta tu tienda y define cuándo se enviarán las solicitudes de feedback. Tú tienes el control total.
+              <p className="text-lg text-gray-600 leading-relaxed font-medium">
+                Olvídate de comprar prendas que usarás una sola vez. Navega por nuestro extenso catálogo y descubre piezas exclusivas de marcas como Zadig & Voltaire, Bimba y Lola, Sandro y muchas más. Todo lo que siempre quisiste usar, ahora a tu alcance.
               </p>
             </div>
-            <div className="mt-10 lg:mt-0 flex justify-center">
+            <div className="mt-10 lg:mt-0 flex justify-center group">
               <img 
                 src={imgPaso1} 
-                alt="Configuración Oulalab" 
-                className="rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg"
+                alt="Catálogo Oulalab" 
+                className="rounded-[2rem] shadow-2xl border border-gray-100 w-full max-w-sm transition-transform duration-500 group-hover:scale-105 object-cover"
               />
             </div>
           </div>
 
           {/* PASO 2 */}
           <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-            <div className="mt-10 lg:mt-0 flex justify-center">
+            <div className="mt-10 lg:mt-0 flex justify-center group">
               <img 
                 src={imgPaso2} 
-                alt="Experiencia del Cliente" 
-                className="rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg"
+                alt="Virtual Try-On Oulalab" 
+                className="rounded-[2rem] shadow-2xl border border-gray-100 w-full max-w-sm transition-transform duration-500 group-hover:scale-105 object-cover"
               />
             </div>
             <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-[#E91E63] font-bold text-xl mb-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">
                 2
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Tus clientes evalúan su experiencia
+              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">
+                Pruébatelo todo con Inteligencia Artificial
               </h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Tus clientes reciben un email personalizado y profesional. Pueden calificar su experiencia en segundos, asegurando altas tasas de respuesta.
+              <p className="text-lg text-gray-600 leading-relaxed font-medium">
+                Nuestra tecnología transforma tu celular en un probador virtual. Sube una foto y mira cómo lucirá la prenda en tu cuerpo antes de pedirla. Además, nuestro recomendador analiza tu colorimetría y medidas para asegurar un ajuste perfecto.
               </p>
             </div>
           </div>
@@ -72,21 +72,21 @@ const ComoFunciona: React.FC = () => {
           {/* PASO 3 */}
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-[#E91E63] font-bold text-xl mb-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">
                 3
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Analiza datos y toma mejores decisiones
+              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">
+                Suscríbete, recibe y renueva tu estilo
               </h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Visualiza el sentimiento de tus clientes en tiempo real e identifica puntos críticos de mejora con métricas claras como NPS.
+              <p className="text-lg text-gray-600 leading-relaxed font-medium">
+                Elige tu plan, selecciona tus prendas y recíbelas en la puerta de tu casa. A los 15 días puedes realizar "swaps" para refrescar tu look, y al finalizar el mes coordinamos el retiro para que tu clóset infinito vuelva a comenzar.
               </p>
             </div>
-            <div className="mt-10 lg:mt-0 flex justify-center">
+            <div className="mt-10 lg:mt-0 flex justify-center group">
               <img 
                 src={imgPaso3} 
-                alt="Dashboard Oulalab" 
-                className="rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg"
+                alt="Mis Alquileres Oulalab" 
+                className="rounded-[2rem] shadow-2xl border border-gray-100 w-full max-w-sm transition-transform duration-500 group-hover:scale-105 object-cover"
               />
             </div>
           </div>
