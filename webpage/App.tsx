@@ -433,6 +433,11 @@ const App: React.FC = () => {
         <ComoFunciona lang={lang} />
       </div>
 
+	  {/* SECCIÓN PLANES / MEMBRESÍAS */}
+	  <div id="planes" className="scroll-mt-20">
+      	<Planes />
+	  </div>
+
       {/* Subscription Plans Section */}
       <section id="plans" className="py-32 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
