@@ -3,7 +3,7 @@ import React from 'react';
 // Importación de imágenes desde assets
 import imgPaso1 from '../assets/paso1.png';
 import imgPaso2 from '../assets/paso2.png';
-import imgPaso3 from '../assets/paso3.jpg';
+import imgPaso3 from '../assets/paso3.png';
 
 const ComoFunciona: React.FC = () => {
   return (
