@@ -7,7 +7,7 @@ import imgPaso3 from '../src/assets/paso3.png';
 
 const ComoFunciona: React.FC = () => {
   return (
-    <section id="how-it-works-detail" className="py-24 bg-white overflow-hidden">
+    <section id="how-it-works" className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Cabecera */}
