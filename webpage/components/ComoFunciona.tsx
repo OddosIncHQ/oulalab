@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Importación de las nuevas imágenes con nombres optimizados para web
+// Importación de las nuevas imágenes desde src/assets (Ya corregidas a .png)
 import imgPaso1 from '../src/assets/plp.png';
 import imgPaso2 from '../src/assets/pdp.png';
 import imgPaso3 from '../src/assets/mis-alquileres-1.png';
@@ -39,10 +39,11 @@ const ComoFunciona: React.FC = () => {
               </p>
             </div>
             <div className="mt-10 lg:mt-0 flex justify-center group">
+              {/* Ajuste de clases para forzar formato vertical tipo celular */}
               <img 
                 src={imgPaso1} 
                 alt="Catálogo Oulalab" 
-                className="rounded-[2rem] shadow-2xl border border-gray-100 w-full max-w-sm transition-transform duration-500 group-hover:scale-105 object-cover"
+                className="rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border-[6px] border-gray-100 w-full max-w-[260px] md:max-w-[280px] aspect-[9/16] object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </div>
@@ -53,7 +54,7 @@ const ComoFunciona: React.FC = () => {
               <img 
                 src={imgPaso2} 
                 alt="Virtual Try-On Oulalab" 
-                className="rounded-[2rem] shadow-2xl border border-gray-100 w-full max-w-sm transition-transform duration-500 group-hover:scale-105 object-cover"
+                className="rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border-[6px] border-gray-100 w-full max-w-[260px] md:max-w-[280px] aspect-[9/16] object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
             </div>
             <div className="relative">
@@ -86,7 +87,7 @@ const ComoFunciona: React.FC = () => {
               <img 
                 src={imgPaso3} 
                 alt="Mis Alquileres Oulalab" 
-                className="rounded-[2rem] shadow-2xl border border-gray-100 w-full max-w-sm transition-transform duration-500 group-hover:scale-105 object-cover"
+                className="rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border-[6px] border-gray-100 w-full max-w-[260px] md:max-w-[280px] aspect-[9/16] object-cover object-top transition-transform duration-500 group-hover:scale-105"
               />
             </div>
           </div>
