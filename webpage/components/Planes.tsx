@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Play, X } from 'lucide-react';
 
 // 1. Importación actualizada con la extensión .MOV (o .mov si lo renombraste)
-import videoTutorial from '../src/assets/tutorial-registro.mov'; 
+import videoTutorial from '../src/assets/tutorial-registro.MOV'; 
 
 const Planes: React.FC = () => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
