@@ -1,10 +1,10 @@
 import React from 'react';
 
-// Importación de TODAS las imágenes (Respetando las extensiones exactas de tus últimos archivos)
+// Importación de TODAS las imágenes en formato .png
 import imgPaso1 from '../src/assets/plp.png';
-import imgPaso2 from '../src/assets/pdp1.png'; // Nueva: Detalle de producto
-import imgTryOn from '../src/assets/virtual-try-on.png'; // Try-On Panorámico
-import imgPaso4 from '../src/assets/pdp2.png'; // Recomendador IA
+import imgPaso2 from '../src/assets/pdp1.png';
+import imgTryOn from '../src/assets/virtual-try-on.png';
+import imgPaso4 from '../src/assets/pdp2.png';
 import imgPaso5 from '../src/assets/mis-alquileres-1.png';
 
 interface ComoFuncionaProps {
@@ -103,7 +103,7 @@ const ComoFunciona: React.FC<ComoFuncionaProps> = ({ lang }) => {
             </div>
           </div>
 
-          {/* PASO 2 - PDP Detalle (pdp1.jpg) */}
+          {/* PASO 2 - PDP Detalle */}
           <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="mt-10 lg:mt-0 flex justify-center group">
               <img 
@@ -147,7 +147,7 @@ const ComoFunciona: React.FC<ComoFuncionaProps> = ({ lang }) => {
             </div>
           </div>
 
-          {/* PASO 4 - PDP Recomendador (pdp2.png) */}
+          {/* PASO 4 - PDP Recomendador */}
           <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="mt-10 lg:mt-0 flex justify-center group">
               <img 
