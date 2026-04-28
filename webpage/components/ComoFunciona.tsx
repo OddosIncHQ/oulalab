@@ -1,9 +1,9 @@
 import React from 'react';
 
-// Importación de las nuevas imágenes desde src/assets
-import imgPaso1 from '../src/assets/PLP.jpg';
-import imgPaso2 from '../src/assets/PDP.jpg';
-import imgPaso3 from '../src/assets/MIS ALQUILERES-1.png';
+// Importación de las nuevas imágenes con nombres optimizados para web
+import imgPaso1 from '../src/assets/plp.jpg';
+import imgPaso2 from '../src/assets/pdp.jpg';
+import imgPaso3 from '../src/assets/mis-alquileres-1.png';
 
 const ComoFunciona: React.FC = () => {
   return (
