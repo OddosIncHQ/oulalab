@@ -15,30 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # V4 es compatible, pero necesita Node actualizado abajo
+        uses: actions/checkout@v4
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24 # Forzamos explícitamente 24 para evitar el conflicto de "forzado"
+          node-version: 24  # Sincronizamos con el runner de 2026
           cache: 'npm'
           cache-dependency-path: webpage/package-lock.json
 
       - name: Install dependencies
-        # Usamos --legacy-peer-deps por si alguna librería de lucide o react aún no se actualiza a Node 24
-        run: npm install --legacy-peer-deps
+        # Importante: React 19 y Node 24 a veces requieren resolución estricta
+        run: npm ci || npm install
         working-directory: webpage
 
       - name: Build
-        # CI=false evita que warnings de TypeScript/Lint rompan el despliegue
-        # NODE_OPTIONS ayuda si hay problemas de memoria con la nueva versión de Node
-        run: |
-          export CI=false
-          npm run build
+        # CI=false por si hay algún warning en el CSS o assets de Vite
+        run: npx --node-options="--max-old-space-size=4096" vite build
         working-directory: webpage
         env:
           VITE_GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          NODE_OPTIONS: "--max-old-space-size=4096"
+          CI: false 
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
