@@ -28,18 +28,15 @@ import Planes from './components/Planes';
 
 
 // --- Types ---
-
-
-// --- Types ---
 type Language = 'es' | 'en' | 'pt';
 
 // --- Translations ---
 const UI_STRINGS = {
-  // ... (Tus traducciones se mantienen exactamente igual)
   es: {
     nav_works: 'Cómo funciona',
     nav_plans: 'Planes',
     nav_team: 'Equipo',
+    nav_visit: 'Agenda una Visita al Showroom',
     hero_title: 'Bienvenido al futuro de la moda.',
     hero_cta: 'UNIRSE A LA LISTA DE ESPERA',
     hero_description: 'La primera Fashion Technology Company en Chile. Redefiniendo cómo vivimos el estilo.',
@@ -92,6 +89,7 @@ const UI_STRINGS = {
     nav_works: 'How it works',
     nav_plans: 'Plans',
     nav_team: 'Team',
+    nav_visit: 'Schedule a Showroom Visit',
     hero_title: 'Welcome to the future of fashion.',
     hero_cta: 'JOIN THE WAITLIST',
     hero_description: 'The first Fashion Technology Company in Chile. Redefining how we experience style.',
@@ -144,6 +142,7 @@ const UI_STRINGS = {
     nav_works: 'Como funciona',
     nav_plans: 'Planos',
     nav_team: 'Equipe',
+    nav_visit: 'Agende uma Visita ao Showroom',
     hero_title: 'Bem-vindo ao futuro da moda.',
     hero_cta: 'ENTRAR NA LISTA DE ESPERA',
     hero_description: 'A primeira Fashion Technology Company no Chile. Redefinindo como vivemos o estilo.',
@@ -205,7 +204,7 @@ const App: React.FC = () => {
   const LOGO_DARK = LogoObispo;   
   const LOGO_LIGHT = LogoBlanco;  
   const BRAND_LOGO_URL = LOGO_DARK;
-	
+    
   const t = UI_STRINGS[lang];
 
   useEffect(() => {
@@ -237,9 +236,9 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
-  						src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
-  						alt="Oulalab Logo" 
-						className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
+              src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
+              alt="Oulalab Logo" 
+              className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
             />
           </div>
 
@@ -247,6 +246,17 @@ const App: React.FC = () => {
             <button onClick={() => scrollToSection('how-it-works')} className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors">{t.nav_works}</button>
             <button onClick={() => scrollToSection('plans')} className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors">{t.nav_plans}</button>
             <button onClick={() => scrollToSection('team')} className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors">{t.nav_team}</button>
+            
+            {/* Nuevo Enlace Showroom (Desktop) */}
+            <a 
+              href="https://oulalab.odoo.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-sm font-bold uppercase tracking-widest text-[#DF3265] hover:opacity-70 transition-colors"
+            >
+              {t.nav_visit}
+            </a>
+
             <Link 
               to="/about" 
               className="text-sm font-bold uppercase tracking-widest hover:text-black/60 transition-colors"
@@ -295,6 +305,18 @@ const App: React.FC = () => {
           <button onClick={() => scrollToSection('how-it-works')} className="text-3xl font-black uppercase tracking-tighter">{t.nav_works}</button>
           <button onClick={() => scrollToSection('plans')} className="text-3xl font-black uppercase tracking-tighter">{t.nav_plans}</button>
           <button onClick={() => scrollToSection('team')} className="text-3xl font-black uppercase tracking-tighter">{t.nav_team}</button>
+          
+          {/* Nuevo Enlace Showroom (Mobile) */}
+          <a 
+            href="https://oulalab.odoo.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-3xl font-black uppercase tracking-tighter text-[#DF3265]"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t.nav_visit}
+          </a>
+
           <Link 
             to="/about" 
             className="text-3xl font-black uppercase tracking-tighter"
@@ -310,7 +332,6 @@ const App: React.FC = () => {
                   key={l}
                   onClick={() => setLang(l)}
                   className={`w-12 h-12 rounded-full font-black text-xs border-2 transition-all uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}
-                  
                 >
                   {l}
                 </button>
@@ -379,7 +400,6 @@ const App: React.FC = () => {
       </section>
 
       {/* Intro Description Section (Value Prop) */}
-      {/* NOTA: Cambié el ID a "value-prop" para que el botón de "Cómo funciona" del header lleve directo a la nueva sección */}
       <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-24">
@@ -433,10 +453,10 @@ const App: React.FC = () => {
         <ComoFunciona lang={lang} />
       </div>
 
-	  {/* SECCIÓN PLANES / MEMBRESÍAS */}
-	  <div id="planes" className="scroll-mt-20">
-      	<Planes />
-	  </div>
+      {/* SECCIÓN PLANES / MEMBRESÍAS */}
+      <div id="planes" className="scroll-mt-20">
+        <Planes />
+      </div>
 
       {/* Subscription Plans Section */}
       <section id="plans" className="py-32 bg-white scroll-mt-20">
@@ -592,6 +612,19 @@ const App: React.FC = () => {
               <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                 <li><button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:opacity-40 transition-opacity">{t.footer_home}</button></li>
                 <li><button onClick={() => scrollToSection('how-it-works')} className="hover:opacity-40 transition-opacity">{t.nav_works}</button></li>
+                
+                {/* Enlace Showroom (Footer) */}
+                <li>
+                  <a 
+                    href="https://oulalab.odoo.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-[#DF3265] hover:opacity-70 transition-opacity"
+                  >
+                    {t.nav_visit}
+                  </a>
+                </li>
+
                 <li><button onClick={() => scrollToSection('plans')} className="hover:opacity-40 transition-opacity">{t.footer_plans}</button></li>
                 <li><button onClick={() => scrollToSection('team')} className="hover:opacity-40 transition-opacity">{t.footer_team}</button></li>
               </ul>
