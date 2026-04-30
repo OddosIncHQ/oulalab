@@ -249,7 +249,7 @@ const App: React.FC = () => {
             
             {/* Nuevo Enlace Showroom (Desktop) */}
             <a 
-              href="https://oulalab.odoo.com" 
+              href="https://oulalab.odoo.com/agenda-una-visita" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-sm font-bold uppercase tracking-widest text-[#DF3265] hover:opacity-70 transition-colors"
