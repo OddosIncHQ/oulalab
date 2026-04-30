@@ -616,7 +616,7 @@ const App: React.FC = () => {
                 {/* Enlace Showroom (Footer) */}
                 <li>
                   <a 
-                    href="https://oulalab.odoo.com" 
+                    href="https://oulalab.odoo.com/agenda-una-visita" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="text-[#DF3265] hover:opacity-70 transition-opacity"
