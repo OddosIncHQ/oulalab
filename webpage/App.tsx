@@ -308,7 +308,7 @@ const App: React.FC = () => {
           
           {/* Nuevo Enlace Showroom (Mobile) */}
           <a 
-            href="https://oulalab.odoo.com" 
+            href="https://oulalab.odoo.com/agenda-una-visita/" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-3xl font-black uppercase tracking-tighter text-[#DF3265]"
