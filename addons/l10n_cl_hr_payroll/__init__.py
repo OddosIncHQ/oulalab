@@ -1,28 +1,9 @@
-# -*- encoding: utf-8 -*-
-##############################################################################
-#
-#    Odoo, Open Source Management Solution Chilean Payroll
-#
-#    Copyright (c) 2015 Blanco Martin y Asociados - Nelson Ramírez Sánchez
-#    Daniel Blanco -
-#    http://blancomartin.cl
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-from . import hr_payroll
-from . import report
+# -*- coding: utf-8 -*-
+
+# Importamos las subcarpetas que contienen lógica Python
+from . import models
 from . import wizard
-from . import model
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from . import report
+
+# Nota: Odoo 19 ya no requiere que las vistas (XML) se importen aquí, 
+# ya que van declaradas únicamente en el __manifest__.py
