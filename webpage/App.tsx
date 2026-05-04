@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Usamos BrowserRouter para tener URLs limpias (ej. oulalab.com/care)
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
   Menu, 
@@ -26,7 +25,7 @@ import LogoBlanco from './Logo_Blanco.png';
 // Componentes modulares
 import ComoFunciona from './components/ComoFunciona';
 import Planes from './components/Planes'; 
-import Care from './components/Care'; // Página de cuidados
+import Care from './components/Care'; // Componente de la Guía de Cuidados
 
 // Videos para las secciones internas (.mp4)
 import vidValue from './src/assets/vid-2.mp4';
@@ -34,12 +33,10 @@ import vidLaunch from './src/assets/vid-3.mp4';
 
 type Language = 'es' | 'en' | 'pt';
 
-// Helper para resetear el scroll al cambiar de ruta
+// Helper para resetear el scroll al cambiar de página
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 };
 
@@ -196,7 +193,7 @@ const UI_STRINGS = {
     waitlist_success: 'Você está na lista!',
     waitlist_success_desc: 'Entraremos em contato em março con acesso antecipado exclusivo.',
     waitlist_close: 'Fechar',
-    footer_tagline: 'Empoderando mulheres ao redefinir a moda como uma fonte de confianza. A primera Fashion Technology Company do Chile.',
+    footer_tagline: 'Empoderando mulheres ao redefinir a moda como uma fonte de confiança. A primera Fashion Technology Company do Chile.',
     footer_nav: 'Navegação',
     footer_home: 'Início',
     footer_plans: 'Planos de Assinatura',
@@ -208,9 +205,7 @@ const UI_STRINGS = {
   }
 };
 
-// --- COMPONENTE PRINCIPAL (INTERNO AL ROUTER) ---
-// Todo el uso de useLocation y useNavigate DEBE estar dentro de este componente
-const MainApp: React.FC = () => {
+const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('es');
   const [currency, setCurrency] = useState<Currency>('CLP');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -224,6 +219,8 @@ const MainApp: React.FC = () => {
   const BRAND_LOGO_URL = scrolled ? LOGO_DARK : LOGO_LIGHT;
     
   const t = UI_STRINGS[lang];
+
+  // Hooks de navegación extraídos de react-router-dom
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -235,7 +232,8 @@ const MainApp: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleNav = (id: string) => {
+  // Lógica de navegación inteligente (si estamos en /care, nos devuelve a / antes de hacer scroll)
+  const scrollToSection = (id: string) => {
     setIsMenuOpen(false);
     if (pathname !== '/') {
       navigate('/');
@@ -259,9 +257,10 @@ const MainApp: React.FC = () => {
     }
   };
 
-  // Esta variable contiene toda la estructura de la página de inicio (Landing)
+  // Guardamos todo el contenido original del Landing en una variable para no causar re-renders nocivos
   const homeContent = (
     <>
+      {/* Hero Section */}
       <section className="relative h-screen flex items-center overflow-hidden pt-20">
         <div className="absolute inset-0 z-0">
           <img 
@@ -282,10 +281,7 @@ const MainApp: React.FC = () => {
               {t.hero_description}
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
-              <button 
-                onClick={() => setIsWaitlistOpen(true)}
-                className="group relative inline-flex items-center justify-center px-10 py-5 bg-[#DF3265] text-white font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all duration-300 shadow-2xl"
-              >
+              <button onClick={() => setIsWaitlistOpen(true)} className="group relative inline-flex items-center justify-center px-10 py-5 bg-[#DF3265] text-white font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all duration-300 shadow-2xl">
                 <span className="relative z-10 flex items-center text-center">
                   {t.hero_cta} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
                 </span>
@@ -293,11 +289,12 @@ const MainApp: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" onClick={() => handleNav('value-prop')}>
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" onClick={() => scrollToSection('value-prop')}>
           <ChevronDown className="text-white w-10 h-10 opacity-70" />
         </div>
       </section>
 
+      {/* Value Prop */}
       <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-24">
@@ -335,6 +332,7 @@ const MainApp: React.FC = () => {
         </div>
       </section>
 
+      {/* Componentes Originales */}
       <div id="how-it-works" className="scroll-mt-20">
         <ComoFunciona lang={lang} />
       </div>
@@ -343,7 +341,7 @@ const MainApp: React.FC = () => {
         <Planes />
       </div>
 
-      {/* --- SECCIÓN ORIGINAL DE PLANES DOBLE --- */}
+      {/* Sección Subscription Plans Original */}
       <section id="plans" className="py-32 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.pricing_subtitle}</span>
@@ -385,6 +383,7 @@ const MainApp: React.FC = () => {
         </div>
       </section>
 
+      {/* Team */}
       <section id="team" className="py-32 bg-gray-50 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-3xl mb-20">
@@ -429,6 +428,7 @@ const MainApp: React.FC = () => {
         </div>
       </section>
 
+      {/* Launch */}
       <section className="py-40 bg-black text-white relative overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
@@ -443,13 +443,8 @@ const MainApp: React.FC = () => {
           <h2 className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[14rem] font-black italic tracking-tighter uppercase mb-10 leading-[0.8] text-white">
             {t.launch_month} <span className="text-white/10">{t.launch_year}</span>
           </h2>
-          <p className="text-2xl md:text-3xl text-gray-200 leading-relaxed mb-16 max-w-3xl mx-auto font-medium">
-            {t.launch_description}
-          </p>
-          <button 
-            onClick={() => setIsWaitlistOpen(true)}
-            className="inline-flex items-center px-16 py-8 bg-[#DF3265] text-white font-black uppercase tracking-tighter text-xl hover:scale-110 transition-all shadow-[0_0_50px_rgba(223,50,101,0.4)]"
-          >
+          <p className="text-2xl md:text-3xl text-gray-200 leading-relaxed mb-16 max-w-3xl mx-auto font-medium">{t.launch_description}</p>
+          <button onClick={() => setIsWaitlistOpen(true)} className="inline-flex items-center px-16 py-8 bg-[#DF3265] text-white font-black uppercase tracking-tighter text-xl hover:scale-110 transition-all shadow-[0_0_50px_rgba(223,50,101,0.4)]">
             {t.launch_waitlist} <Send className="ml-4 w-6 h-6" />
           </button>
         </div>
@@ -459,20 +454,28 @@ const MainApp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
+      <ScrollToTop />
       
+      {/* --- Navegación Principal --- */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center group cursor-pointer" onClick={() => { navigate('/'); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100); }}>
-            <img src={BRAND_LOGO_URL} alt="Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} />
-          </div>
+          <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img 
+              src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
+              alt="Oulalab Logo" 
+              className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
+            />
+          </Link>
 
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
-            <button onClick={() => handleNav('how-it-works')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_works}</button>
-            <button onClick={() => handleNav('planes')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_plans}</button>
-            <button onClick={() => handleNav('team')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_team}</button>
+            <button onClick={() => scrollToSection('how-it-works')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_works}</button>
+            <button onClick={() => scrollToSection('planes')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_plans}</button>
+            <button onClick={() => scrollToSection('team')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_team}</button>
             
-            <Link to="/care" className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_care}</Link>
-            
+            <Link to="/care" className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>
+              {t.nav_care}
+            </Link>
+
             <a 
               href="https://oulalab.odoo.com/agenda-una-visita/" 
               target="_blank" 
@@ -482,17 +485,23 @@ const MainApp: React.FC = () => {
               {t.nav_visit}
             </a>
 
-            <Link to="/about" className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>About</Link>
-            
+            <Link to="/about" className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>
+              About
+            </Link>
+
             <div className="flex items-center space-x-2 ml-4">
               <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
                 {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                  <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>
+                  <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>
+                    {l}
+                  </button>
                 ))}
               </div>
               <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
                 {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                  <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{c}</button>
+                  <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>
+                    {c}
+                  </button>
                 ))}
               </div>
             </div>
@@ -504,28 +513,41 @@ const MainApp: React.FC = () => {
         </div>
       </nav>
 
-      {/* MOBILE MENU */}
+      {/* --- Menú Móvil --- */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
           <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
-          <button onClick={() => handleNav('how-it-works')} className="text-3xl font-black uppercase text-center w-full">{t.nav_works}</button>
-          <button onClick={() => handleNav('planes')} className="text-3xl font-black uppercase text-center w-full">{t.nav_plans}</button>
-          <button onClick={() => handleNav('team')} className="text-3xl font-black uppercase text-center w-full">{t.nav_team}</button>
+          <button onClick={() => scrollToSection('how-it-works')} className="text-3xl font-black uppercase text-center w-full">{t.nav_works}</button>
+          <button onClick={() => scrollToSection('planes')} className="text-3xl font-black uppercase text-center w-full">{t.nav_plans}</button>
+          <button onClick={() => scrollToSection('team')} className="text-3xl font-black uppercase text-center w-full">{t.nav_team}</button>
+          
           <Link to="/care" onClick={() => setIsMenuOpen(false)} className="text-3xl font-black uppercase text-center w-full">{t.nav_care}</Link>
-          <a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-3xl font-black uppercase text-[#DF3265] text-center w-full leading-tight px-6" onClick={() => setIsMenuOpen(false)}>
+
+          <a 
+            href="https://oulalab.odoo.com/agenda-una-visita/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-3xl font-black uppercase text-[#DF3265] text-center w-full leading-tight"
+            onClick={() => setIsMenuOpen(false)}
+          >
             {t.nav_visit}
           </a>
-          <Link to="/about" className="text-3xl font-black uppercase text-center w-full" onClick={() => setIsMenuOpen(false)}>About</Link>
+
+          <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-3xl font-black uppercase text-center w-full">About</Link>
           
           <div className="flex flex-col space-y-6 pt-10 border-t w-1/2 items-center">
             <div className="flex space-x-4">
               {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 transition-all uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>{l}</button>
+                <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 transition-all uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>
+                  {l}
+                </button>
               ))}
             </div>
             <div className="flex space-x-4">
               {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 transition-all uppercase ${currency === c ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>{c}</button>
+                <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 transition-all uppercase ${currency === c ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>
+                  {c}
+                </button>
               ))}
             </div>
           </div>
@@ -533,18 +555,18 @@ const MainApp: React.FC = () => {
         </div>
       )}
 
-      {/* RUTAS PRINCIPALES */}
+      {/* --- Enrutamiento (Contenido Dinámico) --- */}
       <Routes>
         <Route path="/" element={homeContent} />
         <Route path="/care" element={<Care />} />
       </Routes>
 
-      {/* FOOTER */}
+      {/* --- Footer Completo --- */}
       <footer className="py-32 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
             <div className="col-span-1 md:col-span-2">
-              <Link to="/" onClick={() => { navigate('/'); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100); }}>
+              <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <img src={LogoObispo} alt="Oulalab Logo" className="h-16 mb-12" />
               </Link>
               <p className="text-gray-500 font-bold text-xl leading-relaxed max-w-md italic opacity-80">{t.footer_tagline}</p>
@@ -554,13 +576,11 @@ const MainApp: React.FC = () => {
               <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
               <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                 <li><Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
-                <li><button onClick={() => handleNav('how-it-works')} className="hover:text-[#DF3265] transition-colors uppercase">{t.nav_works}</button></li>
+                <li><button onClick={() => scrollToSection('how-it-works')} className="hover:text-[#DF3265] transition-colors">{t.nav_works}</button></li>
                 <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
-                <li>
-                  <a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265] hover:opacity-70 transition-opacity">
-                    {t.nav_visit}
-                  </a>
-                </li>
+                <li><a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265] hover:opacity-70 transition-opacity">{t.nav_visit}</a></li>
+                <li><button onClick={() => scrollToSection('planes')} className="hover:text-[#DF3265] transition-colors">{t.footer_plans}</button></li>
+                <li><button onClick={() => scrollToSection('team')} className="hover:text-[#DF3265] transition-colors">{t.footer_team}</button></li>
               </ul>
             </div>
             
@@ -587,7 +607,7 @@ const MainApp: React.FC = () => {
         </div>
       </footer>
 
-      {/* WAITLIST MODAL */}
+      {/* --- Waitlist Modal --- */}
       {isWaitlistOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
@@ -637,13 +657,4 @@ const MainApp: React.FC = () => {
   );
 };
 
-// --- EL ENVOLTORIO PRINCIPAL QUE EVITA EL ERROR DE RUTAS ---
-const AppWrapper = () => {
-  return (
-    <Router>
-      <MainApp />
-    </Router>
-  );
-};
-
-export default AppWrapper;
+export default App;
