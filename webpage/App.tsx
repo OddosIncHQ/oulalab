@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Usamos HashRouter para que las rutas funcionen perfecto en GitHub Pages (evita el error 404)
+// Cambiamos a HashRouter para compatibilidad total con GitHub Pages y evitar el fondo vacío
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -26,15 +26,16 @@ import LogoBlanco from './Logo_Blanco.png';
 // Componentes modulares
 import ComoFunciona from './components/ComoFunciona';
 import Planes from './components/Planes'; 
-import Care from './components/Care'; // <--- REFERENCIA A CARE UBICADO EN webpage/components/Care.tsx
+import Care from './components/Care'; // Componente ubicado en webpage/components/Care.tsx
 
 // Videos para las secciones internas (.mp4)
 import vidValue from './src/assets/vid-2.mp4';
 import vidLaunch from './src/assets/vid-3.mp4';
 
+// --- Types ---
 type Language = 'es' | 'en' | 'pt';
 
-// Helper para resetear el scroll al cambiar de página
+// Helper para resetear el scroll al cambiar de página o ruta
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -43,6 +44,7 @@ const ScrollToTop = () => {
   return null;
 };
 
+// --- Diccionarios de Traducción Completos ---
 const UI_STRINGS = {
   es: {
     nav_works: 'Cómo funciona',
@@ -166,7 +168,7 @@ const UI_STRINGS = {
     intro_title_2: 'assinar é Oulalab.',
     intro_description: 'Oulalab busca mudar o modelo de aquisição de roupas por um modelo de assinatura mensal, con taxa fixa, que permite acessar qualquer marca e modelo de peça.',
     deliver_title_1: 'Closet Infinito',
-    deliver_desc_1: 'Ter milhares de opciones para me sentir única, a um só clique.',
+    deliver_desc_1: 'Ter milhares de opções para me sentir única, a um só clique.',
     deliver_title_2: 'Outfit Infinito',
     deliver_desc_2: 'Combinações que batem con quem eu preciso ser para aquela ocasião especial.',
     deliver_title_3: 'Budget Infinito',
@@ -176,7 +178,7 @@ const UI_STRINGS = {
     plans_title: 'Planos de Assinatura',
     team_subtitle: 'Por trás da marca',
     team_title: 'A Equipe Oulalab',
-    team_description: 'Líderes especialistas em indústria, branding, operaciones e tecnología unidos para redefinir o futuro de la moda.',
+    team_description: 'Líderes especialistas em industria, branding, operaciones e tecnología unidos para redefinir o futuro de la moda.',
     pricing_btn: 'Assinar',
     launch_countdown: 'Contagem regressiva iniciada',
     launch_month: 'MAIO',
@@ -187,7 +189,7 @@ const UI_STRINGS = {
     launch_tag2: 'Luxo Sustentável',
     launch_tag3: 'Personal Shopper con IA',
     waitlist_title: 'Entre na lista de espera',
-    waitlist_subtitle: 'Seja a primeira a viver a experiencia del closet de los seus sonhos em março.',
+    waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
     waitlist_email: 'E-mail',
     waitlist_phone: 'Telefone',
@@ -216,12 +218,11 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  
+
+  const t = UI_STRINGS[lang];
   const LOGO_DARK = LogoObispo;   
   const LOGO_LIGHT = LogoBlanco;  
-  const BRAND_LOGO_URL = LOGO_DARK;
-    
-  const t = UI_STRINGS[lang];
+  const BRAND_LOGO_URL = scrolled ? LOGO_DARK : LOGO_LIGHT;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -231,7 +232,7 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- NAVEGACIÓN COMPARTIDA REESTABLECIDA ---
+  // --- NAVEGACIÓN COMPARTIDA (DENTRO DEL COMPONENTE APP) ---
   const NavLinks = ({ isMobile = false }) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
@@ -240,16 +241,14 @@ const App: React.FC = () => {
       setIsMenuOpen(false);
       if (pathname !== '/') {
         navigate('/');
+        // Tiempo de espera para asegurar que la página de inicio cargue antes de scrollear
         setTimeout(() => {
           const element = document.getElementById(id);
           if (element) {
             const offset = 80;
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - offset;
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: 'smooth'
-            });
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
           }
         }, 150);
       } else {
@@ -258,10 +257,7 @@ const App: React.FC = () => {
           const offset = 80;
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
         }
       }
     };
@@ -275,10 +271,7 @@ const App: React.FC = () => {
         <button onClick={() => handleNav('how-it-works')} className={linkBaseClass}>{t.nav_works}</button>
         <button onClick={() => handleNav('planes')} className={linkBaseClass}>{t.nav_plans}</button>
         <button onClick={() => handleNav('team')} className={linkBaseClass}>{t.nav_team}</button>
-        
-        {/* Link a Care integrado en la navegación */}
         <Link to="/care" onClick={() => setIsMenuOpen(false)} className={linkBaseClass}>{t.nav_care}</Link>
-
         <a 
           href="https://oulalab.odoo.com/agenda-una-visita/" 
           target="_blank" 
@@ -289,7 +282,6 @@ const App: React.FC = () => {
         >
           {t.nav_visit}
         </a>
-
         {!isMobile && (
           <Link 
             to="/about" 
@@ -302,24 +294,11 @@ const App: React.FC = () => {
     );
   };
 
-  // --- COMPONENTE DE LA PÁGINA DE INICIO ---
+  // --- COMPONENTE DE LA PÁGINA DE INICIO (HOME) ---
   const HomePage = () => {
-    const scrollToSection = (id: string) => {
-      const element = document.getElementById(id);
-      if (element) {
-        const offset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
-    };
-
     return (
       <>
-        {/* Main Hero Section */}
+        {/* --- Hero Section --- */}
         <section className="relative h-screen flex items-center overflow-hidden pt-20">
           <div className="absolute inset-0 z-0">
             <img 
@@ -336,11 +315,9 @@ const App: React.FC = () => {
               <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] tracking-tighter mb-8 font-black uppercase drop-shadow-xl">
                  {t.hero_title}
               </h1>
-              
               <p className="text-xl md:text-2xl text-gray-100 mb-12 leading-relaxed max-w-xl font-medium drop-shadow-md">
                 {t.hero_description}
               </p>
-              
               <div className="flex flex-col sm:flex-row gap-6">
                 <button 
                   onClick={() => setIsWaitlistOpen(true)}
@@ -353,13 +330,18 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" onClick={() => scrollToSection('value-prop')}>
+          <div 
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" 
+            onClick={() => {
+              const el = document.getElementById('value-prop');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
             <ChevronDown className="text-white w-10 h-10 opacity-70" />
           </div>
         </section>
 
-        {/* Intro Description Section (Value Prop) */}
+        {/* --- Value Prop Section --- */}
         <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-24">
@@ -381,15 +363,11 @@ const App: React.FC = () => {
                   {t.intro_title_1} <span className="italic opacity-20">{t.intro_normal},</span><br />
                   {t.intro_title_2}
                 </h3>
-                <p className="text-xl text-gray-600 leading-relaxed mb-12">
-                  {t.intro_description}
-                </p>
+                <p className="text-xl text-gray-600 leading-relaxed mb-12">{t.intro_description}</p>
                 <div className="grid grid-cols-1 gap-8">
                   {[{ icon: ShoppingBag, title: t.deliver_title_1, desc: t.deliver_desc_1 }, { icon: RefreshCw, title: t.deliver_title_2, desc: t.deliver_desc_2 }, { icon: Clock, title: t.deliver_title_3, desc: t.deliver_desc_3 }].map((item, idx) => (
                     <div key={idx} className="flex items-start space-x-6 p-8 bg-white border border-gray-100 rounded-3xl hover:shadow-2xl transition-all duration-500">
-                      <div className="p-4 bg-gray-50 rounded-2xl text-[#DF3265]">
-                        <item.icon className="w-8 h-8" />
-                      </div>
+                      <div className="p-4 bg-gray-50 rounded-2xl text-[#DF3265]"><item.icon className="w-8 h-8" /></div>
                       <div>
                         <h4 className="text-lg font-black uppercase tracking-tighter mb-2">{item.title}</h4>
                         <p className="text-gray-500 text-base leading-relaxed">{item.desc}</p>
@@ -402,12 +380,12 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* SECCIÓN CÓMO FUNCIONA */}
+        {/* --- Cómo Funciona --- */}
         <div id="how-it-works" className="scroll-mt-20">
           <ComoFunciona lang={lang} />
         </div>
 
-        {/* SECCIÓN PLANES / MEMBRESÍAS DUPLICADA SEGÚN ORIGINAL */}
+        {/* --- Sección de Planes (Doble estructura original) --- */}
         <div id="planes" className="scroll-mt-20">
           <Planes />
         </div>
@@ -427,9 +405,7 @@ const App: React.FC = () => {
                         OULALAB CHOICE
                       </div>
                     )}
-                    
                     <h3 className="text-3xl md:text-2xl lg:text-4xl font-black uppercase tracking-tighter mb-4 text-center">{plan.name}</h3>
-                    
                     <div className="flex flex-col items-center justify-center mb-10 text-center">
                       <span className="text-4xl sm:text-5xl md:text-2xl lg:text-4xl xl:text-7xl font-black tracking-tighter leading-none">{price}</span>
                       <div className="mt-2 flex items-center justify-center space-x-2 text-gray-400">
@@ -437,7 +413,6 @@ const App: React.FC = () => {
                         <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
                       </div>
                     </div>
-
                     <div className="space-y-4 flex-grow text-left">
                       {plan.features.map((feature, i) => (
                         <div key={i} className="flex items-start space-x-3 text-sm font-bold">
@@ -457,7 +432,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Founders / Team Section */}
+        {/* --- Team Section --- */}
         <section id="team" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="max-w-3xl mb-20">
@@ -465,7 +440,6 @@ const App: React.FC = () => {
               <h2 className="text-6xl md:text-8xl font-black tracking-tighter uppercase mb-8 leading-none">{t.team_title}</h2>
               <p className="text-2xl text-gray-500 font-medium italic border-l-4 border-[#DF3265] pl-8">{t.team_description}</p>
             </div>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
               {CONTENT[lang].team.map((member: TeamMember, idx: number) => {
                 const isExpanded = expandedTeamMember === member.name;
@@ -477,7 +451,7 @@ const App: React.FC = () => {
                         <div className="absolute -bottom-3 -right-3 bg-[#DF3265] text-white p-3 rounded-2xl shadow-xl"><Star size={20} fill="white" /></div>
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black uppercase mb-1">{member.name}</h3>
+                        <h3 className="text-2xl font-black uppercase tracking-tighter mb-1">{member.name}</h3>
                         <p className="text-black/30 font-black text-xs tracking-widest uppercase">{member.role}</p>
                       </div>
                     </div>
@@ -492,8 +466,8 @@ const App: React.FC = () => {
                     <div className="pt-8 border-t border-gray-100 flex items-center justify-between">
                       <p className="italic font-black text-black/70 text-sm leading-tight max-w-[70%]">"{member.quote}"</p>
                       <div className="flex space-x-4">
-                        <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Mail size={20} /></a>
-                        <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Linkedin size={20} /></a>
+                        <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all"><Mail size={20} /></a>
+                        <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all"><Linkedin size={20} /></a>
                       </div>
                     </div>
                   </div>
@@ -503,7 +477,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Launch Countdown Section */}
+        {/* --- Launch Section --- */}
         <section className="py-40 bg-black text-white relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
@@ -533,83 +507,49 @@ const App: React.FC = () => {
       <ScrollToTop />
       <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
         
-        {/* Navigation Bar */}
+        {/* --- Barra de Navegación --- */}
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <Link 
-              to="/" 
-              className="flex items-center group cursor-pointer"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            >
-              <img 
-                src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
-                alt="Oulalab Logo" 
-                className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
-              />
+            <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <img src={BRAND_LOGO_URL} alt="Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} />
             </Link>
-
             <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
               <NavLinks />
               <div className="flex items-center space-x-2 ml-4">
+                {/* Idiomas */}
                 <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
                   {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                    <button
-                      key={l}
-                      onClick={() => setLang(l)}
-                      className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}
-                    >
-                      {l}
-                    </button>
+                    <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>
                   ))}
                 </div>
-                {/* Selector de Moneda restaurado */}
+                {/* Monedas */}
                 <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
                   {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setCurrency(c)}
-                      className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}
-                    >
-                      {c}
-                    </button>
+                    <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{c}</button>
                   ))}
                 </div>
               </div>
             </div>
-
             <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
               {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
             </button>
           </div>
         </nav>
 
-        {/* Mobile Overlay Menu - CENTRADO CORREGIDO */}
+        {/* --- Menú Móvil --- */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
             <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
             <NavLinks isMobile />
-            
-            <div className="flex flex-col space-y-6 pt-10 border-t w-1/2 items-center">
+            <div className="flex flex-col space-y-4 pt-6 border-t w-1/2 items-center">
               <div className="flex space-x-4">
                 {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => setLang(l)}
-                    className={`w-12 h-12 rounded-full font-black text-xs border-2 transition-all uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}
-                  >
-                    {l}
-                  </button>
+                  <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>{l}</button>
                 ))}
               </div>
               <div className="flex space-x-4">
                 {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setCurrency(c)}
-                    className={`w-12 h-12 rounded-full font-black text-[10px] border-2 transition-all uppercase ${currency === c ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}
-                  >
-                    {c}
-                  </button>
+                  <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>{c}</button>
                 ))}
               </div>
             </div>
@@ -623,127 +563,60 @@ const App: React.FC = () => {
           <Route path="/care" element={<Care />} />
         </Routes>
 
-        {/* Site Footer */}
+        {/* --- Footer --- */}
         <footer className="py-32 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
               <div className="col-span-1 md:col-span-2">
-                <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                  <img src={LogoObispo} alt="Oulalab Logo" className="h-16 mb-12" />
-                </Link>
-                <p className="text-gray-500 font-bold text-xl leading-relaxed max-w-md italic opacity-80">{t.footer_tagline}</p>
+                <Link to="/"><img src={LogoObispo} alt="Oulalab Logo" className="h-16 mb-12" /></Link>
+                <p className="text-gray-500 font-bold text-xl italic opacity-80">{t.footer_tagline}</p>
               </div>
-              
               <div>
                 <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
                 <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                   <li><Link to="/" className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
+                  <li><button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}), 150); }} className="hover:text-[#DF3265] uppercase">Cómo funciona</button></li>
                   <li><Link to="/care" className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
-                  <li>
-                    <a 
-                      href="https://oulalab.odoo.com/agenda-una-visita/" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-[#DF3265] hover:opacity-70 transition-opacity"
-                    >
-                      {t.nav_visit}
-                    </a>
-                  </li>
-                  <li>
-                    <button 
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        const el = document.getElementById('planes');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="hover:text-[#DF3265] transition-colors uppercase"
-                    >
-                      {t.footer_plans}
-                    </button>
-                  </li>
-                  <li>
-                    <button 
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        const el = document.getElementById('team');
-                        el?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="hover:text-[#DF3265] transition-colors uppercase"
-                    >
-                      {t.footer_team}
-                    </button>
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_contact_title}</h4>
-                <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
-                  <li><a href="mailto:hola@oulalab.com" className="hover:opacity-40 transition-opacity">hola@oulalab.com</a></li>
-                  <li><a href="#" className="hover:opacity-40 transition-opacity">LinkedIn</a></li>
+                  <li><a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265]">{t.nav_visit}</a></li>
                 </ul>
               </div>
             </div>
-            
             <div className="pt-16 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-10">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-black/20">
-                {t.footer_rights}
-              </p>
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2 text-black/20">
-                  <Languages size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Global Fashion Network</span>
-                </div>
-                <div className="w-10 h-1 text-black/10"></div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-black/40">EST. 2025 | CHILE</p>
-              </div>
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-black/20">{t.footer_rights}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-black/40">EST. 2025 | CHILE</p>
             </div>
           </div>
         </footer>
 
-        {/* Waitlist Registration Modal */}
+        {/* --- Modal Waitlist --- */}
         {isWaitlistOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
-            <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
-            <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-              <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full transition-all" onClick={() => setIsWaitlistOpen(false)}>
-                <X size={32} />
-              </button>
-              <div className="p-16 md:p-24 text-center">
-                <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
-                <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
-                
-                <form 
-                  className="space-y-8" 
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    setIsSending(true);
-                    const form = e.currentTarget;
-                    const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
-                    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-                    try {
-                      await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
-                        method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ nombre, email })
-                      });
-                      alert(t.waitlist_success);
-                      setIsWaitlistOpen(false);
-                    } catch (error) {
-                      alert("Error técnico.");
-                    } finally {
-                      setIsSending(false);
-                    }
-                  }}
-                >
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
-                    <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
-                  </div>
-                  <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">
-                    {isSending ? "ENVIANDO..." : t.waitlist_button}
-                  </button>
-                </form>
-              </div>
+            <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setIsWaitlistOpen(false)}></div>
+            <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center">
+              <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full" onClick={() => setIsWaitlistOpen(false)}><X size={32} /></button>
+              <h3 className="text-5xl font-black uppercase tracking-tighter mb-6">{t.waitlist_title}</h3>
+              <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
+              <form className="space-y-8" onSubmit={async (e) => {
+                  e.preventDefault();
+                  setIsSending(true);
+                  const form = e.currentTarget;
+                  const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
+                  const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+                  try {
+                    await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
+                      method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ nombre, email })
+                    });
+                    alert(t.waitlist_success);
+                    setIsWaitlistOpen(false);
+                  } catch (error) { alert("Error técnico."); } finally { setIsSending(false); }
+                }}>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none focus:border-[#DF3265] border-b-2 border-transparent" placeholder={t.waitlist_name} required />
+                  <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none focus:border-[#DF3265] border-b-2 border-transparent" placeholder={t.waitlist_email} required />
+                </div>
+                <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">{isSending ? "ENVIANDO..." : t.waitlist_button}</button>
+              </form>
             </div>
           </div>
         )}
