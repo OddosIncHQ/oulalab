@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Usamos HashRouter para que las rutas funcionen perfecto en GitHub Pages (evita el error 404)
+// HashRouter es vital para que las rutas funcionen en servidores estáticos como GitHub Pages
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -73,6 +73,9 @@ const UI_STRINGS = {
     launch_year: '2026',
     launch_description: 'El mes en que Oulalab redefine la forma en que vives la moda. El lanzamiento oficial está cerca.',
     launch_waitlist: 'Unirse a la lista de espera',
+    launch_tag1: 'Estilo Infinito',
+    launch_tag2: 'Lujo Sustentable',
+    launch_tag3: 'Personal Shopper con IA',
     waitlist_title: 'Únete a la lista de espera',
     waitlist_subtitle: 'Sé la primera en vivir la experiencia del clóset de tus sueños este marzo.',
     waitlist_name: 'Nombre Completo',
@@ -225,7 +228,7 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- NAVEGACIÓN COMPARTIDA (REESTABLECIDA AQUÍ) ---
+  // --- NAVEGACIÓN COMPARTIDA (REESTABLECIDA) ---
   const NavLinks = ({ isMobile = false }) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
@@ -361,7 +364,7 @@ const App: React.FC = () => {
 
         <ComoFunciona lang={lang} />
 
-        {/* --- SECCIÓN DE PLANES (CON TODAS SUS PARTES) --- */}
+        {/* --- SECCIÓN DE PLANES DUPLICADA SEGÚN ORIGINAL --- */}
         <div id="planes" className="scroll-mt-20">
           <Planes />
         </div>
@@ -411,7 +414,7 @@ const App: React.FC = () => {
             <div className="max-w-3xl mb-20">
               <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.team_subtitle}</span>
               <h2 className="text-6xl md:text-8xl font-black tracking-tighter uppercase mb-8">{t.team_title}</h2>
-              <p className="text-2xl text-gray-500 italic border-l-4 border-[#DF3265] pl-8">{t.team_description}</p>
+              <p className="text-2xl text-gray-500 font-medium italic border-l-4 border-[#DF3265] pl-8">{t.team_description}</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
               {CONTENT[lang].team.map((member: TeamMember, idx: number) => {
@@ -419,23 +422,29 @@ const App: React.FC = () => {
                 return (
                   <div key={idx} className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col group">
                     <div className="flex items-center space-x-8 mb-10">
-                      <img src={member.image} alt={member.name} className="w-28 h-28 rounded-[2rem] object-cover grayscale transition-all group-hover:grayscale-0 shadow-xl" />
+                      <div className="relative">
+                        <img src={member.image} alt={member.name} className="relative w-28 h-28 rounded-[2rem] object-cover grayscale transition-all duration-700 group-hover:grayscale-0 shadow-xl" />
+                        <div className="absolute -bottom-3 -right-3 bg-[#DF3265] text-white p-3 rounded-2xl shadow-xl"><Star size={20} fill="white" /></div>
+                      </div>
                       <div>
                         <h3 className="text-2xl font-black uppercase mb-1">{member.name}</h3>
-                        <p className="text-black/30 font-black text-xs uppercase">{member.role}</p>
+                        <p className="text-black/30 font-black text-xs tracking-widest uppercase">{member.role}</p>
                       </div>
                     </div>
                     <div className="mb-8 flex-grow">
                       <div className={`relative transition-all duration-500 ${isExpanded ? '' : 'max-h-32 overflow-hidden'}`}>
-                        <p className="text-gray-600 text-sm leading-[1.8]">{member.description}</p>
+                        <p className="text-gray-600 text-sm leading-[1.8] font-medium">{member.description}</p>
                       </div>
                       <button onClick={() => setExpandedTeamMember(isExpanded ? null : member.name)} className="mt-4 flex items-center text-[10px] font-black tracking-widest uppercase text-black hover:text-[#DF3265]">
                         {isExpanded ? t.collapse : 'LEER MÁS'} {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                     </div>
                     <div className="pt-8 border-t border-gray-100 flex items-center justify-between">
-                      <p className="italic font-black text-black/70 text-sm">"{member.quote}"</p>
-                      <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Mail size={20} /></a>
+                      <p className="italic font-black text-black/70 text-sm leading-tight max-w-[70%]">"{member.quote}"</p>
+                      <div className="flex space-x-4">
+                        <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Mail size={20} /></a>
+                        <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Linkedin size={20} /></a>
+                      </div>
                     </div>
                   </div>
                 );
@@ -444,7 +453,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* --- LAUNCH --- */}
+        {/* Launch Section */}
         <section className="py-40 bg-black text-white relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
@@ -466,56 +475,16 @@ const App: React.FC = () => {
     );
   };
 
-    // --- NAVEGACIÓN COMPARTIDA REESTABLECIDA ---
-  const NavLinks = ({ isMobile = false }) => {
-    const navigate = useNavigate();
-    const { pathname } = useLocation();
-
-    const handleNav = (id: string) => {
-      setIsMenuOpen(false);
-      if (pathname !== '/') {
-        navigate('/');
-        setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 150);
-      } else {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-      }
-    };
-
-    const linkBaseClass = isMobile 
-      ? "text-3xl font-black uppercase text-center w-full" 
-      : `text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`;
-
-    return (
-      <>
-        <button onClick={() => handleNav('how-it-works')} className={linkBaseClass}>{t.nav_works}</button>
-        <button onClick={() => handleNav('planes')} className={linkBaseClass}>{t.nav_plans}</button>
-        <button onClick={() => handleNav('team')} className={linkBaseClass}>{t.nav_team}</button>
-        <Link to="/care" onClick={() => setIsMenuOpen(false)} className={linkBaseClass}>{t.nav_care}</Link>
-        <a 
-          href="https://oulalab.odoo.com/agenda-una-visita/" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className={isMobile 
-            ? "text-3xl font-black uppercase text-[#DF3265] text-center w-full leading-tight px-6" 
-            : `text-sm font-black uppercase tracking-widest px-4 py-2 border-2 rounded-full transition-all ${scrolled ? 'border-[#DF3265] text-[#DF3265] hover:bg-[#DF3265] hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-black'}`}
-        >
-          {t.nav_visit}
-        </a>
-        {!isMobile && <Link to="/about" className={linkBaseClass}>About</Link>}
-      </>
-    );
-  };
-  
   return (
     <Router>
       <ScrollToTop />
       <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
         
-        {/* BARRA SUPERIOR */}
+        {/* NAV BAR */}
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
             <Link to="/" className="flex items-center group cursor-pointer"><img src={BRAND_LOGO_URL} alt="Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} /></Link>
-            <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
               <NavLinks />
               <div className="flex items-center space-x-2 ml-4">
                 <div className="flex bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
@@ -530,20 +499,19 @@ const App: React.FC = () => {
           </div>
         </nav>
 
-        {/* MENÚ MÓVIL */}
+        {/* MOBILE MENU */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
             <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
             <NavLinks isMobile />
             <div className="flex flex-col space-y-4 pt-6 border-t w-1/2 items-center">
               <div className="flex space-x-4">{(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200'}`}>{l}</button>)}</div>
-              <div className="flex space-x-4">{(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{c}</button>)}</div>
+              <div className="flex space-x-4">{(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200'}`}>{c}</button>)}</div>
             </div>
             <button onClick={() => setIsMenuOpen(false)} className="p-4 bg-gray-100 rounded-full text-black transition-transform active:scale-90"><X size={24} /></button>
           </div>
         )}
 
-        {/* SISTEMA DE RUTAS */}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/care" element={<Care />} />
@@ -581,6 +549,7 @@ const App: React.FC = () => {
             <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center">
               <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full" onClick={() => setIsWaitlistOpen(false)}><X size={32} /></button>
               <h3 className="text-5xl font-black uppercase mb-6 leading-none">{t.waitlist_title}</h3>
+              <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
               <form className="space-y-8" onSubmit={async (e) => {
                   e.preventDefault();
                   setIsSending(true);
@@ -600,7 +569,7 @@ const App: React.FC = () => {
                   <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none focus:border-[#DF3265] border-b-2 border-transparent" placeholder={t.waitlist_name} required />
                   <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none focus:border-[#DF3265] border-b-2 border-transparent" placeholder={t.waitlist_email} required />
                 </div>
-                <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">{isSending ? "ENVIANDO..." : t.waitlist_button}</button>
+                <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">{isSending ? "ENVIANDO..." : t.waitlist_button}</button>
               </form>
             </div>
           </div>
