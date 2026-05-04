@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+// HashRouter es fundamental para que las rutas funcionen en GitHub Pages sin errores 404
+import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
   Menu, 
@@ -25,7 +26,7 @@ import LogoBlanco from './Logo_Blanco.png';
 // Componentes modulares
 import ComoFunciona from './components/ComoFunciona';
 import Planes from './components/Planes'; 
-import Care from './components/Care';
+import Care from './components/Care'; 
 
 // Videos para las secciones internas (.mp4)
 import vidValue from './src/assets/vid-2.mp4';
@@ -76,8 +77,12 @@ const UI_STRINGS = {
     waitlist_subtitle: 'Sé la primera en vivir la experiencia del clóset de tus sueños este marzo.',
     waitlist_name: 'Nombre Completo',
     waitlist_email: 'Correo Electrónico',
+    waitlist_phone: 'Telefono',
+    waitlist_address: 'Dirección',
     waitlist_button: 'ASEGURAR MI LUGAR',
     waitlist_success: '¡Ya estás en la lista!',
+    waitlist_success_desc: 'Te contactaremos en marzo con acceso anticipado exclusivo.',
+    waitlist_close: 'Cerrar',
     footer_tagline: 'Empoderar a las mujeres redefiniendo a la moda como una fuente de confianza. La primera Fashion Technology Company de Chile.',
     footer_nav: 'Navegación',
     footer_home: 'Inicio',
@@ -100,32 +105,36 @@ const UI_STRINGS = {
     intro_normal: 'normal',
     intro_title_1: 'Buying is',
     intro_title_2: 'subscribing is Oulalab.',
-    intro_description: 'Oulalab aims to change the clothing acquisition model for a monthly subscription model.',
+    intro_description: 'Oulalab aims to change the clothing acquisition model for a monthly subscription model, with a fixed monthly fee, which allows access to any brand and garment model.',
     deliver_title_1: 'Infinite Closet',
     deliver_desc_1: 'Thousands of options to make me feel unique, just a click away.',
     deliver_title_2: 'Infinite Outfit',
-    deliver_desc_2: 'Mixes that match whoever I need to be.',
+    deliver_desc_2: 'Mixes that match whoever I need to be for that special occasion.',
     deliver_title_3: 'Infinite Budget',
-    deliver_desc_3: 'Access to the best brands without thinking about money.',
+    deliver_desc_3: 'Access to the best brands without thinking about money. Enjoy luxury today.',
     pricing_subtitle: 'Choose your style',
     pricing_title: 'Why Oulalab?',
     plans_title: 'Subscription Plans',
     team_subtitle: 'Behind the brand',
     team_title: 'The Oulalab Team',
-    team_description: 'Leading experts united to redefine the future of fashion.',
+    team_description: 'Leading experts in industry, branding, operations, and technology united to redefine the future of fashion.',
     pricing_btn: 'Subscribe',
     launch_countdown: 'Countdown started',
     launch_month: 'MAY',
     launch_year: '2026',
-    launch_description: 'The month Oulalab redefines the way you live fashion.',
+    launch_description: 'The month Oulalab redefines the way you live fashion. The official launch is near.',
     launch_waitlist: 'Join the waitlist',
     waitlist_title: 'Join the waitlist',
-    waitlist_subtitle: 'Be the first to experience the closet of your dreams.',
+    waitlist_subtitle: 'Be the first to experience the closet of your dreams this March.',
     waitlist_name: 'Full Name',
     waitlist_email: 'Email Address',
+    waitlist_phone: 'Phone Number',
+    waitlist_address: 'Address',
     waitlist_button: 'SECURE MY SPOT',
     waitlist_success: 'You\'re on the list!',
-    footer_tagline: 'Empowering women by redefining fashion as a source of confidence.',
+    waitlist_success_desc: 'We\'ll contact you in March with exclusive early access.',
+    waitlist_close: 'Close',
+    footer_tagline: 'Empowering women by redefining fashion as a source of confidence. The first Fashion Technology Company in Chile.',
     footer_nav: 'Navigation',
     footer_home: 'Home',
     footer_plans: 'Subscription Plans',
@@ -143,36 +152,40 @@ const UI_STRINGS = {
     nav_care: 'Cuidados com a Roupa',
     hero_title: 'Bem-vindo ao futuro da moda.',
     hero_cta: 'ENTRAR NA LISTA DE ESPERA',
-    hero_description: 'A primera Fashion Technology Company no Chile.',
+    hero_description: 'A primera Fashion Technology Company no Chile. Redefinindo como vivemos o estilo.',
     intro_normal: 'normal',
     intro_title_1: 'Comprar é',
     intro_title_2: 'assinar é Oulalab.',
-    intro_description: 'Oulalab busca mudar o modelo de aquisição de roupas por um modelo de assinatura mensal.',
+    intro_description: 'Oulalab busca mudar o modelo de aquisição de roupas por um modelo de assinatura mensal, con taxa fixa, que permite acessar qualquer marca e modelo de peça.',
     deliver_title_1: 'Closet Infinito',
     deliver_desc_1: 'Ter milhares de opções para me sentir única, a um só clique.',
     deliver_title_2: 'Outfit Infinito',
-    deliver_desc_2: 'Combinações que batem con quem eu preciso ser.',
+    deliver_desc_2: 'Combinações que batem con quem eu preciso ser para aquela ocasião especial.',
     deliver_title_3: 'Budget Infinito',
-    deliver_desc_3: 'Acesso às mejores marcas sem pensar no preço.',
+    deliver_desc_3: 'Acesso às mejores marcas sem pensar no preço. Aproveite o luxo hoje.',
     pricing_subtitle: 'Escolha seu estilo',
     pricing_title: 'Por que Oulalab?',
     plans_title: 'Planos de Assinatura',
     team_subtitle: 'Por trás da marca',
     team_title: 'A Equipe Oulalab',
-    team_description: 'Líderes especialistas unidos para redefinir o futuro de la moda.',
+    team_description: 'Líderes especialistas em indústria, branding, operações e tecnologia unidos para redefinir o futuro de la moda.',
     pricing_btn: 'Assinar',
     launch_countdown: 'Contagem regressiva iniciada',
     launch_month: 'MAIO',
     launch_year: '2026',
-    launch_description: 'O mes em que a Oulalab redefine a forma como você vive a moda.',
+    launch_description: 'O mes em que a Oulalab redefine a forma como você vive a moda. O lançamento oficial está próximo.',
     launch_waitlist: 'Entrar na lista de espera',
     waitlist_title: 'Entre na lista de espera',
-    waitlist_subtitle: 'Seja a primeira a viver a experiência del closet.',
+    waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
     waitlist_email: 'E-mail',
+    waitlist_phone: 'Telefone',
+    waitlist_address: 'Endereço',
     waitlist_button: 'GARANTIR MEU LUGAR',
     waitlist_success: 'Você está na lista!',
-    footer_tagline: 'Empoderando mulheres ao redefinir a moda como uma fonte de confiança.',
+    waitlist_success_desc: 'Entraremos em contato em março con acesso antecipado exclusivo.',
+    waitlist_close: 'Fechar',
+    footer_tagline: 'Empoderando mulheres ao redefinir a moda como uma fonte de confianza. A primera Fashion Technology Company do Chile.',
     footer_nav: 'Navegação',
     footer_home: 'Início',
     footer_plans: 'Planos de Assinatura',
@@ -204,7 +217,7 @@ const App: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Componente HomePage que envuelve todas las secciones principales
+  // --- COMPONENTE DE PÁGINA DE INICIO (HOME) ---
   const HomePage = () => {
     const scrollToSection = (id: string) => {
       const element = document.getElementById(id);
@@ -223,7 +236,7 @@ const App: React.FC = () => {
           <div className="absolute inset-0 z-0">
             <img 
               src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" 
-              alt="Fashion background" 
+              alt="Fashion" 
               className="w-full h-full object-cover brightness-[0.85] scale-105"
               style={{ animation: 'slow-zoom 20s ease-in-out infinite alternate' }}
             />
@@ -243,7 +256,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Intro Value Prop Section */}
+        {/* Value Prop Section con Video 2 */}
         <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-24">
@@ -279,9 +292,12 @@ const App: React.FC = () => {
         </section>
 
         <ComoFunciona lang={lang} />
-        <div id="planes" className="scroll-mt-20"><Planes /></div>
 
-        {/* Subscription Plans Context Section */}
+        {/* --- SECCIÓN DE PLANES RESTAURADA COMPLETA --- */}
+        <div id="planes" className="scroll-mt-20">
+          <Planes />
+        </div>
+
         <section id="plans" className="py-32 bg-white scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6 text-center">
             <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.pricing_subtitle}</span>
@@ -314,7 +330,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Team Section */}
+        {/* --- EQUIPO --- */}
         <section id="team" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="max-w-3xl mb-20">
@@ -328,10 +344,7 @@ const App: React.FC = () => {
                 return (
                   <div key={idx} className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col group">
                     <div className="flex items-center space-x-8 mb-10">
-                      <div className="relative">
-                        <img src={member.image} alt={member.name} className="relative w-28 h-28 rounded-[2rem] object-cover grayscale transition-all duration-700 group-hover:grayscale-0 shadow-xl" />
-                        <div className="absolute -bottom-3 -right-3 bg-[#DF3265] text-white p-3 rounded-2xl shadow-xl"><Star size={20} fill="white" /></div>
-                      </div>
+                      <img src={member.image} alt={member.name} className="w-28 h-28 rounded-[2rem] object-cover grayscale transition-all group-hover:grayscale-0 shadow-xl" />
                       <div>
                         <h3 className="text-2xl font-black uppercase mb-1">{member.name}</h3>
                         <p className="text-black/30 font-black text-xs uppercase">{member.role}</p>
@@ -341,13 +354,13 @@ const App: React.FC = () => {
                       <div className={`relative transition-all duration-500 ${isExpanded ? '' : 'max-h-32 overflow-hidden'}`}>
                         <p className="text-gray-600 text-sm leading-[1.8]">{member.description}</p>
                       </div>
-                      <button onClick={() => setExpandedTeamMember(isExpanded ? null : member.name)} className="mt-4 flex items-center text-[10px] font-black uppercase text-black hover:text-[#DF3265]">
-                        {isExpanded ? t.collapse : t.read_more} {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      <button onClick={() => setExpandedTeamMember(isExpanded ? null : member.name)} className="mt-4 flex items-center text-[10px] font-black tracking-widest uppercase text-black hover:text-[#DF3265]">
+                        {isExpanded ? t.collapse : 'LEER MÁS'} {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                     </div>
                     <div className="pt-8 border-t border-gray-100 flex items-center justify-between">
                       <p className="italic font-black text-black/70 text-sm">"{member.quote}"</p>
-                      <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all"><Mail size={20} /></a>
+                      <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Mail size={20} /></a>
                     </div>
                   </div>
                 );
@@ -356,7 +369,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* Launch Section */}
+        {/* --- LAUNCH CON VIDEO 3 --- */}
         <section className="py-40 bg-black text-white relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
@@ -378,7 +391,7 @@ const App: React.FC = () => {
     );
   };
 
-  // --- LÓGICA DE NAVEGACIÓN COMPARTIDA ---
+  // --- NAVEGACIÓN COMPARTIDA REESTABLECIDA ---
   const NavLinks = ({ isMobile = false }) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
@@ -387,13 +400,9 @@ const App: React.FC = () => {
       setIsMenuOpen(false);
       if (pathname !== '/') {
         navigate('/');
-        setTimeout(() => {
-          const element = document.getElementById(id);
-          if (element) element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+        setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 150);
       } else {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
       }
     };
 
@@ -413,8 +422,7 @@ const App: React.FC = () => {
           rel="noopener noreferrer" 
           className={isMobile 
             ? "text-3xl font-black uppercase text-[#DF3265] text-center w-full leading-tight px-6" 
-            : `text-sm font-black uppercase tracking-widest px-4 py-2 border-2 rounded-full transition-all ${scrolled ? 'border-[#DF3265] text-[#DF3265] hover:bg-[#DF3265] hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-black'}`
-          }
+            : `text-sm font-black uppercase tracking-widest px-4 py-2 border-2 rounded-full transition-all ${scrolled ? 'border-[#DF3265] text-[#DF3265] hover:bg-[#DF3265] hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-black'}`}
         >
           {t.nav_visit}
         </a>
@@ -428,61 +436,46 @@ const App: React.FC = () => {
       <ScrollToTop />
       <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
         
-        {/* Barra de Navegación */}
+        {/* BARRA SUPERIOR */}
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-            <Link to="/" className="flex items-center group cursor-pointer">
-              <img src={BRAND_LOGO_URL} alt="Oulalab Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} />
-            </Link>
+            <Link to="/" className="flex items-center group cursor-pointer"><img src={BRAND_LOGO_URL} alt="Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} /></Link>
             <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
               <NavLinks />
-              {/* Selectores de Idioma y Moneda */}
+              {/* SELECTORES DE IDIOMA Y MONEDA */}
               <div className="flex items-center space-x-2 ml-4">
-                <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
-                  {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                    <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>
-                  ))}
+                <div className="flex bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
+                  {(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>)}
                 </div>
-                <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
-                  {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                    <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{c}</button>
-                  ))}
+                <div className="flex bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
+                  {(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{c}</button>)}
                 </div>
               </div>
             </div>
-            <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
-            </button>
+            <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
           </div>
         </nav>
 
-        {/* Menú Móvil */}
+        {/* MENÚ MÓVIL CENTRADO */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
             <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
             <NavLinks isMobile />
             <div className="flex flex-col space-y-4 pt-6 border-t w-1/2 items-center">
-              <div className="flex space-x-4">
-                {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                  <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{l}</button>
-                ))}
-              </div>
-              <div className="flex space-x-4">
-                {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                  <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{c}</button>
-                ))}
-              </div>
+              <div className="flex space-x-4">{(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{l}</button>)}</div>
+              <div className="flex space-x-4">{(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{c}</button>)}</div>
             </div>
-            <button onClick={() => setIsMenuOpen(false)} className="p-4 bg-gray-100 rounded-full text-black"><X size={24} /></button>
+            <button onClick={() => setIsMenuOpen(false)} className="p-4 bg-gray-100 rounded-full text-black transition-transform active:scale-90"><X size={24} /></button>
           </div>
         )}
 
+        {/* SISTEMA DE RUTAS */}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/care" element={<Care />} />
         </Routes>
 
-        {/* Footer */}
+        {/* FOOTER */}
         <footer className="py-32 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
@@ -494,7 +487,7 @@ const App: React.FC = () => {
                 <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
                 <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                   <li><Link to="/" className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
-                  <li><button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}), 100); }} className="hover:text-[#DF3265]">{t.nav_works}</button></li>
+                  <li><button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}), 150); }} className="hover:text-[#DF3265] uppercase">Cómo funciona</button></li>
                   <li><Link to="/care" className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
                   <li><a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265]">{t.nav_visit}</a></li>
                 </ul>
@@ -507,14 +500,13 @@ const App: React.FC = () => {
           </div>
         </footer>
 
-        {/* Waitlist Modal */}
+        {/* MODAL WAITLIST */}
         {isWaitlistOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
             <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setIsWaitlistOpen(false)}></div>
-            <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center">
+            <div className="relative bg-white w-full max-w-2xl rounded-[4rem] shadow-2xl p-16 md:p-24 text-center">
               <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full" onClick={() => setIsWaitlistOpen(false)}><X size={32} /></button>
-              <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
-              <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
+              <h3 className="text-5xl font-black uppercase mb-6">{t.waitlist_title}</h3>
               <form className="space-y-8" onSubmit={async (e) => {
                   e.preventDefault();
                   setIsSending(true);
@@ -531,10 +523,10 @@ const App: React.FC = () => {
                   } catch (error) { alert("Error técnico."); } finally { setIsSending(false); }
                 }}>
                 <div className="grid md:grid-cols-2 gap-8">
-                  <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
-                  <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
+                  <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none focus:border-[#DF3265] border-b-2 border-transparent" placeholder={t.waitlist_name} required />
+                  <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none focus:border-[#DF3265] border-b-2 border-transparent" placeholder={t.waitlist_email} required />
                 </div>
-                <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all shadow-xl">{isSending ? "ENVIANDO..." : t.waitlist_button}</button>
+                <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">{isSending ? "ENVIANDO..." : t.waitlist_button}</button>
               </form>
             </div>
           </div>
