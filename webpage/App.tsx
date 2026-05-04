@@ -427,7 +427,16 @@ const App: React.FC = () => {
                   <div className="relative group">
                     <div className="absolute -inset-6 bg-[#DF3265]/5 rounded-[3rem] transform -rotate-3 transition-transform group-hover:rotate-0"></div>
                     <div className="relative overflow-hidden rounded-[2.5rem] shadow-2xl bg-black">
-                      <video autoPlay muted loop playsInline className="w-full grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-105">
+                      <video 
+                        autoPlay 
+                        loop 
+                        muted 
+                        defaultMuted 
+                        playsInline 
+                        preload="auto" 
+                        className="w-full grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
+                      >
+
                         <source src={vidValue} type="video/mp4" />
                       </video>
                     </div>
@@ -562,7 +571,16 @@ const App: React.FC = () => {
             {/* Launch Countdown CTA Section */}
             <section className="py-40 bg-black text-white relative overflow-hidden">
               <div className="absolute inset-0 z-0">
-                <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
+                <video 
+                  autoPlay 
+                  loop 
+                  muted 
+                  defaultMuted 
+                  playsInline 
+                  preload="auto" 
+                  className="w-full h-full object-cover opacity-50 scale-110"
+                >
+
                   <source src={vidLaunch} type="video/mp4" />
                 </video>
               </div>
