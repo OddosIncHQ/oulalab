@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// Cambiamos a HashRouter para compatibilidad total con GitHub Pages y evitar el fondo vacío
+// Usamos HashRouter para que funcione en GitHub Pages sin errores 404
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -26,16 +26,15 @@ import LogoBlanco from './Logo_Blanco.png';
 // Componentes modulares
 import ComoFunciona from './components/ComoFunciona';
 import Planes from './components/Planes'; 
-import Care from './components/Care'; // Componente ubicado en webpage/components/Care.tsx
+import Care from './components/Care'; // Componente en webpage/components/Care.tsx
 
 // Videos para las secciones internas (.mp4)
 import vidValue from './src/assets/vid-2.mp4';
 import vidLaunch from './src/assets/vid-3.mp4';
 
-// --- Types ---
 type Language = 'es' | 'en' | 'pt';
 
-// Helper para resetear el scroll al cambiar de página o ruta
+// Helper para resetear el scroll al cambiar de página
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -44,7 +43,6 @@ const ScrollToTop = () => {
   return null;
 };
 
-// --- Diccionarios de Traducción Completos ---
 const UI_STRINGS = {
   es: {
     nav_works: 'Cómo funciona',
@@ -178,7 +176,7 @@ const UI_STRINGS = {
     plans_title: 'Planos de Assinatura',
     team_subtitle: 'Por trás da marca',
     team_title: 'A Equipe Oulalab',
-    team_description: 'Líderes especialistas em industria, branding, operaciones e tecnología unidos para redefinir o futuro de la moda.',
+    team_description: 'Líderes especialistas em indústria, branding, operaciones e tecnología unidos para redefinir o futuro de la moda.',
     pricing_btn: 'Assinar',
     launch_countdown: 'Contagem regressiva iniciada',
     launch_month: 'MAIO',
@@ -189,7 +187,7 @@ const UI_STRINGS = {
     launch_tag2: 'Luxo Sustentável',
     launch_tag3: 'Personal Shopper con IA',
     waitlist_title: 'Entre na lista de espera',
-    waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
+    waitlist_subtitle: 'Seja a primeira a viver a experiencia del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
     waitlist_email: 'E-mail',
     waitlist_phone: 'Telefone',
@@ -241,7 +239,6 @@ const App: React.FC = () => {
       setIsMenuOpen(false);
       if (pathname !== '/') {
         navigate('/');
-        // Tiempo de espera para asegurar que la página de inicio cargue antes de scrollear
         setTimeout(() => {
           const element = document.getElementById(id);
           if (element) {
@@ -271,7 +268,10 @@ const App: React.FC = () => {
         <button onClick={() => handleNav('how-it-works')} className={linkBaseClass}>{t.nav_works}</button>
         <button onClick={() => handleNav('planes')} className={linkBaseClass}>{t.nav_plans}</button>
         <button onClick={() => handleNav('team')} className={linkBaseClass}>{t.nav_team}</button>
+        
+        {/* Enlace a Care integrado */}
         <Link to="/care" onClick={() => setIsMenuOpen(false)} className={linkBaseClass}>{t.nav_care}</Link>
+
         <a 
           href="https://oulalab.odoo.com/agenda-una-visita/" 
           target="_blank" 
@@ -282,23 +282,19 @@ const App: React.FC = () => {
         >
           {t.nav_visit}
         </a>
+
         {!isMobile && (
-          <Link 
-            to="/about" 
-            className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}
-          >
-            About
-          </Link>
+          <Link to="/about" className={linkBaseClass}>About</Link>
         )}
       </>
     );
   };
 
-  // --- COMPONENTE DE LA PÁGINA DE INICIO (HOME) ---
+  // --- COMPONENTE HOME (PÁGINA PRINCIPAL) ---
   const HomePage = () => {
     return (
       <>
-        {/* --- Hero Section --- */}
+        {/* Main Hero Section */}
         <section className="relative h-screen flex items-center overflow-hidden pt-20">
           <div className="absolute inset-0 z-0">
             <img 
@@ -330,18 +326,12 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-          <div 
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" 
-            onClick={() => {
-              const el = document.getElementById('value-prop');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" onClick={() => document.getElementById('value-prop')?.scrollIntoView({behavior:'smooth'})}>
             <ChevronDown className="text-white w-10 h-10 opacity-70" />
           </div>
         </section>
 
-        {/* --- Value Prop Section --- */}
+        {/* Intro Value Prop Section */}
         <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-24">
@@ -367,7 +357,9 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 gap-8">
                   {[{ icon: ShoppingBag, title: t.deliver_title_1, desc: t.deliver_desc_1 }, { icon: RefreshCw, title: t.deliver_title_2, desc: t.deliver_desc_2 }, { icon: Clock, title: t.deliver_title_3, desc: t.deliver_desc_3 }].map((item, idx) => (
                     <div key={idx} className="flex items-start space-x-6 p-8 bg-white border border-gray-100 rounded-3xl hover:shadow-2xl transition-all duration-500">
-                      <div className="p-4 bg-gray-50 rounded-2xl text-[#DF3265]"><item.icon className="w-8 h-8" /></div>
+                      <div className="p-4 bg-gray-50 rounded-2xl text-[#DF3265]">
+                        <item.icon className="w-8 h-8" />
+                      </div>
                       <div>
                         <h4 className="text-lg font-black uppercase tracking-tighter mb-2">{item.title}</h4>
                         <p className="text-gray-500 text-base leading-relaxed">{item.desc}</p>
@@ -380,12 +372,9 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* --- Cómo Funciona --- */}
-        <div id="how-it-works" className="scroll-mt-20">
-          <ComoFunciona lang={lang} />
-        </div>
+        <ComoFunciona lang={lang} />
 
-        {/* --- Sección de Planes (Doble estructura original) --- */}
+        {/* --- Sección Planes Original --- */}
         <div id="planes" className="scroll-mt-20">
           <Planes />
         </div>
@@ -405,7 +394,9 @@ const App: React.FC = () => {
                         OULALAB CHOICE
                       </div>
                     )}
+                    
                     <h3 className="text-3xl md:text-2xl lg:text-4xl font-black uppercase tracking-tighter mb-4 text-center">{plan.name}</h3>
+                    
                     <div className="flex flex-col items-center justify-center mb-10 text-center">
                       <span className="text-4xl sm:text-5xl md:text-2xl lg:text-4xl xl:text-7xl font-black tracking-tighter leading-none">{price}</span>
                       <div className="mt-2 flex items-center justify-center space-x-2 text-gray-400">
@@ -413,6 +404,7 @@ const App: React.FC = () => {
                         <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
                       </div>
                     </div>
+
                     <div className="space-y-4 flex-grow text-left">
                       {plan.features.map((feature, i) => (
                         <div key={i} className="flex items-start space-x-3 text-sm font-bold">
@@ -432,7 +424,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* --- Team Section --- */}
+        {/* Founders / Team Section */}
         <section id="team" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="max-w-3xl mb-20">
@@ -451,7 +443,7 @@ const App: React.FC = () => {
                         <div className="absolute -bottom-3 -right-3 bg-[#DF3265] text-white p-3 rounded-2xl shadow-xl"><Star size={20} fill="white" /></div>
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black uppercase tracking-tighter mb-1">{member.name}</h3>
+                        <h3 className="text-2xl font-black uppercase mb-1">{member.name}</h3>
                         <p className="text-black/30 font-black text-xs tracking-widest uppercase">{member.role}</p>
                       </div>
                     </div>
@@ -460,14 +452,14 @@ const App: React.FC = () => {
                         <p className="text-gray-600 text-sm leading-[1.8] font-medium">{member.description}</p>
                       </div>
                       <button onClick={() => setExpandedTeamMember(isExpanded ? null : member.name)} className="mt-4 flex items-center text-[10px] font-black tracking-widest uppercase text-black hover:text-[#DF3265]">
-                        {isExpanded ? t.collapse : t.read_more} {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        {isExpanded ? t.collapse : 'LEER MÁS'} {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </button>
                     </div>
                     <div className="pt-8 border-t border-gray-100 flex items-center justify-between">
                       <p className="italic font-black text-black/70 text-sm leading-tight max-w-[70%]">"{member.quote}"</p>
                       <div className="flex space-x-4">
-                        <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all"><Mail size={20} /></a>
-                        <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all"><Linkedin size={20} /></a>
+                        <a href={`mailto:${member.email}`} className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Mail size={20} /></a>
+                        <a href={`https://${member.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-gray-50 hover:bg-[#DF3265] hover:text-white rounded-2xl transition-all shadow-sm"><Linkedin size={20} /></a>
                       </div>
                     </div>
                   </div>
@@ -477,7 +469,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* --- Launch Section --- */}
+        {/* Launch Section con Video 3 */}
         <section className="py-40 bg-black text-white relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
@@ -492,7 +484,6 @@ const App: React.FC = () => {
             <h2 className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[14rem] font-black italic tracking-tighter uppercase mb-10 leading-[0.8] text-white">
               {t.launch_month} <span className="text-white/10">{t.launch_year}</span>
             </h2>
-            <p className="text-2xl md:text-3xl text-gray-200 leading-relaxed mb-16 max-w-3xl mx-auto font-medium">{t.launch_description}</p>
             <button onClick={() => setIsWaitlistOpen(true)} className="inline-flex items-center px-16 py-8 bg-[#DF3265] text-white font-black uppercase tracking-tighter text-xl hover:scale-110 transition-all shadow-[0_0_50px_rgba(223,50,101,0.4)]">
               {t.launch_waitlist} <Send className="ml-4 w-6 h-6" />
             </button>
@@ -507,63 +498,47 @@ const App: React.FC = () => {
       <ScrollToTop />
       <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
         
-        {/* --- Barra de Navegación --- */}
+        {/* BARRA DE NAVEGACIÓN - EL ROUTER DEBE ENVOLVERLA PARA QUE NavLinks FUNCIONE */}
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
             <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <img src={BRAND_LOGO_URL} alt="Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} />
             </Link>
-            <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
+            <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
               <NavLinks />
               <div className="flex items-center space-x-2 ml-4">
-                {/* Idiomas */}
-                <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
-                  {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                    <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>
-                  ))}
+                <div className="flex bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
+                  {(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>)}
                 </div>
-                {/* Monedas */}
-                <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
-                  {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                    <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{c}</button>
-                  ))}
+                <div className="flex bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
+                  {(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{c}</button>)}
                 </div>
               </div>
             </div>
-            <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
-            </button>
+            <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X size={32} /> : <Menu size={32} />}</button>
           </div>
         </nav>
 
-        {/* --- Menú Móvil --- */}
+        {/* MENÚ MÓVIL CENTRADO */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
             <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
             <NavLinks isMobile />
             <div className="flex flex-col space-y-4 pt-6 border-t w-1/2 items-center">
-              <div className="flex space-x-4">
-                {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                  <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>{l}</button>
-                ))}
-              </div>
-              <div className="flex space-x-4">
-                {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                  <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200 text-gray-400'}`}>{c}</button>
-                ))}
-              </div>
+              <div className="flex space-x-4">{(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200'}`}>{l}</button>)}</div>
+              <div className="flex space-x-4">{(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{c}</button>)}</div>
             </div>
             <button onClick={() => setIsMenuOpen(false)} className="p-4 bg-gray-100 rounded-full text-black transition-transform active:scale-90"><X size={24} /></button>
           </div>
         )}
 
-        {/* --- SISTEMA DE RUTAS --- */}
+        {/* SISTEMA DE RUTAS (HASH PARA GITHUB PAGES) */}
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/care" element={<Care />} />
         </Routes>
 
-        {/* --- Footer --- */}
+        {/* FOOTER */}
         <footer className="py-32 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
@@ -575,7 +550,7 @@ const App: React.FC = () => {
                 <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
                 <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                   <li><Link to="/" className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
-                  <li><button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}), 150); }} className="hover:text-[#DF3265] uppercase">Cómo funciona</button></li>
+                  <li><button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}), 100); }} className="hover:text-[#DF3265] uppercase">Cómo funciona</button></li>
                   <li><Link to="/care" className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
                   <li><a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265]">{t.nav_visit}</a></li>
                 </ul>
@@ -588,13 +563,13 @@ const App: React.FC = () => {
           </div>
         </footer>
 
-        {/* --- Modal Waitlist --- */}
+        {/* WAITLIST MODAL */}
         {isWaitlistOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
             <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setIsWaitlistOpen(false)}></div>
             <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center">
               <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full" onClick={() => setIsWaitlistOpen(false)}><X size={32} /></button>
-              <h3 className="text-5xl font-black uppercase tracking-tighter mb-6">{t.waitlist_title}</h3>
+              <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
               <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
               <form className="space-y-8" onSubmit={async (e) => {
                   e.preventDefault();
