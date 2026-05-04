@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// HashRouter es fundamental para que las rutas funcionen en GitHub Pages sin errores 404
+// Usamos HashRouter para que las rutas funcionen perfecto en GitHub Pages (evita el error 404)
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -124,6 +124,9 @@ const UI_STRINGS = {
     launch_year: '2026',
     launch_description: 'The month Oulalab redefines the way you live fashion. The official launch is near.',
     launch_waitlist: 'Join the waitlist',
+    launch_tag1: 'Infinite Style',
+    launch_tag2: 'Sustainable Luxury',
+    launch_tag3: 'AI Personal Shopper',
     waitlist_title: 'Join the waitlist',
     waitlist_subtitle: 'Be the first to experience the closet of your dreams this March.',
     waitlist_name: 'Full Name',
@@ -158,7 +161,7 @@ const UI_STRINGS = {
     intro_title_2: 'assinar é Oulalab.',
     intro_description: 'Oulalab busca mudar o modelo de aquisição de roupas por um modelo de assinatura mensal, con taxa fixa, que permite acessar qualquer marca e modelo de peça.',
     deliver_title_1: 'Closet Infinito',
-    deliver_desc_1: 'Ter milhares de opções para me sentir única, a um só clique.',
+    deliver_desc_1: 'Ter milhares de opciones para me sentir única, a um só clique.',
     deliver_title_2: 'Outfit Infinito',
     deliver_desc_2: 'Combinações que batem con quem eu preciso ser para aquela ocasião especial.',
     deliver_title_3: 'Budget Infinito',
@@ -168,13 +171,16 @@ const UI_STRINGS = {
     plans_title: 'Planos de Assinatura',
     team_subtitle: 'Por trás da marca',
     team_title: 'A Equipe Oulalab',
-    team_description: 'Líderes especialistas em indústria, branding, operações e tecnologia unidos para redefinir o futuro de la moda.',
+    team_description: 'Líderes especialistas em indústria, branding, operaciones e tecnología unidos para redefinir o futuro de la moda.',
     pricing_btn: 'Assinar',
     launch_countdown: 'Contagem regressiva iniciada',
     launch_month: 'MAIO',
     launch_year: '2026',
     launch_description: 'O mes em que a Oulalab redefine a forma como você vive a moda. O lançamento oficial está próximo.',
     launch_waitlist: 'Entrar na lista de espera',
+    launch_tag1: 'Estilo Infinito',
+    launch_tag2: 'Luxo Sustentável',
+    launch_tag3: 'Personal Shopper con IA',
     waitlist_title: 'Entre na lista de espera',
     waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
@@ -212,10 +218,56 @@ const App: React.FC = () => {
   const BRAND_LOGO_URL = scrolled ? LOGO_DARK : LOGO_LIGHT;
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // --- NAVEGACIÓN COMPARTIDA (REESTABLECIDA AQUÍ) ---
+  const NavLinks = ({ isMobile = false }) => {
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
+
+    const handleNav = (id: string) => {
+      setIsMenuOpen(false);
+      if (pathname !== '/') {
+        navigate('/');
+        setTimeout(() => {
+          const element = document.getElementById(id);
+          if (element) element.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      } else {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+
+    const linkBaseClass = isMobile 
+      ? "text-3xl font-black uppercase text-center w-full" 
+      : `text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`;
+
+    return (
+      <>
+        <button onClick={() => handleNav('how-it-works')} className={linkBaseClass}>{t.nav_works}</button>
+        <button onClick={() => handleNav('planes')} className={linkBaseClass}>{t.nav_plans}</button>
+        <button onClick={() => handleNav('team')} className={linkBaseClass}>{t.nav_team}</button>
+        <Link to="/care" onClick={() => setIsMenuOpen(false)} className={linkBaseClass}>{t.nav_care}</Link>
+        <a 
+          href="https://oulalab.odoo.com/agenda-una-visita/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className={isMobile 
+            ? "text-3xl font-black uppercase text-[#DF3265] text-center w-full leading-tight px-6" 
+            : `text-sm font-black uppercase tracking-widest px-4 py-2 border-2 rounded-full transition-all ${scrolled ? 'border-[#DF3265] text-[#DF3265] hover:bg-[#DF3265] hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-black'}`}
+        >
+          {t.nav_visit}
+        </a>
+        {!isMobile && <Link to="/about" className={linkBaseClass}>About</Link>}
+      </>
+    );
+  };
 
   // --- COMPONENTE DE PÁGINA DE INICIO (HOME) ---
   const HomePage = () => {
@@ -236,27 +288,40 @@ const App: React.FC = () => {
           <div className="absolute inset-0 z-0">
             <img 
               src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" 
-              alt="Fashion" 
+              alt="Fashion background" 
               className="w-full h-full object-cover brightness-[0.85] scale-105"
               style={{ animation: 'slow-zoom 20s ease-in-out infinite alternate' }}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20"></div>
           </div>
+
           <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
             <div className="max-w-4xl">
-              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] tracking-tighter mb-8 font-black uppercase drop-shadow-xl">{t.hero_title}</h1>
-              <p className="text-xl md:text-2xl text-gray-100 mb-12 leading-relaxed max-w-xl font-medium drop-shadow-md">{t.hero_description}</p>
-              <button onClick={() => setIsWaitlistOpen(true)} className="group inline-flex items-center justify-center px-10 py-5 bg-[#DF3265] text-white font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all duration-300 shadow-2xl">
-                {t.hero_cta} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
-              </button>
+              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] tracking-tighter mb-8 font-black uppercase drop-shadow-xl">
+                 {t.hero_title}
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-100 mb-12 leading-relaxed max-w-xl font-medium drop-shadow-md">
+                {t.hero_description}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6">
+                <button 
+                  onClick={() => setIsWaitlistOpen(true)}
+                  className="group relative inline-flex items-center justify-center px-10 py-5 bg-[#DF3265] text-white font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all duration-300 shadow-2xl"
+                >
+                  <span className="relative z-10 flex items-center text-center">
+                    {t.hero_cta} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
+
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer z-20" onClick={() => scrollToSection('value-prop')}>
             <ChevronDown className="text-white w-10 h-10 opacity-70" />
           </div>
         </section>
 
-        {/* Value Prop Section con Video 2 */}
+        {/* Intro Value Prop Section */}
         <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-24">
@@ -273,7 +338,10 @@ const App: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase mb-10 leading-[0.9]">{t.intro_title_1} <span className="italic opacity-20">{t.intro_normal},</span><br />{t.intro_title_2}</h3>
+                <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase mb-10 leading-[0.9]">
+                  {t.intro_title_1} <span className="italic opacity-20">{t.intro_normal},</span><br />
+                  {t.intro_title_2}
+                </h3>
                 <p className="text-xl text-gray-600 leading-relaxed mb-12">{t.intro_description}</p>
                 <div className="grid grid-cols-1 gap-8">
                   {[{ icon: ShoppingBag, title: t.deliver_title_1, desc: t.deliver_desc_1 }, { icon: RefreshCw, title: t.deliver_title_2, desc: t.deliver_desc_2 }, { icon: Clock, title: t.deliver_title_3, desc: t.deliver_desc_3 }].map((item, idx) => (
@@ -293,7 +361,7 @@ const App: React.FC = () => {
 
         <ComoFunciona lang={lang} />
 
-        {/* --- SECCIÓN DE PLANES RESTAURADA COMPLETA --- */}
+        {/* --- SECCIÓN DE PLANES (CON TODAS SUS PARTES) --- */}
         <div id="planes" className="scroll-mt-20">
           <Planes />
         </div>
@@ -311,17 +379,24 @@ const App: React.FC = () => {
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black text-white px-8 py-4 rounded-[2rem] text-[11px] font-black tracking-[0.2em] uppercase shadow-xl">OULALAB CHOICE</div>
                     )}
                     <h3 className="text-3xl font-black uppercase mb-4 text-center">{plan.name}</h3>
-                    <div className="flex flex-col items-center justify-center mb-10">
-                      <span className="text-4xl xl:text-7xl font-black tracking-tighter">{price}</span>
-                      <span className="text-[10px] uppercase font-black opacity-30 mt-2">/ {plan.frequency}</span>
+                    <div className="flex flex-col items-center justify-center mb-10 text-center">
+                      <span className="text-4xl sm:text-5xl md:text-2xl lg:text-4xl xl:text-7xl font-black tracking-tighter leading-none">{price}</span>
+                      <div className="mt-2 flex items-center justify-center space-x-2 text-gray-400">
+                        <span className="text-2xl font-light opacity-30">/</span>
+                        <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
+                      </div>
                     </div>
                     <div className="space-y-4 flex-grow text-left">
                       {plan.features.map((feature, i) => (
                         <div key={i} className="flex items-start space-x-3 text-sm font-bold">
                           <CheckCircle2 size={18} className="text-black shrink-0 mt-0.5" />
-                          <span className="text-gray-600 group-hover:text-black">{feature}</span>
+                          <span className="text-gray-600 group-hover:text-black transition-colors">{feature}</span>
                         </div>
                       ))}
+                      <div className="pt-6 border-t border-gray-100 mt-6">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-black/30 mb-1">{plan.limit}</p>
+                        <p className="text-xs italic font-bold text-gray-400">{plan.swap}</p>
+                      </div>
                     </div>
                   </div>
                 );
@@ -369,7 +444,7 @@ const App: React.FC = () => {
           </div>
         </section>
 
-        {/* --- LAUNCH CON VIDEO 3 --- */}
+        {/* --- LAUNCH --- */}
         <section className="py-40 bg-black text-white relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-50 scale-110">
@@ -391,7 +466,7 @@ const App: React.FC = () => {
     );
   };
 
-  // --- NAVEGACIÓN COMPARTIDA REESTABLECIDA ---
+    // --- NAVEGACIÓN COMPARTIDA REESTABLECIDA ---
   const NavLinks = ({ isMobile = false }) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
@@ -430,7 +505,7 @@ const App: React.FC = () => {
       </>
     );
   };
-
+  
   return (
     <Router>
       <ScrollToTop />
@@ -442,7 +517,6 @@ const App: React.FC = () => {
             <Link to="/" className="flex items-center group cursor-pointer"><img src={BRAND_LOGO_URL} alt="Logo" className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`} /></Link>
             <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
               <NavLinks />
-              {/* SELECTORES DE IDIOMA Y MONEDA */}
               <div className="flex items-center space-x-2 ml-4">
                 <div className="flex bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
                   {(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white shadow-md' : scrolled ? 'text-gray-400' : 'text-white/50'}`}>{l}</button>)}
@@ -456,13 +530,13 @@ const App: React.FC = () => {
           </div>
         </nav>
 
-        {/* MENÚ MÓVIL CENTRADO */}
+        {/* MENÚ MÓVIL */}
         {isMenuOpen && (
           <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
             <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
             <NavLinks isMobile />
             <div className="flex flex-col space-y-4 pt-6 border-t w-1/2 items-center">
-              <div className="flex space-x-4">{(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{l}</button>)}</div>
+              <div className="flex space-x-4">{(['es', 'en', 'pt'] as Language[]).map(l => <button key={l} onClick={() => setLang(l)} className={`w-12 h-12 rounded-full font-black text-xs border-2 uppercase ${lang === l ? 'bg-black text-white border-black shadow-xl' : 'border-gray-200'}`}>{l}</button>)}</div>
               <div className="flex space-x-4">{(['CLP', 'USD', 'EUR'] as Currency[]).map(c => <button key={c} onClick={() => setCurrency(c)} className={`w-12 h-12 rounded-full font-black text-[10px] border-2 uppercase ${currency === c ? 'bg-black text-white border-black' : 'border-gray-200'}`}>{c}</button>)}</div>
             </div>
             <button onClick={() => setIsMenuOpen(false)} className="p-4 bg-gray-100 rounded-full text-black transition-transform active:scale-90"><X size={24} /></button>
@@ -486,7 +560,7 @@ const App: React.FC = () => {
               <div>
                 <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
                 <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
-                  <li><Link to="/" className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
+                  <li><Link to="/" className="hover:text-[#DF3265] transition-colors">Inicio</Link></li>
                   <li><button onClick={() => { navigate('/'); setTimeout(() => document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}), 150); }} className="hover:text-[#DF3265] uppercase">Cómo funciona</button></li>
                   <li><Link to="/care" className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
                   <li><a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265]">{t.nav_visit}</a></li>
@@ -500,13 +574,13 @@ const App: React.FC = () => {
           </div>
         </footer>
 
-        {/* MODAL WAITLIST */}
+        {/* WAITLIST MODAL */}
         {isWaitlistOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
             <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setIsWaitlistOpen(false)}></div>
-            <div className="relative bg-white w-full max-w-2xl rounded-[4rem] shadow-2xl p-16 md:p-24 text-center">
+            <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center">
               <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full" onClick={() => setIsWaitlistOpen(false)}><X size={32} /></button>
-              <h3 className="text-5xl font-black uppercase mb-6">{t.waitlist_title}</h3>
+              <h3 className="text-5xl font-black uppercase mb-6 leading-none">{t.waitlist_title}</h3>
               <form className="space-y-8" onSubmit={async (e) => {
                   e.preventDefault();
                   setIsSending(true);
