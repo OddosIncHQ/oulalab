@@ -1,20 +1,19 @@
-
 import { PricingPlan, TeamMember, Currency } from './types';
 
 export const PRICES: Record<Currency, Record<string, string>> = {
   CLP: {
     'try-on': '$49.900',
-    'premium': '$128.000',
+    'premium': '$149.000',
     'luxury': '$249.000'
   },
   USD: {
     'try-on': '$55',
-    'premium': '$145',
+    'premium': '$165',
     'luxury': '$280'
   },
   EUR: {
     'try-on': '€50',
-    'premium': '€135',
+    'premium': '€155',
     'luxury': '€260'
   }
 };
@@ -35,15 +34,15 @@ export const CONTENT = {
         name: 'Premium',
         frequency: 'MENSUAL',
         features: ['Suscripción flexible', 'Acceso a todas las marcas', 'Seguro de prenda básico'],
-        limit: 'HASTA 10 PRENDAS POR MES',
+        limit: 'HASTA 8 PRENDAS POR MES',
         swap: 'Swap al día 15 del mes'
       },
       {
         id: 'luxury',
         name: 'Luxury',
         frequency: 'MENSUAL',
-        features: ['Curaduría VIP', 'Personal Shopper dedicado', 'Acceso anticipado a colecciones'],
-        limit: 'HASTA 16 PRENDAS POR MES',
+        features: ['Curaduría VIP', 'Personal Stylist dedicado', 'Acceso anticipado a colecciones'],
+        limit: 'HASTA 12 PRENDAS POR MES',
         swap: 'Swap al día 15 del mes'
       }
     ],
@@ -131,15 +130,15 @@ export const CONTENT = {
         name: 'Premium',
         frequency: 'MONTHLY',
         features: ['Flexible subscription', 'Access to all brands', 'Basic garment insurance'],
-        limit: 'UP TO 10 ITEMS PER MONTH',
+        limit: 'UP TO 8 ITEMS PER MONTH',
         swap: 'Swap on the 15th of the month'
       },
       {
         id: 'luxury',
         name: 'Luxury',
         frequency: 'MONTHLY',
-        features: ['VIP curation', 'Dedicated Personal Shopper', 'Early access to collections'],
-        limit: 'UP TO 16 ITEMS PER MONTH',
+        features: ['VIP curation', 'Dedicated Personal Stylist', 'Early access to collections'],
+        limit: 'UP TO 12 ITEMS PER MONTH',
         swap: 'Swap on the 15th of the month'
       }
     ],
@@ -227,15 +226,15 @@ export const CONTENT = {
         name: 'Premium',
         frequency: 'MENSAL',
         features: ['Assinatura flexível', 'Acesso a todas as marcas', 'Seguro de peça básico'],
-        limit: 'ATÉ 10 PEÇAS POR MÊS',
+        limit: 'ATÉ 8 PEÇAS POR MÊS',
         swap: 'Troca no dia 15 do mês'
       },
       {
         id: 'luxury',
         name: 'Luxury',
         frequency: 'MENSAL',
-        features: ['Curadoria VIP', 'Personal Shopper dedicado', 'Acesso antecipado a coleções'],
-        limit: 'ATÉ 16 PEÇAS POR MÊS',
+        features: ['Curadoria VIP', 'Personal Stylist dedicado', 'Acesso antecipado a coleções'],
+        limit: 'ATÉ 12 PEÇAS POR MÊS',
         swap: 'Troca no dia 15 do mês'
       }
     ],
