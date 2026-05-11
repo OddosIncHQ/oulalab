@@ -213,14 +213,12 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  
   const LOGO_DARK = LogoObispo;   
   const LOGO_LIGHT = LogoBlanco;  
   const BRAND_LOGO_URL = scrolled ? LOGO_DARK : LOGO_LIGHT;
     
   const t = UI_STRINGS[lang];
 
-  // Ya que index.tsx tiene el BrowserRouter, es seguro usar estos hooks aquí.
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -242,7 +240,10 @@ const App: React.FC = () => {
           const offset = 80;
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
-          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
         }
       }, 150);
     } else {
@@ -251,7 +252,10 @@ const App: React.FC = () => {
         const offset = 80;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
       }
     }
   };
@@ -259,17 +263,16 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
       <ScrollToTop />
-      
       {/* Fixed Navigation Bar */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <div className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
-              src={scrolled ? LOGO_DARK : LOGO_LIGHT} 
+              src={BRAND_LOGO_URL} 
               alt="Oulalab Logo" 
               className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
             />
-          </Link>
+          </div>
 
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
             <button onClick={() => handleNav('how-it-works')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_works}</button>
@@ -342,7 +345,7 @@ const App: React.FC = () => {
           >
             {t.nav_visit}
           </a>
-
+          
           <div className="flex flex-col space-y-6 pt-10 border-t w-1/2 items-center">
             <div className="flex space-x-4">
               {(['es', 'en', 'pt'] as Language[]).map((l) => (
@@ -436,7 +439,6 @@ const App: React.FC = () => {
                         preload="auto" 
                         className="w-full grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
                       >
-
                         <source src={vidValue} type="video/mp4" />
                       </video>
                     </div>
@@ -471,7 +473,6 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Componentes modulares */}
             <div id="how-it-works" className="scroll-mt-20">
               <ComoFunciona lang={lang} />
             </div>
@@ -480,7 +481,7 @@ const App: React.FC = () => {
               <Planes />
             </div>
 
-            {/* Subscription Plans Context Section */}
+            {/* SECCIÓN DE PLANES CON CONDICIONAL PARA COMING SOON */}
             <section id="plans" className="py-32 bg-white scroll-mt-20">
               <div className="max-w-7xl mx-auto px-6 text-center">
                 <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.pricing_subtitle}</span>
@@ -497,13 +498,22 @@ const App: React.FC = () => {
                           </div>
                         )}
                         <h3 className="text-3xl md:text-2xl lg:text-4xl font-black uppercase tracking-tighter mb-4 text-center">{plan.name}</h3>
-                        <div className="flex flex-col items-center justify-center mb-10 text-center">
-                          <span className="text-4xl sm:text-5xl md:text-2xl lg:text-4xl xl:text-7xl font-black tracking-tighter leading-none">{price}</span>
-                          <div className="mt-2 flex items-center justify-center space-x-2 text-gray-400">
-                            <span className="text-2xl font-light opacity-30">/</span>
-                            <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
-                          </div>
+                        
+                        <div className="flex flex-col items-center justify-center mb-10 text-center min-h-[100px]">
+                          {/* Lógica condicional: Si el plan es premium, mostramos el precio, si no, Coming Soon */}
+                          {plan.id === 'premium' ? (
+                            <>
+                              <span className="text-4xl sm:text-5xl md:text-2xl lg:text-4xl xl:text-7xl font-black tracking-tighter leading-none">{price}</span>
+                              <div className="mt-2 flex items-center justify-center space-x-2 text-gray-400">
+                                <span className="text-2xl font-light opacity-30">/</span>
+                                <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-2xl sm:text-3xl md:text-xl lg:text-2xl xl:text-4xl font-black tracking-widest text-gray-300 uppercase">Coming Soon</span>
+                          )}
                         </div>
+
                         <div className="space-y-4 flex-grow text-left">
                           {plan.features.map((feature, i) => (
                             <div key={i} className="flex items-start space-x-3 text-sm font-bold">
@@ -568,7 +578,6 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Launch Countdown CTA Section */}
             <section className="py-40 bg-black text-white relative overflow-hidden">
               <div className="absolute inset-0 z-0">
                 <video 
@@ -580,7 +589,6 @@ const App: React.FC = () => {
                   preload="auto" 
                   className="w-full h-full object-cover opacity-50 scale-110"
                 >
-
                   <source src={vidLaunch} type="video/mp4" />
                 </video>
               </div>
@@ -605,12 +613,12 @@ const App: React.FC = () => {
             </section>
           </>
         } />
-
-        {/* --- RUTA DE CUIDADOS --- */}
+        
+        {/* RUTA DE CUIDADOS */}
         <Route path="/care" element={<Care />} />
       </Routes>
 
-      {/* Site Footer */}
+      {/* FOOTER */}
       <footer className="py-32 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
@@ -625,15 +633,15 @@ const App: React.FC = () => {
               <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
               <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                 <li><Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
-                <li><button onClick={() => handleNav('how-it-works')} className="hover:text-[#DF3265] transition-colors uppercase">{t.nav_works}</button></li>
-                <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors uppercase">{t.nav_care}</Link></li>
+                <li><button onClick={() => handleNav('how-it-works')} className="hover:text-[#DF3265] transition-colors">{t.nav_works}</button></li>
+                <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
                 <li>
                   <a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265] hover:opacity-70 transition-opacity">
                     {t.nav_visit}
                   </a>
                 </li>
-                <li><button onClick={() => handleNav('plans')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_plans}</button></li>
-                <li><button onClick={() => handleNav('team')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_team}</button></li>
+                <li><button onClick={() => handleNav('plans')} className="hover:text-[#DF3265] transition-colors">{t.footer_plans}</button></li>
+                <li><button onClick={() => handleNav('team')} className="hover:text-[#DF3265] transition-colors">{t.footer_team}</button></li>
               </ul>
             </div>
             
@@ -662,7 +670,7 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Waitlist Registration Modal */}
+      {/* WAITLIST MODAL */}
       {isWaitlistOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
