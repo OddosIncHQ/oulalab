@@ -74,7 +74,7 @@ const UI_STRINGS = {
     launch_waitlist: 'Unirse a la lista de espera',
     launch_tag1: 'Estilo Infinito',
     launch_tag2: 'Lujo Sustentable',
-    launch_tag3: 'Personal Shopper con IA',
+    launch_tag3: 'Personal Stylist con IA', // <-- ACTUALIZADO
     waitlist_title: 'Únete a la lista de espera',
     waitlist_subtitle: 'Sé la primera en vivir la experiencia del clóset de tus sueños este marzo.',
     waitlist_name: 'Nombre Completo',
@@ -128,7 +128,7 @@ const UI_STRINGS = {
     launch_waitlist: 'Join the waitlist',
     launch_tag1: 'Infinite Style',
     launch_tag2: 'Sustainable Luxury',
-    launch_tag3: 'AI Personal Shopper',
+    launch_tag3: 'AI Personal Stylist', // <-- ACTUALIZADO
     waitlist_title: 'Join the waitlist',
     waitlist_subtitle: 'Be the first to experience the closet of your dreams this March.',
     waitlist_name: 'Full Name',
@@ -182,7 +182,7 @@ const UI_STRINGS = {
     launch_waitlist: 'Entrar na lista de espera',
     launch_tag1: 'Estilo Infinito',
     launch_tag2: 'Luxo Sustentável',
-    launch_tag3: 'Personal Shopper con IA',
+    launch_tag3: 'Personal Stylist com IA', // <-- ACTUALIZADO
     waitlist_title: 'Entre na lista de espera',
     waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
@@ -213,12 +213,14 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  
   const LOGO_DARK = LogoObispo;   
   const LOGO_LIGHT = LogoBlanco;  
   const BRAND_LOGO_URL = scrolled ? LOGO_DARK : LOGO_LIGHT;
     
   const t = UI_STRINGS[lang];
 
+  // Ya que index.tsx tiene el BrowserRouter, es seguro usar estos hooks aquí.
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -240,10 +242,7 @@ const App: React.FC = () => {
           const offset = 80;
           const elementPosition = element.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - offset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
         }
       }, 150);
     } else {
@@ -252,10 +251,7 @@ const App: React.FC = () => {
         const offset = 80;
         const elementPosition = element.getBoundingClientRect().top;
         const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       }
     }
   };
@@ -263,16 +259,17 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
       <ScrollToTop />
+      
       {/* Fixed Navigation Bar */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
               src={BRAND_LOGO_URL} 
               alt="Oulalab Logo" 
               className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
             />
-          </div>
+          </Link>
 
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
             <button onClick={() => handleNav('how-it-works')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_works}</button>
@@ -634,14 +631,14 @@ const App: React.FC = () => {
               <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
                 <li><Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
                 <li><button onClick={() => handleNav('how-it-works')} className="hover:text-[#DF3265] transition-colors">{t.nav_works}</button></li>
-                <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.nav_care}</Link></li>
+                <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors uppercase">{t.nav_care}</Link></li>
                 <li>
                   <a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265] hover:opacity-70 transition-opacity">
                     {t.nav_visit}
                   </a>
                 </li>
-                <li><button onClick={() => handleNav('plans')} className="hover:text-[#DF3265] transition-colors">{t.footer_plans}</button></li>
-                <li><button onClick={() => handleNav('team')} className="hover:text-[#DF3265] transition-colors">{t.footer_team}</button></li>
+                <li><button onClick={() => handleNav('plans')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_plans}</button></li>
+                <li><button onClick={() => handleNav('team')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_team}</button></li>
               </ul>
             </div>
             
@@ -672,7 +669,7 @@ const App: React.FC = () => {
 
       {/* WAITLIST MODAL */}
       {isWaitlistOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+        <div className="fixed inset0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
           <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
             <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full transition-all" onClick={() => setIsWaitlistOpen(false)}>
