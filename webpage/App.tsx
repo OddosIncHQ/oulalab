@@ -612,7 +612,7 @@ const App: React.FC = () => {
         } />
         
         {/* RUTA DE CUIDADOS */}
-        <Route path="/care" element={<Care />} />
+        <Route path="/care" element={<Care lang={lang} />} />
       </Routes>
 
       {/* FOOTER */}
