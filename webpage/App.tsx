@@ -74,7 +74,7 @@ const UI_STRINGS = {
     launch_waitlist: 'Unirse a la lista de espera',
     launch_tag1: 'Estilo Infinito',
     launch_tag2: 'Lujo Sustentable',
-    launch_tag3: 'Personal Stylist con IA', // <-- ACTUALIZADO
+    launch_tag3: 'Personal Stylist con IA', 
     waitlist_title: 'Únete a la lista de espera',
     waitlist_subtitle: 'Sé la primera en vivir la experiencia del clóset de tus sueños este marzo.',
     waitlist_name: 'Nombre Completo',
@@ -128,7 +128,7 @@ const UI_STRINGS = {
     launch_waitlist: 'Join the waitlist',
     launch_tag1: 'Infinite Style',
     launch_tag2: 'Sustainable Luxury',
-    launch_tag3: 'AI Personal Stylist', // <-- ACTUALIZADO
+    launch_tag3: 'AI Personal Stylist', 
     waitlist_title: 'Join the waitlist',
     waitlist_subtitle: 'Be the first to experience the closet of your dreams this March.',
     waitlist_name: 'Full Name',
@@ -182,7 +182,7 @@ const UI_STRINGS = {
     launch_waitlist: 'Entrar na lista de espera',
     launch_tag1: 'Estilo Infinito',
     launch_tag2: 'Luxo Sustentável',
-    launch_tag3: 'Personal Stylist com IA', // <-- ACTUALIZADO
+    launch_tag3: 'Personal Stylist com IA', 
     waitlist_title: 'Entre na lista de espera',
     waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
     waitlist_name: 'Nome Completo',
@@ -220,7 +220,6 @@ const App: React.FC = () => {
     
   const t = UI_STRINGS[lang];
 
-  // Ya que index.tsx tiene el BrowserRouter, es seguro usar estos hooks aquí.
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -669,47 +668,45 @@ const App: React.FC = () => {
 
       {/* WAITLIST MODAL */}
       {isWaitlistOpen && (
-        <div className="fixed inset0 z-[100] flex items-center justify-center px-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
-          <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 p-16 md:p-24 text-center">
             <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full transition-all" onClick={() => setIsWaitlistOpen(false)}>
               <X size={32} />
             </button>
-            <div className="p-16 md:p-24 text-center">
-              <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
-              <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
-              
-              <form 
-                className="space-y-8" 
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setIsSending(true);
-                  const form = e.currentTarget;
-                  const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
-                  const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-                  try {
-                    await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
-                      method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ nombre, email })
-                    });
-                    alert(t.waitlist_success);
-                    setIsWaitlistOpen(false);
-                  } catch (error) {
-                    alert("Error técnico. Intenta más tarde.");
-                  } finally {
-                    setIsSending(false);
-                  }
-                }}
-              >
-                <div className="grid md:grid-cols-2 gap-8">
-                  <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
-                  <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
-                </div>
-                <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">
-                  {isSending ? "ENVIANDO..." : t.waitlist_button}
-                </button>
-              </form>
-            </div>
+            <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
+            <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
+            
+            <form 
+              className="space-y-8" 
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setIsSending(true);
+                const form = e.currentTarget;
+                const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
+                const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+                try {
+                  await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
+                    method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nombre, email })
+                  });
+                  alert(t.waitlist_success);
+                  setIsWaitlistOpen(false);
+                } catch (error) {
+                  alert("Error técnico. Intenta más tarde.");
+                } finally {
+                  setIsSending(false);
+                }
+              }}
+            >
+              <div className="grid md:grid-cols-2 gap-8">
+                <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
+                <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
+              </div>
+              <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">
+                {isSending ? "ENVIANDO..." : t.waitlist_button}
+              </button>
+            </form>
           </div>
         </div>
       )}
