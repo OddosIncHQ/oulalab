@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -167,7 +167,7 @@ const UI_STRINGS = {
     deliver_title_2: 'Outfit Infinito',
     deliver_desc_2: 'Combinações que batem con quem eu preciso ser para aquela ocasião especial.',
     deliver_title_3: 'Budget Infinito',
-    deliver_desc_3: 'Acesso às melhores marcas sem pensar no preço. Aproveite o luxo hoje.',
+    deliver_desc_3: 'Acesso às mejores marcas sem pensar no preço. Aproveite o luxo hoje.',
     pricing_subtitle: 'Escolha seu estilo',
     pricing_title: 'Por que Oulalab?',
     plans_title: 'Planos de Assinatura',
@@ -211,8 +211,7 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
   const [isSending, setIsSending] = useState(false);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden bg-black">
-      {/* Fondo elegante */}
+    <div className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden bg-black font-sans">
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" 
@@ -221,13 +220,12 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
         />
       </div>
       
-      {/* Caja del formulario (Botón X eliminado) */}
-      <div className="relative z-10 bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center animate-in zoom-in-95 duration-300">
-        <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
-        <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
+      <div className="relative z-10 bg-white w-full max-w-2xl rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-2xl p-10 md:p-24 text-center animate-in zoom-in-95 duration-300">
+        <h3 className="font-claven text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
+        <p className="text-lg md:text-xl text-gray-500 font-medium italic mb-12 md:mb-16">{t.waitlist_subtitle}</p>
         
         <form 
-          className="space-y-8" 
+          className="space-y-6 md:space-y-8" 
           onSubmit={async (e) => {
             e.preventDefault();
             setIsSending(true);
@@ -235,13 +233,12 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
             const email = (form.elements.namedItem('email') as HTMLInputElement).value;
             try {
-              // CONEXIÓN INTACTA A GOOGLE SHEETS
               await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre, email })
               });
               alert(t.waitlist_success);
-              form.reset(); // Limpia el formulario en lugar de ir a la página principal
+              form.reset();
             } catch (error) {
               alert("Error técnico. Intenta más tarde.");
             } finally {
@@ -249,11 +246,11 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             }
           }}
         >
-          <div className="grid md:grid-cols-2 gap-8">
-            <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
-            <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265] text-base md:text-lg" placeholder={t.waitlist_name} required />
+            <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265] text-base md:text-lg" placeholder={t.waitlist_email} required />
           </div>
-          <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">
+          <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-6 md:py-8 rounded-[1.5rem] md:rounded-[2rem] hover:scale-105 transition-all text-base md:text-lg shadow-xl">
             {isSending ? "ENVIANDO..." : t.waitlist_button}
           </button>
         </form>
@@ -272,6 +269,10 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Referencias para forzar la reproducción de los videos
+  const videoRef1 = useRef<HTMLVideoElement>(null);
+  const videoRef2 = useRef<HTMLVideoElement>(null);
   
   const LOGO_DARK = LogoObispo;   
   const LOGO_LIGHT = LogoBlanco;  
@@ -289,6 +290,19 @@ const App: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Forzar reproducción de los videos al montar el componente
+  useEffect(() => {
+    const playVideo = (ref: React.RefObject<HTMLVideoElement>) => {
+      if (ref.current) {
+        ref.current.defaultMuted = true;
+        ref.current.muted = true;
+        ref.current.play().catch(error => console.log("Autoplay prevented:", error));
+      }
+    };
+    playVideo(videoRef1);
+    playVideo(videoRef2);
+  }, [pathname]);
 
   const handleNav = (id: string) => {
     setIsMenuOpen(false);
@@ -314,7 +328,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Ocultar Navbar y Footer si estamos en la ruta de "/unirse-aqui"
   const isStandaloneWaitlist = pathname === '/unirse-aqui';
 
   return (
@@ -453,7 +466,7 @@ const App: React.FC = () => {
 
               <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
                 <div className="max-w-4xl">
-                  <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] tracking-tighter mb-8 font-black uppercase drop-shadow-xl">
+                  <h1 className="font-claven text-5xl md:text-7xl lg:text-[10rem] text-white leading-[0.9] tracking-tighter mb-8 font-black uppercase drop-shadow-xl">
                      {t.hero_title}
                   </h1>
                   
@@ -480,23 +493,23 @@ const App: React.FC = () => {
             </section>
 
             {/* Intro Description Section (Value Prop) */}
-            <section id="value-prop" className="py-32 bg-gray-50 scroll-mt-20">
+            <section id="value-prop" className="py-24 md:py-32 bg-gray-50 scroll-mt-20">
               <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-24">
-                  <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">Concepto Oulalab</span>
-                  <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase">{t.pricing_title}</h2>
+                <div className="text-center mb-16 md:mb-24">
+                  <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-4 md:mb-6 block">Concepto Oulalab</span>
+                  <h2 className="font-claven text-4xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase">{t.pricing_title}</h2>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-20 items-center">
+                <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
                   <div className="relative group">
                     <div className="absolute -inset-6 bg-[#DF3265]/5 rounded-[3rem] transform -rotate-3 transition-transform group-hover:rotate-0"></div>
-                    <div className="relative overflow-hidden rounded-[2.5rem] shadow-2xl bg-black">
+                    <div className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] shadow-2xl bg-black">
                       <video 
-                        autoPlay 
-                        loop 
-                        muted 
-                        defaultMuted 
-                        playsInline 
+                        ref={videoRef1}
+                        autoPlay={true} 
+                        loop={true} 
+                        muted={true} 
+                        playsInline={true} 
                         preload="auto" 
                         className="w-full grayscale hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
                       >
@@ -505,7 +518,7 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase mb-10 leading-[0.9]">
+                    <h3 className="font-claven text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase mb-10 leading-[0.9]">
                       {t.intro_title_1} <span className="italic opacity-20">{t.intro_normal},</span><br />
                       {t.intro_title_2}
                     </h3>
@@ -543,35 +556,35 @@ const App: React.FC = () => {
             </div>
 
             {/* SECCIÓN DE PLANES CON CONDICIONAL PARA COMING SOON */}
-            <section id="plans" className="py-32 bg-white scroll-mt-20">
+            <section id="plans" className="py-24 md:py-32 bg-white scroll-mt-20">
               <div className="max-w-7xl mx-auto px-6 text-center">
                 <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.pricing_subtitle}</span>
-                <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase mb-20">{t.plans_title}</h2>
+                <h2 className="font-claven text-4xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase mb-16 md:mb-20">{t.plans_title}</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
                   {CONTENT[lang].pricing.map((plan) => {
                     const price = PRICES[currency][plan.id];
                     return (
-                      <div key={plan.id} className={`relative flex flex-col p-8 md:p-6 lg:p-10 xl:p-12 bg-white border-2 rounded-[3.5rem] transition-all duration-500 group ${plan.id === 'premium' ? 'border-black shadow-2xl scale-105 z-10' : 'border-gray-100 hover:border-black hover:shadow-xl'}`}>
+                      <div key={plan.id} className={`relative flex flex-col p-10 md:p-8 lg:p-12 bg-white border-2 rounded-[3.5rem] transition-all duration-500 group ${plan.id === 'premium' ? 'border-black shadow-2xl scale-105 z-10' : 'border-gray-100 hover:border-black hover:shadow-xl'}`}>
                         {plan.id === 'premium' && (
                           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black text-white px-8 py-4 rounded-[2rem] text-[11px] font-black tracking-[0.2em] uppercase whitespace-nowrap shadow-xl">
                             OULALAB CHOICE
                           </div>
                         )}
-                        <h3 className="text-3xl md:text-2xl lg:text-4xl font-black uppercase tracking-tighter mb-4 text-center">{plan.name}</h3>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter mb-4 text-center">{plan.name}</h3>
                         
                         <div className="flex flex-col items-center justify-center mb-10 text-center min-h-[100px]">
                           {/* Lógica condicional: Si el plan es premium, mostramos el precio, si no, Coming Soon */}
                           {plan.id === 'premium' ? (
                             <>
-                              <span className="text-4xl sm:text-5xl md:text-2xl lg:text-4xl xl:text-7xl font-black tracking-tighter leading-none">{price}</span>
+                              <span className="text-5xl lg:text-7xl font-black tracking-tighter leading-none">{price}</span>
                               <div className="mt-2 flex items-center justify-center space-x-2 text-gray-400">
                                 <span className="text-2xl font-light opacity-30">/</span>
-                                <span className="text-[10px] sm:text-xs font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
+                                <span className="text-[10px] font-black tracking-[0.2em] uppercase">{plan.frequency}</span>
                               </div>
                             </>
                           ) : (
-                            <span className="text-2xl sm:text-3xl md:text-xl lg:text-2xl xl:text-4xl font-black tracking-widest text-gray-300 uppercase">Coming Soon</span>
+                            <span className="text-2xl md:text-3xl font-black tracking-widest text-gray-300 uppercase">Coming Soon</span>
                           )}
                         </div>
 
@@ -595,12 +608,12 @@ const App: React.FC = () => {
             </section>
 
             {/* Founders / Team Section */}
-            <section id="team" className="py-32 bg-gray-50 scroll-mt-20">
+            <section id="team" className="py-24 md:py-32 bg-gray-50 scroll-mt-20">
               <div className="max-w-7xl mx-auto px-6">
-                <div className="max-w-3xl mb-20">
+                <div className="max-w-3xl mb-16 md:mb-20">
                   <span className="text-xs font-black tracking-widest uppercase text-gray-400 mb-6 block">{t.team_subtitle}</span>
-                  <h2 className="text-6xl md:text-8xl font-black tracking-tighter uppercase mb-8 leading-none">{t.team_title}</h2>
-                  <p className="text-2xl text-gray-500 font-medium italic border-l-4 border-[#DF3265] pl-8">{t.team_description}</p>
+                  <h2 className="font-claven text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase mb-8 leading-none">{t.team_title}</h2>
+                  <p className="text-xl md:text-2xl text-gray-500 font-medium italic border-l-4 border-[#DF3265] pl-8">{t.team_description}</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
                   {CONTENT[lang].team.map((member: TeamMember, idx: number) => {
@@ -639,14 +652,14 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            <section className="py-40 bg-black text-white relative overflow-hidden">
+            <section className="py-32 md:py-40 bg-black text-white relative overflow-hidden">
               <div className="absolute inset-0 z-0">
                 <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  defaultMuted 
-                  playsInline 
+                  ref={videoRef2}
+                  autoPlay={true} 
+                  loop={true} 
+                  muted={true} 
+                  playsInline={true} 
                   preload="auto" 
                   className="w-full h-full object-cover opacity-50 scale-110"
                 >
@@ -658,7 +671,7 @@ const App: React.FC = () => {
                   <Rocket className="text-[#DF3265] w-5 h-5 animate-bounce" />
                   <span className="text-white text-xs font-black tracking-[0.3em] uppercase">{t.launch_countdown}</span>
                 </div>
-                <h2 className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[14rem] font-black italic tracking-tighter uppercase mb-10 leading-[0.8] text-white">
+                <h2 className="font-claven text-6xl md:text-[10rem] lg:text-[14rem] font-black italic tracking-tighter uppercase mb-10 leading-[0.8] text-white">
                   {t.launch_month} <span className="text-white/10">{t.launch_year}</span>
                 </h2>
                 <p className="text-2xl md:text-3xl text-gray-200 leading-relaxed mb-16 max-w-3xl mx-auto font-medium">
@@ -684,12 +697,12 @@ const App: React.FC = () => {
 
       {/* FOOTER (Oculto en StandaloneWaitlist) */}
       {!isStandaloneWaitlist && (
-        <footer className="py-32 bg-white border-t border-gray-100">
+        <footer className="py-24 md:py-32 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-20 mb-24 md:mb-32">
               <div className="col-span-1 md:col-span-2">
                 <div className="flex items-center mb-12 cursor-pointer" onClick={() => { navigate('/'); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100); }}>
-                  <img src={LogoObispo} alt="Oulalab Logo" className="h-16 w-auto object-contain transition-transform hover:scale-105" />
+                  <img src={LogoObispo} alt="Oulalab Logo" className="h-12 md:h-16 w-auto object-contain transition-transform hover:scale-105" />
                 </div>
                 <p className="text-gray-500 font-bold text-xl leading-relaxed max-w-md italic opacity-80">{t.footer_tagline}</p>
               </div>
@@ -740,12 +753,12 @@ const App: React.FC = () => {
       {isWaitlistOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
-          <div className="relative bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 p-16 md:p-24 text-center">
+          <div className="relative bg-white w-full max-w-2xl rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 p-10 md:p-24 text-center">
             <button className="absolute top-10 right-10 p-4 hover:bg-gray-100 rounded-full transition-all" onClick={() => setIsWaitlistOpen(false)}>
               <X size={32} />
             </button>
-            <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
-            <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
+            <h3 className="font-claven text-4xl md:text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
+            <p className="text-lg md:text-xl text-gray-500 font-medium italic mb-12 md:mb-16">{t.waitlist_subtitle}</p>
             
             <form 
               className="space-y-8" 
@@ -769,11 +782,11 @@ const App: React.FC = () => {
                 }
               }}
             >
-              <div className="grid md:grid-cols-2 gap-8">
-                <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
-                <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265] text-base md:text-lg" placeholder={t.waitlist_name} required />
+                <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265] text-base md:text-lg" placeholder={t.waitlist_email} required />
               </div>
-              <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">
+              <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-6 md:py-8 rounded-[1.5rem] md:rounded-[2rem] hover:scale-105 transition-all text-base md:text-lg shadow-xl">
                 {isSending ? "ENVIANDO..." : t.waitlist_button}
               </button>
             </form>
