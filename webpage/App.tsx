@@ -167,7 +167,7 @@ const UI_STRINGS = {
     deliver_title_2: 'Outfit Infinito',
     deliver_desc_2: 'Combinações que batem con quem eu preciso ser para aquela ocasião especial.',
     deliver_title_3: 'Budget Infinito',
-    deliver_desc_3: 'Acesso às mejores marcas sem pensar no preço. Aproveite o luxo hoje.',
+    deliver_desc_3: 'Acesso às melhores marcas sem pensar no preço. Aproveite o luxo hoje.',
     pricing_subtitle: 'Escolha seu estilo',
     pricing_title: 'Por que Oulalab?',
     plans_title: 'Planos de Assinatura',
@@ -204,6 +204,65 @@ const UI_STRINGS = {
     collapse: 'RECOLHER'
   }
 };
+
+// --- COMPONENTE: PÁGINA EXCLUSIVA PARA EL QR (SIN "X") ---
+const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
+  const t = UI_STRINGS[lang];
+  const [isSending, setIsSending] = useState(false);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden bg-black">
+      {/* Fondo elegante */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" 
+          alt="Fashion background" 
+          className="w-full h-full object-cover brightness-[0.3] scale-105"
+        />
+      </div>
+      
+      {/* Caja del formulario (Botón X eliminado) */}
+      <div className="relative z-10 bg-white w-full max-w-2xl rounded-[4rem] overflow-hidden shadow-2xl p-16 md:p-24 text-center animate-in zoom-in-95 duration-300">
+        <h3 className="text-5xl font-black uppercase tracking-tighter mb-6 leading-none">{t.waitlist_title}</h3>
+        <p className="text-xl text-gray-500 font-medium italic mb-16">{t.waitlist_subtitle}</p>
+        
+        <form 
+          className="space-y-8" 
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setIsSending(true);
+            const form = e.currentTarget;
+            const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
+            const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+            try {
+              // CONEXIÓN INTACTA A GOOGLE SHEETS
+              await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
+                method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nombre, email })
+              });
+              alert(t.waitlist_success);
+              form.reset(); // Limpia el formulario en lugar de ir a la página principal
+            } catch (error) {
+              alert("Error técnico. Intenta más tarde.");
+            } finally {
+              setIsSending(false);
+            }
+          }}
+        >
+          <div className="grid md:grid-cols-2 gap-8">
+            <input name="nombre" type="text" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_name} required />
+            <input name="email" type="email" className="w-full bg-gray-50 rounded-2xl px-8 py-6 font-bold outline-none border-b-2 border-transparent focus:border-[#DF3265]" placeholder={t.waitlist_email} required />
+          </div>
+          <button type="submit" disabled={isSending} className="w-full bg-[#DF3265] text-white font-black uppercase tracking-[0.2em] py-8 rounded-[2rem] hover:scale-105 transition-all text-lg shadow-xl">
+            {isSending ? "ENVIANDO..." : t.waitlist_button}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+// --- FIN DEL COMPONENTE QR ---
+
 
 const App: React.FC = () => {
   const [lang, setLang] = useState<Language>('es');
@@ -255,73 +314,78 @@ const App: React.FC = () => {
     }
   };
 
+  // Ocultar Navbar y Footer si estamos en la ruta de "/unirse-aqui"
+  const isStandaloneWaitlist = pathname === '/unirse-aqui';
+
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
       <ScrollToTop />
       
-      {/* Fixed Navigation Bar */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <img 
-              src={BRAND_LOGO_URL} 
-              alt="Oulalab Logo" 
-              className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
-            />
-          </Link>
-
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
-            <button onClick={() => handleNav('how-it-works')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_works}</button>
-            <button onClick={() => handleNav('plans')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_plans}</button>
-            <button onClick={() => handleNav('team')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_team}</button>
-            
-            <Link to="/care" className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>
-              {t.nav_care}
+      {/* Fixed Navigation Bar (Oculta en StandaloneWaitlist) */}
+      {!isStandaloneWaitlist && (
+        <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
+          <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <Link to="/" className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <img 
+                src={BRAND_LOGO_URL} 
+                alt="Oulalab Logo" 
+                className={`object-contain transition-all duration-500 group-hover:scale-105 ${scrolled ? 'h-16' : 'h-24 md:h-32'}`}
+              />
             </Link>
 
-            <a 
-              href="https://oulalab.odoo.com/agenda-una-visita/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`text-sm font-black uppercase tracking-widest px-4 py-2 border-2 rounded-full transition-all ${scrolled ? 'border-[#DF3265] text-[#DF3265] hover:bg-[#DF3265] hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-black'}`}
-            >
-              {t.nav_visit}
-            </a>
+            <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
+              <button onClick={() => handleNav('how-it-works')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_works}</button>
+              <button onClick={() => handleNav('plans')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_plans}</button>
+              <button onClick={() => handleNav('team')} className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>{t.nav_team}</button>
+              
+              <Link to="/care" className={`text-sm font-bold uppercase tracking-widest hover:opacity-60 transition-colors ${scrolled ? 'text-black' : 'text-white'}`}>
+                {t.nav_care}
+              </Link>
 
-            <div className="flex items-center space-x-2 ml-4">
-              <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
-                {(['es', 'en', 'pt'] as Language[]).map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => setLang(l)}
-                    className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
-                {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setCurrency(c)}
-                    className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}
-                  >
-                    {c}
-                  </button>
-                ))}
+              <a 
+                href="https://oulalab.odoo.com/agenda-una-visita/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={`text-sm font-black uppercase tracking-widest px-4 py-2 border-2 rounded-full transition-all ${scrolled ? 'border-[#DF3265] text-[#DF3265] hover:bg-[#DF3265] hover:text-white' : 'border-white/40 text-white hover:bg-white hover:text-black'}`}
+              >
+                {t.nav_visit}
+              </a>
+
+              <div className="flex items-center space-x-2 ml-4">
+                <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
+                  {(['es', 'en', 'pt'] as Language[]).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => setLang(l)}
+                      className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${lang === l ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center bg-gray-100/20 backdrop-blur-md rounded-full p-1 border border-white/10">
+                  {(['CLP', 'USD', 'EUR'] as Currency[]).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setCurrency(c)}
+                      className={`px-3 py-1 text-[10px] font-black rounded-full transition-all uppercase ${currency === c ? 'bg-black text-white' : scrolled ? 'text-gray-400' : 'text-white/50'}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
-          </button>
-        </div>
-      </nav>
+            <button className={`md:hidden p-2 ${scrolled ? 'text-black' : 'text-white'}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
+            </button>
+          </div>
+        </nav>
+      )}
 
       {/* Mobile Overlay Menu */}
-      {isMenuOpen && (
+      {isMenuOpen && !isStandaloneWaitlist && (
         <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-300 px-6 overflow-y-auto">
           <img src={LogoObispo} alt="Oulalab" className="h-20 mb-4" />
           <button onClick={() => handleNav('how-it-works')} className="text-3xl font-black uppercase text-center w-full">{t.nav_works}</button>
@@ -372,6 +436,7 @@ const App: React.FC = () => {
 
       {/* DEFINICIÓN DE RUTAS */}
       <Routes>
+        {/* RUTA 1: HOME PAGE */}
         <Route path="/" element={
           <>
             {/* Main Hero Section */}
@@ -610,63 +675,68 @@ const App: React.FC = () => {
           </>
         } />
         
-        {/* RUTA DE CUIDADOS */}
+        {/* RUTA 2: CUIDADOS */}
         <Route path="/care" element={<Care lang={lang} />} />
+
+        {/* RUTA 3: EXCLUSIVA CÓDIGO QR */}
+        <Route path="/unirse-aqui" element={<StandaloneWaitlist lang={lang} />} />
       </Routes>
 
-      {/* FOOTER */}
-      <footer className="py-32 bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center mb-12 cursor-pointer" onClick={() => { navigate('/'); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100); }}>
-                <img src={LogoObispo} alt="Oulalab Logo" className="h-16 w-auto object-contain transition-transform hover:scale-105" />
+      {/* FOOTER (Oculto en StandaloneWaitlist) */}
+      {!isStandaloneWaitlist && (
+        <footer className="py-32 bg-white border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-32">
+              <div className="col-span-1 md:col-span-2">
+                <div className="flex items-center mb-12 cursor-pointer" onClick={() => { navigate('/'); setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100); }}>
+                  <img src={LogoObispo} alt="Oulalab Logo" className="h-16 w-auto object-contain transition-transform hover:scale-105" />
+                </div>
+                <p className="text-gray-500 font-bold text-xl leading-relaxed max-w-md italic opacity-80">{t.footer_tagline}</p>
               </div>
-              <p className="text-gray-500 font-bold text-xl leading-relaxed max-w-md italic opacity-80">{t.footer_tagline}</p>
+              
+              <div>
+                <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
+                <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
+                  <li><Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
+                  <li><button onClick={() => handleNav('how-it-works')} className="hover:text-[#DF3265] transition-colors">{t.nav_works}</button></li>
+                  <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors uppercase">{t.nav_care}</Link></li>
+                  <li>
+                    <a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265] hover:opacity-70 transition-opacity">
+                      {t.nav_visit}
+                    </a>
+                  </li>
+                  <li><button onClick={() => handleNav('plans')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_plans}</button></li>
+                  <li><button onClick={() => handleNav('team')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_team}</button></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_contact_title}</h4>
+                <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
+                  <li><a href="mailto:hola@oulalab.com" className="hover:text-[#DF3265] transition-colors">hola@oulalab.com</a></li>
+                  <li><a href="#" className="hover:text-[#DF3265] transition-colors">LinkedIn</a></li>
+                </ul>
+              </div>
             </div>
             
-            <div>
-              <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_nav}</h4>
-              <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
-                <li><Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors">{t.footer_home}</Link></li>
-                <li><button onClick={() => handleNav('how-it-works')} className="hover:text-[#DF3265] transition-colors">{t.nav_works}</button></li>
-                <li><Link to="/care" onClick={() => window.scrollTo(0,0)} className="hover:text-[#DF3265] transition-colors uppercase">{t.nav_care}</Link></li>
-                <li>
-                  <a href="https://oulalab.odoo.com/agenda-una-visita/" target="_blank" rel="noopener noreferrer" className="text-[#DF3265] hover:opacity-70 transition-opacity">
-                    {t.nav_visit}
-                  </a>
-                </li>
-                <li><button onClick={() => handleNav('plans')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_plans}</button></li>
-                <li><button onClick={() => handleNav('team')} className="hover:text-[#DF3265] transition-colors uppercase">{t.footer_team}</button></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-black uppercase tracking-widest text-xs mb-10 text-black/30">{t.footer_contact_title}</h4>
-              <ul className="space-y-6 font-black text-black text-sm uppercase tracking-tighter">
-                <li><a href="mailto:hola@oulalab.com" className="hover:text-[#DF3265] transition-colors">hola@oulalab.com</a></li>
-                <li><a href="#" className="hover:text-[#DF3265] transition-colors">LinkedIn</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="pt-16 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-black/20">
-              {t.footer_rights}
-            </p>
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2 text-black/20">
-                <Languages size={16} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Global Fashion Network</span>
+            <div className="pt-16 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-10">
+              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-black/20">
+                {t.footer_rights}
+              </p>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2 text-black/20">
+                  <Languages size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Global Fashion Network</span>
+                </div>
+                <div className="w-10 h-1 text-black/10"></div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-black/40">EST. 2025 | CHILE</p>
               </div>
-              <div className="w-10 h-1 text-black/10"></div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-black/40">EST. 2025 | CHILE</p>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
-      {/* WAITLIST MODAL */}
+      {/* WAITLIST MODAL PARA EL HOME */}
       {isWaitlistOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
