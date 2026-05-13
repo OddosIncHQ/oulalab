@@ -17,33 +17,39 @@
         }
       }(window.location))
     </script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant:ital,wght@0,300..700;1,300..700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <style>
+        /* 1. CARGA DE LA FUENTE CLAVEN LOCAL */
         @font-face {
-          font-family: 'Claven Regular';
-          src: url('https://comforting-pudding-b649e9.netlify.app/Claven-Regular.woff2') format('woff2'),
-               url('https://comforting-pudding-b649e9.netlify.app/Claven-Regular.woff') format('woff');
+          font-family: 'Claven';
+          src: url('/fonts/Claven.otf') format('opentype');
           font-weight: normal;
           font-style: normal;
+          font-display: swap;
         }
 
+        /* 2. CARGA DE LA FUENTE NEUETHING VARIABLE LOCAL */
+        @font-face {
+          font-family: 'Neuething';
+          src: url('/fonts/NeuethingVariable-variable.woff2') format('woff2-variations'),
+               url('/fonts/NeuethingVariable-variable.woff') format('woff-variations'),
+               url('/fonts/NeuethingVariable-variable.ttf') format('truetype');
+          font-weight: 100 900; /* Cubre todos los grosores de Thin a Black */
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* 3. APLICAMOS LA FUENTE A TODO EL SITIO */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Neuething', sans-serif;
             scroll-behavior: smooth;
         }
-        .font-display {
-            font-family: 'Playfair Display', serif;
-        }
-        .font-logo {
-            font-family: 'Bodoni Moda', serif;
-        }
+        
+        /* CLASES PERSONALIZADAS */
         .font-claven {
-            font-family: 'Claven Regular', 'Cormorant', 'Playfair Display', serif;
+            font-family: 'Claven', serif;
             font-weight: 400;
         }
         
@@ -78,10 +84,6 @@
         .stagger-2 { animation-delay: 0.2s; }
         .stagger-3 { animation-delay: 0.3s; }
 
-        .icon-stagger-1 { animation-delay: 0.4s; opacity: 0; }
-        .icon-stagger-2 { animation-delay: 0.5s; opacity: 0; }
-        .icon-stagger-3 { animation-delay: 0.6s; opacity: 0; }
-
         .reveal-hidden {
             opacity: 0;
             transform: translateY(30px);
@@ -98,10 +100,16 @@
           100% { transform: scale(1.1); }
         }
     </style>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    /* INYECTAR LAS FUENTES EN TAILWIND */
+                    fontFamily: {
+                        sans: ['Neuething', 'sans-serif'], 
+                        claven: ['Claven', 'serif'],       
+                    },
                     colors: {
                         brand: {
                             dark: '#2D132B',
@@ -117,7 +125,7 @@
     
     <link rel="stylesheet" href="./index.css">
 </head>
-<body class="bg-brand-pastel text-brand-dark overflow-x-hidden">
+<body class="bg-brand-pastel text-brand-dark overflow-x-hidden font-sans">
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
 </body>
