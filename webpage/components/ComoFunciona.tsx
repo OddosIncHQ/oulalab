@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 // Importación de imágenes
 import imgPaso2 from '../src/assets/pdp1.png';
 import imgPaso4 from '../src/assets/pdp2.png';
 
-// Importación de videos (Asegúrate de que los nombres coincidan exactamente en tu carpeta)
-import vidPaso1 from '../src/assets/vid-2.mp4'; // App y catálogo
-import vidPaso3 from '../src/assets/vid-1.mp4'; // Virtual Try-On
-import vidPaso5 from '../src/assets/vid-3.mp4'; // Recibiendo el pedido
+// Importación de videos
+import vidPaso1 from '../src/assets/vid-2.mp4'; 
+import vidPaso3 from '../src/assets/vid-1.mp4'; 
+import vidPaso5 from '../src/assets/vid-3.mp4'; 
 
 interface ComoFuncionaProps {
   lang: 'es' | 'en' | 'pt';
@@ -25,7 +25,7 @@ const STRINGS = {
     step3_title: 'Crea tu avatar y pruébatelo todo',
     step3_desc: 'Con nuestra tecnología de Virtual Try-On, visualiza cómo te queda cada prenda de forma ultra realista antes de pedirla.',
     step4_title: 'Ajuste perfecto con IA',
-    step4_desc: 'Nuestro recomendador analiza tu colorimetría y medidas exactas para asegurar un ajuste impecable. Un Personal Shopper en tu bolsillo.',
+    step4_desc: 'Nuestro recomendador analiza tu colorimetría y medidas exactas para asegurar un ajuste impecable. Un Personal Stylist en tu bolsillo.',
     step5_title: 'Suscríbete, recibe y renueva',
     step5_desc: 'Elige tu plan, recibe tus prendas y cámbialas cada 15 días para refrescar tu look. Nosotros coordinamos el retiro por ti.',
   },
@@ -64,83 +64,118 @@ const STRINGS = {
 const ComoFunciona: React.FC<ComoFuncionaProps> = ({ lang }) => {
   const t = STRINGS[lang];
 
-  // Definimos una clase común para el "Marco de Celular" para mantener consistencia
-  const phoneFrameClass = "rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover transition-transform duration-500 group-hover:scale-105 bg-black";
+  // Referencias para forzar la reproducción de los videos
+  const videoRef1 = useRef<HTMLVideoElement>(null);
+  const videoRef3 = useRef<HTMLVideoElement>(null);
+  const videoRef5 = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const playVideo = (ref: React.RefObject<HTMLVideoElement>) => {
+      if (ref.current) {
+        ref.current.defaultMuted = true;
+        ref.current.muted = true;
+        ref.current.play().catch(error => console.log("Autoplay prevented:", error));
+      }
+    };
+    playVideo(videoRef1);
+    playVideo(videoRef3);
+    playVideo(videoRef5);
+  }, []);
+
+  const phoneFrameClass = "rounded-[2.5rem] md:rounded-[3rem] shadow-2xl border-[8px] border-gray-100 w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] aspect-[9/16] object-cover transition-transform duration-500 group-hover:scale-105 bg-black";
 
   return (
-    <section id="how-it-works" className="py-24 bg-white overflow-hidden">
+    <section id="how-it-works" className="py-20 md:py-32 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         
         {/* Cabecera */}
-        <div className="text-center mb-20">
-          <h2 className="text-base font-black text-[#DF3265] tracking-widest uppercase">{t.tag}</h2>
-          <p className="mt-2 text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">{t.title}</p>
-          <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">{t.desc}</p>
+        <div className="text-center mb-16 md:mb-24">
+          <span className="text-[10px] md:text-xs font-black tracking-widest uppercase text-gray-400 mb-4 md:mb-6 block">
+            {t.tag}
+          </span>
+          {/* Título adaptado a Claven Responsivo */}
+          <h2 className="font-claven text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter uppercase mb-6 md:mb-8 leading-none">
+            {t.title}
+          </h2>
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-600 font-medium leading-relaxed">
+            {t.desc}
+          </p>
         </div>
 
-        <div className="space-y-32">
+        <div className="space-y-24 md:space-y-32">
           
-          {/* PASO 1 - VIDEO: Catálogo (vid-2) */}
+          {/* PASO 1 - VIDEO */}
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-            <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">1</div>
-              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">{t.step1_title}</h3>
-              <p className="text-lg text-gray-600 leading-relaxed font-medium">{t.step1_desc}</p>
+            <div className="relative text-center lg:text-left mb-10 lg:mb-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6 mx-auto lg:mx-0">1</div>
+              {/* Títulos de pasos adaptados a Claven Responsivo */}
+              <h3 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 md:mb-6 leading-[0.9]">
+                {t.step1_title}
+              </h3>
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed font-medium">{t.step1_desc}</p>
             </div>
-            <div className="mt-10 lg:mt-0 flex justify-center group">
-              <video autoPlay muted loop playsInline className={phoneFrameClass}>
+            <div className="flex justify-center group">
+              <video ref={videoRef1} autoPlay={true} muted={true} loop={true} playsInline={true} className={phoneFrameClass}>
                 <source src={vidPaso1} type="video/mp4" />
               </video>
             </div>
           </div>
 
-          {/* PASO 2 - IMAGEN: Detalle (pdp1) */}
+          {/* PASO 2 - IMAGEN */}
           <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="mt-10 lg:mt-0 flex justify-center group">
               <img src={imgPaso2} alt="Detalle" className={phoneFrameClass + " object-top"} />
             </div>
-            <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">2</div>
-              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">{t.step2_title}</h3>
-              <p className="text-lg text-gray-600 leading-relaxed font-medium">{t.step2_desc}</p>
+            <div className="relative text-center lg:text-left">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6 mx-auto lg:mx-0">2</div>
+              <h3 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 md:mb-6 leading-[0.9]">
+                {t.step2_title}
+              </h3>
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed font-medium">{t.step2_desc}</p>
             </div>
           </div>
 
-          {/* PASO 3 - VIDEO: Virtual Try-On (vid-1) */}
+          {/* PASO 3 - VIDEO */}
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-            <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">3</div>
-              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">{t.step3_title}</h3>
-              <p className="text-lg text-gray-600 leading-relaxed font-medium">{t.step3_desc}</p>
+            <div className="relative text-center lg:text-left mb-10 lg:mb-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6 mx-auto lg:mx-0">3</div>
+              <h3 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 md:mb-6 leading-[0.9]">
+                {t.step3_title}
+              </h3>
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed font-medium">{t.step3_desc}</p>
             </div>
-            <div className="mt-10 lg:mt-0 flex justify-center group">
-              <video autoPlay muted loop playsInline className={phoneFrameClass}>
+            <div className="flex justify-center group">
+              <video ref={videoRef3} autoPlay={true} muted={true} loop={true} playsInline={true} className={phoneFrameClass}>
                 <source src={vidPaso3} type="video/mp4" />
               </video>
             </div>
           </div>
 
-          {/* PASO 4 - IMAGEN: Recomendador (pdp2) */}
+          {/* PASO 4 - IMAGEN */}
           <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div className="mt-10 lg:mt-0 flex justify-center group">
               <img src={imgPaso4} alt="Recomendador IA" className={phoneFrameClass + " object-top"} />
             </div>
-            <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">4</div>
-              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">{t.step4_title}</h3>
-              <p className="text-lg text-gray-600 leading-relaxed font-medium">{t.step4_desc}</p>
+            <div className="relative text-center lg:text-left">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6 mx-auto lg:mx-0">4</div>
+              <h3 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 md:mb-6 leading-[0.9]">
+                {t.step4_title}
+              </h3>
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed font-medium">{t.step4_desc}</p>
             </div>
           </div>
 
-          {/* PASO 5 - VIDEO: Recibe y Renueva (vid-3) */}
+          {/* PASO 5 - VIDEO */}
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
-            <div className="relative">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6">5</div>
-              <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tighter">{t.step5_title}</h3>
-              <p className="text-lg text-gray-600 leading-relaxed font-medium">{t.step5_desc}</p>
+            <div className="relative text-center lg:text-left mb-10 lg:mb-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7E8F7] text-[#DF3265] font-black text-xl mb-6 mx-auto lg:mx-0">5</div>
+              <h3 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 md:mb-6 leading-[0.9]">
+                {t.step5_title}
+              </h3>
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed font-medium">{t.step5_desc}</p>
             </div>
-            <div className="mt-10 lg:mt-0 flex justify-center group">
-              <video autoPlay muted loop playsInline className={phoneFrameClass}>
+            <div className="flex justify-center group">
+              <video ref={videoRef5} autoPlay={true} muted={true} loop={true} playsInline={true} className={phoneFrameClass}>
                 <source src={vidPaso5} type="video/mp4" />
               </video>
             </div>
