@@ -96,7 +96,7 @@ export const CONTENT = {
         role: 'CIO',
         title: 'CIO by Oulalab',
         experience: '25 AÑOS TRANSFORMANDO EMPRESAS A TRAVÉS DE LA TECNOLOGÍA',
-        description: 'Actualmente es el Gerente General de Google Cloud en Chile y ha estado vinculado al mundo de Tecnología por más de 25 años en distintos roles en Accenture y EY. Inversionista Angel en varias startups y limited Partner en dos VCs que lo hacen conocedor del ecosistema digital.',
+        description: 'Vice presidente de Huawei Cloud Latinoamérica y ha estado vinculado al mundo de Tecnología por más de 25 años en distintos roles en Accenture y EY. Inversionista Angel en varias startups y limited Partner en dos VCs que lo hacen conocedor del ecosistema digital.',
         quote: 'Nunca dejes de aprender porque la vida nunca deja de enseñar.',
         image: 'https://i.imgur.com/K8Dk9yH.jpeg',
         email: 'angel@oulalab.com',
