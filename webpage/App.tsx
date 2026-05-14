@@ -206,14 +206,21 @@ const UI_STRINGS = {
 };
 
 // --- COMPONENTE: PÁGINA EXCLUSIVA PARA EL QR (NUEVO DISEÑO EXACTO) ---
-const StandaloneWaitlist: React.FC<{ lang: Language, currency: Currency }> = ({ lang, currency }) => {
+const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
   const t = UI_STRINGS[lang];
   const [isSending, setIsSending] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 md:px-6 relative overflow-hidden bg-gray-500 font-sans">
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" 
+          alt="Fashion background" 
+          className="w-full h-full object-cover brightness-[0.3] scale-105"
+        />
+      </div>
       
-      {/* Nuevo Contenedor Morado (Réplica exacta de la imagen) */}
+      {/* Nuevo Contenedor Morado y Estrecho */}
       <div className="relative z-10 bg-[#2D132B] w-full max-w-[400px] rounded-[3rem] overflow-hidden shadow-2xl p-8 md:p-10 text-center animate-in zoom-in-95 duration-300 my-8">
         
         <div className="mb-10 mt-4">
@@ -232,10 +239,10 @@ const StandaloneWaitlist: React.FC<{ lang: Language, currency: Currency }> = ({ 
             const email = (form.elements.namedItem('email') as HTMLInputElement).value;
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
-              // CONEXIÓN A GOOGLE SHEETS
+              // CONEXIÓN A GOOGLE SHEETS ENVIANDO "comuna"
               await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nombre, email, address })
+                body: JSON.stringify({ nombre, email, comuna: address })
               });
               alert(t.waitlist_success);
               form.reset();
@@ -695,7 +702,7 @@ const App: React.FC = () => {
         <Route path="/care" element={<Care lang={lang} />} />
 
         {/* RUTA 3: EXCLUSIVA CÓDIGO QR */}
-        <Route path="/unirse-aqui" element={<StandaloneWaitlist lang={lang} currency={currency} />} />
+        <Route path="/unirse-aqui" element={<StandaloneWaitlist lang={lang} />} />
       </Routes>
 
       {/* FOOTER (Oculto en StandaloneWaitlist) */}
@@ -752,7 +759,7 @@ const App: React.FC = () => {
         </footer>
       )}
 
-      {/* WAITLIST MODAL PARA EL HOME (MISMO ESTILO MORADO DE LA IMAGEN) */}
+      {/* WAITLIST MODAL PARA EL HOME (NUEVO DISEÑO EXACTO) */}
       {isWaitlistOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 md:px-6">
           <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
@@ -764,7 +771,7 @@ const App: React.FC = () => {
 
             <div className="mb-10 mt-4">
               <p className="font-sans text-lg md:text-xl text-white font-medium mb-1">{t.waitlist_pretitle}</p>
-              <h3 className="font-claven text-6xl md:text-7xl text-white font-normal tracking-tight leading-none mb-8">{t.waitlist_title}</h3>
+              <h3 className="font-claven text-6xl md:text-7xl font-normal tracking-tight text-white leading-none mb-8">{t.waitlist_title}</h3>
               <p className="font-sans text-xl md:text-2xl text-white font-bold max-w-[250px] mx-auto leading-tight">{t.waitlist_subtitle}</p>
             </div>
             
@@ -778,9 +785,10 @@ const App: React.FC = () => {
                 const email = (form.elements.namedItem('email') as HTMLInputElement).value;
                 const address = (form.elements.namedItem('address') as HTMLInputElement).value;
                 try {
+                  // CONEXIÓN A GOOGLE SHEETS ENVIANDO "comuna"
                   await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                     method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nombre, email, address })
+                    body: JSON.stringify({ nombre, email, comuna: address })
                   });
                   alert(t.waitlist_success);
                   setIsWaitlistOpen(false);
