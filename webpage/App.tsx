@@ -24,7 +24,6 @@ import LogoBlanco from './Logo_Blanco.png';
 
 // Componentes modulares
 import ComoFunciona from './components/ComoFunciona';
-import Planes from './components/Planes'; 
 import Care from './components/Care'; 
 
 // Videos para las secciones internas (.mp4)
@@ -560,10 +559,6 @@ const App: React.FC = () => {
 
             <div id="how-it-works" className="scroll-mt-20">
               <ComoFunciona lang={lang} />
-            </div>
-
-            <div id="planes" className="scroll-mt-20">
-              <Planes />
             </div>
 
             {/* SECCIÓN DE PLANES */}
