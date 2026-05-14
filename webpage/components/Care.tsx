@@ -1,7 +1,6 @@
 import React from 'react';
-import { Wind, ShieldCheck, Droplets, Sun, Sparkles, Scissors } from 'lucide-react';
-
-type Language = 'es' | 'en' | 'pt';
+import { Wind, ShieldCheck, Droplets, Sun, Sparkles, Scissors, Mail } from 'lucide-react';
+import type { Language } from '../types';
 
 interface CareProps {
   lang: Language;
@@ -112,66 +111,85 @@ const CARE_CONTENT = {
 const Care: React.FC<CareProps> = ({ lang }) => {
   const t = CARE_CONTENT[lang];
 
-  // Mantenemos los iconos separados para inyectarlos dinámicamente en el map
+  // Iconos separados para inyectarlos dinámicamente
   const categoryIcons = [
-    <Droplets className="w-8 h-8" />,
-    <Wind className="w-8 h-8" />,
-    <Scissors className="w-8 h-8" />,
-    <Sun className="w-8 h-8" />
+    <Droplets className="w-6 h-6 md:w-8 md:h-8" />,
+    <Wind className="w-6 h-6 md:w-8 md:h-8" />,
+    <Scissors className="w-6 h-6 md:w-8 md:h-8" />,
+    <Sun className="w-6 h-6 md:w-8 md:h-8" />
   ];
 
   return (
-    <div className="bg-white min-h-screen pt-32 pb-20">
+    <div className="bg-white min-h-screen pt-24 md:pt-32 pb-16 md:pb-20 text-[#2D132B]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Header Editorial */}
-        <div className="text-center mb-24">
-          <span className="text-[#DF3265] font-black tracking-[0.3em] uppercase text-sm mb-4 block">
+        
+        {/* === Header Editorial === */}
+        <div className="text-center mb-16 md:mb-24">
+          <span className="text-[#DF3265] font-black tracking-[0.3em] uppercase text-[10px] md:text-xs mb-4 md:mb-6 block">
             {t.tagline}
           </span>
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter uppercase mb-8">
-            {t.title_1} <br/><span className="text-gray-300 italic">{t.title_2}</span>
+          {/* Título en Claven Responsivo */}
+          <h1 className="font-claven text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter uppercase mb-6 md:mb-8 leading-[0.95]">
+            {t.title_1} <br/>
+            <span className="text-gray-300 italic">{t.title_2}</span>
           </h1>
-          <p className="max-w-2xl mx-auto text-xl text-gray-500 font-medium leading-relaxed">
+          <p className="max-w-2xl mx-auto text-base md:text-lg lg:text-xl text-gray-600 font-medium leading-relaxed">
             {t.description}
           </p>
         </div>
 
-        {/* Grid de Consejos */}
-        <div className="grid md:grid-cols-2 gap-12 mb-32">
+        {/* === Grid de Consejos === */}
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-20 md:mb-32">
           {t.categories.map((cat, idx) => (
-            <div key={idx} className="group p-12 bg-gray-50 rounded-[3rem] hover:bg-black hover:text-white transition-all duration-700">
-              <div className="text-[#DF3265] mb-8 group-hover:scale-110 transition-transform duration-500">
+            <div key={idx} className="group p-8 md:p-12 bg-gray-50 rounded-[2.5rem] md:rounded-[3rem] hover:bg-black hover:text-white transition-all duration-700">
+              <div className="text-[#DF3265] mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500">
                 {categoryIcons[idx]}
               </div>
-              <h3 className="text-2xl font-black uppercase mb-4 tracking-tighter">{cat.title}</h3>
-              <p className="text-gray-500 group-hover:text-gray-400 leading-relaxed font-medium">
+              {/* Títulos de tarjeta en Claven Responsivo */}
+              <h3 className="font-claven text-2xl md:text-3xl lg:text-4xl font-black uppercase mb-3 md:mb-4 tracking-tighter">
+                {cat.title}
+              </h3>
+              <p className="text-sm md:text-base lg:text-lg text-gray-600 group-hover:text-gray-400 leading-relaxed font-medium">
                 {cat.desc}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Sección Especial: Materiales */}
-        <div className="border-t border-gray-100 pt-24">
-          <h2 className="text-3xl font-black uppercase mb-16 tracking-tighter flex items-center">
-            <Sparkles className="mr-4 text-[#DF3265]" /> {t.materials_title}
+        {/* === Sección Especial: Materiales === */}
+        <div className="border-t border-gray-100 pt-16 md:pt-24">
+          {/* Título de sección en Claven Responsivo */}
+          <h2 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase mb-12 md:mb-16 tracking-tighter flex items-center">
+            <Sparkles className="mr-3 md:mr-4 text-[#DF3265] w-6 h-6 md:w-8 md:h-8" /> 
+            {t.materials_title}
           </h2>
-          <div className="space-y-12">
+          <div className="space-y-8 md:space-y-12">
             {t.materials.map((item, i) => (
-              <div key={i} className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-50 pb-8 group">
-                <span className="text-2xl font-bold uppercase group-hover:text-[#DF3265] transition-colors">{item.mat}</span>
-                <span className="text-gray-500 md:max-w-md font-medium">{item.care}</span>
+              <div key={i} className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-50 pb-6 md:pb-8 group">
+                {/* Nombre material en Claven */}
+                <span className="font-claven text-xl md:text-2xl lg:text-3xl font-bold uppercase group-hover:text-[#DF3265] transition-colors mb-2 md:mb-0">
+                  {item.mat}
+                </span>
+                <span className="text-sm md:text-base lg:text-lg text-gray-600 md:max-w-md font-medium">
+                  {item.care}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Call to action final */}
-        <div className="mt-32 p-16 bg-[#F7E8F7] rounded-[4rem] text-center">
-          <ShieldCheck className="w-16 h-16 text-[#DF3265] mx-auto mb-8" />
-          <h2 className="text-3xl font-black uppercase mb-4">{t.cta_title}</h2>
-          <p className="text-gray-600 mb-8 font-medium">{t.cta_desc}</p>
-          <a href="mailto:concierge@oulalab.com" className="inline-block bg-black text-white px-12 py-5 rounded-full font-black uppercase tracking-widest hover:bg-[#DF3265] transition-colors">
+        {/* === Call to action final === */}
+        <div className="mt-20 md:mt-32 p-10 md:p-16 bg-[#F7E8F7] rounded-[2.5rem] md:rounded-[4rem] text-center">
+          <ShieldCheck className="w-12 h-12 md:w-16 md:h-16 text-[#DF3265] mx-auto mb-6 md:mb-8" />
+          {/* Título CTA en Claven Responsivo */}
+          <h2 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black uppercase mb-3 md:mb-4">
+            {t.cta_title}
+          </h2>
+          <p className="text-base md:text-lg lg:text-xl text-gray-700 mb-10 md:mb-8 font-medium">
+            {t.cta_desc}
+          </p>
+          <a href="mailto:concierge@oulalab.com" className="inline-flex items-center bg-black text-white px-10 py-4 md:px-12 md:py-5 rounded-full text-sm md:text-base font-black uppercase tracking-widest hover:bg-[#DF3265] transition-colors">
+            <Mail className="w-5 h-5 mr-3" />
             {t.cta_btn}
           </a>
         </div>
