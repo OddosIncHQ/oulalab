@@ -75,17 +75,13 @@ const UI_STRINGS = {
     launch_tag1: 'Estilo Infinito',
     launch_tag2: 'Lujo Sustentable',
     launch_tag3: 'Personal Stylist con IA', 
-    waitlist_title: 'Se Oulalaber',
-    waitlist_subtitle: 'Sé la primera en vivir la experiencia del clóset de tus sueños este marzo.',
-    waitlist_name: 'Nombre Completo',
-    waitlist_email: 'Correo Electrónico',
-    waitlist_phone: 'Telefono',
+    waitlist_pretitle: 'Se una de nuestras',
+    waitlist_title: 'Oulalaber',
+    waitlist_subtitle: 'Tu closet infinito esta a un click',
+    waitlist_name: 'Nombre completo',
+    waitlist_email: 'Mail',
     waitlist_address: 'Comuna',
-    waitlist_button: 'ASEGURAR MI LUGAR',
-    waitlist_outfit_title: 'Selecciona tus Outfits',
-    waitlist_outfit_desc: 'Recibe [X] Outfits completos al mes. Intercambia cuando quieras y disfruta tu clóset de lujo.',
-    waitlist_btn_price: '$79.99', 
-    waitlist_btn_per_month: '/ MES',
+    waitlist_button: 'Asegura tu lugar',
     waitlist_success: '¡Ya estás registrada!',
     waitlist_success_desc: 'Te contactaremos pronto',
     waitlist_close: 'Cerrar',
@@ -133,17 +129,13 @@ const UI_STRINGS = {
     launch_tag1: 'Infinite Style',
     launch_tag2: 'Sustainable Luxury',
     launch_tag3: 'AI Personal Stylist', 
-    waitlist_title: 'Become a Oulalaber',
-    waitlist_subtitle: 'Be one of the first Oulalaber soon',
+    waitlist_pretitle: 'Be one of our',
+    waitlist_title: 'Oulalaber',
+    waitlist_subtitle: 'Your infinite closet is a click away',
     waitlist_name: 'Full Name',
-    waitlist_email: 'Email Address',
-    waitlist_phone: 'Phone Number',
+    waitlist_email: 'Email',
     waitlist_address: 'Commune',
-    waitlist_button: 'SECURE MY SPOT',
-    waitlist_outfit_title: 'Select Your Outfits',
-    waitlist_outfit_desc: 'Receive [X] complete outfits per month. Exchange when you want and enjoy your luxury closet.',
-    waitlist_btn_price: '$79.99', 
-    waitlist_btn_per_month: '/ MONTH',
+    waitlist_button: 'Secure your spot',
     waitlist_success: 'Registration succesful!',
     waitlist_success_desc: 'We\'ll contact you in soon.',
     waitlist_close: 'Close',
@@ -191,17 +183,13 @@ const UI_STRINGS = {
     launch_tag1: 'Estilo Infinito',
     launch_tag2: 'Luxo Sustentável',
     launch_tag3: 'Personal Stylist com IA', 
-    waitlist_title: 'Seja uma Oulalaber',
-    waitlist_subtitle: 'Seja a primeira a viver a experiência del closet de los seus sonhos em março.',
-    waitlist_name: 'Nome Completo',
-    waitlist_email: 'E-mail',
-    waitlist_phone: 'Telefone',
+    waitlist_pretitle: 'Seja uma de nossas',
+    waitlist_title: 'Oulalaber',
+    waitlist_subtitle: 'Seu closet infinito está a um clique',
+    waitlist_name: 'Nome completo',
+    waitlist_email: 'Mail',
     waitlist_address: 'Comuna',
-    waitlist_button: 'GARANTIR MEU LUGAR',
-    waitlist_outfit_title: 'Selecione seus Outfits',
-    waitlist_outfit_desc: 'Receba [X] outfits completos por mês. Troque quando quiser e aproveite seu closet de luxo.',
-    waitlist_btn_price: '$79.99', 
-    waitlist_btn_per_month: '/ MÊS',
+    waitlist_button: 'Garanta seu lugar',
     waitlist_success: 'Já está registrada!',
     waitlist_success_desc: 'Entraremos em contato logo.',
     waitlist_close: 'Fechar',
@@ -217,30 +205,25 @@ const UI_STRINGS = {
   }
 };
 
-// --- COMPONENTE: PÁGINA EXCLUSIVA PARA EL QR (SIN "X") ---
+// --- COMPONENTE: PÁGINA EXCLUSIVA PARA EL QR (NUEVO DISEÑO EXACTO) ---
 const StandaloneWaitlist: React.FC<{ lang: Language, currency: Currency }> = ({ lang, currency }) => {
   const t = UI_STRINGS[lang];
   const [isSending, setIsSending] = useState(false);
-  const [outfitCount, setOutfitCount] = useState(3);
-
-  const premiumPriceStr = PRICES[currency]['premium'];
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden bg-black font-sans">
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2000" 
-          alt="Fashion background" 
-          className="w-full h-full object-cover brightness-[0.3] scale-105"
-        />
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 md:px-6 relative overflow-hidden bg-gray-500 font-sans">
       
-      <div className="relative z-10 bg-brand-dark w-full max-w-2xl rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_80px_rgba(102,47,95,0.3),_inset_0_0_20px_rgba(247,232,247,0.1)] border border-brand-plum p-10 md:p-16 lg:p-24 text-center animate-in zoom-in-95 duration-300">
-        <h3 className="font-claven text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6 leading-none text-brand-pastel-plum">{t.waitlist_title}</h3>
-        <p className="text-lg md:text-xl text-gray-400 font-medium italic mb-12 md:mb-16 lg:mb-20">{t.waitlist_subtitle}</p>
+      {/* Nuevo Contenedor Morado (Réplica exacta de la imagen) */}
+      <div className="relative z-10 bg-[#2D132B] w-full max-w-[400px] rounded-[3rem] overflow-hidden shadow-2xl p-8 md:p-10 text-center animate-in zoom-in-95 duration-300 my-8">
+        
+        <div className="mb-10 mt-4">
+          <p className="font-sans text-lg md:text-xl text-white font-medium mb-1">{t.waitlist_pretitle}</p>
+          <h3 className="font-claven text-6xl md:text-7xl font-normal tracking-tight text-white leading-none mb-8">{t.waitlist_title}</h3>
+          <p className="font-sans text-xl md:text-2xl text-white font-bold max-w-[250px] mx-auto leading-tight">{t.waitlist_subtitle}</p>
+        </div>
         
         <form 
-          className="space-y-6 md:space-y-8 lg:space-y-10" 
+          className="flex flex-col space-y-4" 
           onSubmit={async (e) => {
             e.preventDefault();
             setIsSending(true);
@@ -249,13 +232,13 @@ const StandaloneWaitlist: React.FC<{ lang: Language, currency: Currency }> = ({ 
             const email = (form.elements.namedItem('email') as HTMLInputElement).value;
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
+              // CONEXIÓN A GOOGLE SHEETS
               await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nombre, email, address, outfitCount })
+                body: JSON.stringify({ nombre, email, address })
               });
               alert(t.waitlist_success);
               form.reset();
-              setOutfitCount(3);
             } catch (error) {
               alert("Error técnico. Intenta más tarde.");
             } finally {
@@ -263,44 +246,23 @@ const StandaloneWaitlist: React.FC<{ lang: Language, currency: Currency }> = ({ 
             }
           }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-10">
-            <input name="nombre" type="text" className="w-full bg-white rounded-2xl px-6 md:px-8 lg:px-10 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-brand-neon-pink text-base md:text-lg text-gray-900 shadow-[inset_0_0_10px_rgba(102,47,95,0.1)] placeholder-gray-500" placeholder={t.waitlist_name} required />
-            <input name="email" type="email" className="w-full bg-white rounded-2xl px-6 md:px-8 lg:px-10 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-brand-neon-pink text-base md:text-lg text-gray-900 shadow-[inset_0_0_10px_rgba(102,47,95,0.1)] placeholder-gray-500" placeholder={t.waitlist_email} required />
-          </div>
+          {/* Inputs redondos rosados apilados verticalmente */}
+          <input name="nombre" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_name} required />
+          <input name="email" type="email" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_email} required />
+          <input name="address" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_address} required />
 
-          <div className="w-full">
-            <input name="address" type="text" className="w-full bg-white rounded-2xl px-6 md:px-8 lg:px-10 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-brand-neon-pink text-base md:text-lg text-gray-900 shadow-[inset_0_0_10px_rgba(102,47,95,0.1)] placeholder-gray-500" placeholder={t.waitlist_address} required />
+          {/* Botón Magenta */}
+          <div className="pt-6 mb-2">
+            <button type="submit" disabled={isSending} className="w-full bg-[#E61D64] text-white font-bold text-xl py-4 rounded-full hover:scale-105 transition-transform shadow-lg">
+              {isSending ? "ENVIANDO..." : t.waitlist_button}
+            </button>
           </div>
-
-          <div className="mt-12 md:mt-16 lg:mt-20 border border-brand-plum rounded-3xl bg-brand-dark shadow-[inset_0_0_30px_rgba(102,47,95,0.3)] p-10 md:p-12 lg:p-16">
-            <h4 className="font-sans text-xs md:text-sm font-black uppercase text-brand-pastel-plum tracking-widest mb-6 lg:mb-8">{t.waitlist_outfit_title}</h4>
-            <div className="flex items-center justify-center space-x-6 md:space-x-8">
-              <button type="button" onClick={() => setOutfitCount(Math.max(1, outfitCount - 1))} className="p-4 md:p-5 bg-brand-plum hover:bg-brand-plum/80 text-brand-pastel rounded-full shadow-lg">-</button>
-              <div className="flex items-center justify-center bg-brand-plum rounded-3xl shadow-xl p-8 md:p-10 lg:p-12 min-w-[120px]">
-                <span className="text-4xl md:text-5xl lg:text-6xl font-black text-brand-pastel">{outfitCount}</span>
-              </div>
-              <button type="button" onClick={() => setOutfitCount(outfitCount + 1)} className="p-4 md:p-5 bg-brand-plum hover:bg-brand-plum/80 text-brand-pastel rounded-full shadow-lg">+</button>
-            </div>
-            <p className="mt-8 md:mt-10 lg:mt-12 text-gray-500 text-sm md:text-base leading-relaxed font-medium">{t.waitlist_outfit_desc.replace('[X]', outfitCount.toString())}</p>
-          </div>
-
-          <button type="submit" disabled={isSending} className="w-full relative group bg-brand-neon-pink text-white font-black uppercase tracking-[0.2em] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] hover:scale-105 transition-all text-base md:text-lg shadow-[0_0_50px_rgba(223,50,101,0.5)] overflow-hidden">
-            <span className="relative z-10 flex flex-col items-center justify-center text-center leading-none">
-              <span className="font-sans text-xs md:text-sm font-medium tracking-widest text-brand-pastel-pink mb-1">{isSending ? "ENVIANDO..." : t.waitlist_button}</span>
-              <span className="font-claven text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter text-white">
-                {t.waitlist_btn_price}
-                <span className="font-sans text-xs md:text-sm font-medium tracking-widest text-brand-pastel-pink ml-2">{t.waitlist_btn_per_month}</span>
-              </span>
-            </span>
-            <div className="absolute inset-0 z-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-          
-          <p className="mt-8 text-xs font-black uppercase text-brand-dark tracking-widest bg-brand-plum p-4 rounded-xl text-center shadow-inner">Garantía Oulalab: Cancela en cualquier momento</p>
         </form>
       </div>
     </div>
   );
 };
+// --- FIN DEL COMPONENTE QR ---
 
 
 const App: React.FC = () => {
@@ -311,7 +273,6 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [expandedTeamMember, setExpandedTeamMember] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [outfitCount, setOutfitCount] = useState(3);
 
   // Referencias para forzar la reproducción de los videos
   const videoRef1 = useRef<HTMLVideoElement>(null);
@@ -377,7 +338,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-black selection:text-white overflow-x-hidden">
       <ScrollToTop />
       
-      {/* Fixed Navigation Bar (Oculta en StandaloneWaitlist) */}
+      {/* Fixed Navigation Bar */}
       {!isStandaloneWaitlist && (
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg py-3' : 'bg-transparent py-8'}`}>
           <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -496,7 +457,6 @@ const App: React.FC = () => {
         <Route path="/" element={
           <>
             {/* Main Hero Section */}
-            {/* Aumentamos pt-20 a pt-32 md:pt-40 para que el título no choque con el navbar en iPad */}
             <section className="relative h-screen flex items-center overflow-hidden pt-32 md:pt-40 lg:pt-20">
               <div className="absolute inset-0 z-0">
                 <img 
@@ -510,7 +470,6 @@ const App: React.FC = () => {
 
               <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
                 <div className="max-w-4xl">
-                  {/* Título Claven escalado armónicamente */}
                   <h1 className="font-claven text-5xl md:text-6xl lg:text-8xl xl:text-[9rem] text-white leading-[0.9] tracking-tighter mb-6 md:mb-8 font-black uppercase drop-shadow-xl">
                      {t.hero_title}
                   </h1>
@@ -542,7 +501,6 @@ const App: React.FC = () => {
               <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-16 md:mb-24">
                   <span className="text-[10px] md:text-xs font-black tracking-widest uppercase text-gray-400 mb-4 md:mb-6 block">Concepto Oulalab</span>
-                  {/* Título adaptado */}
                   <h2 className="font-claven text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter uppercase">{t.pricing_title}</h2>
                 </div>
                 
@@ -564,7 +522,6 @@ const App: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    {/* Título interior adaptado */}
                     <h3 className="font-claven text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter uppercase mb-8 md:mb-10 leading-[0.9]">
                       {t.intro_title_1} <span className="italic opacity-20">{t.intro_normal},</span><br />
                       {t.intro_title_2}
@@ -602,11 +559,10 @@ const App: React.FC = () => {
               <Planes />
             </div>
 
-            {/* SECCIÓN DE PLANES CON CONDICIONAL PARA COMING SOON */}
+            {/* SECCIÓN DE PLANES */}
             <section id="plans" className="py-20 md:py-32 bg-white scroll-mt-20">
               <div className="max-w-7xl mx-auto px-6 text-center">
                 <span className="text-[10px] md:text-xs font-black tracking-widest uppercase text-gray-400 mb-4 md:mb-6 block">{t.pricing_subtitle}</span>
-                {/* Título adaptado */}
                 <h2 className="font-claven text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter uppercase mb-12 md:mb-20">{t.plans_title}</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
@@ -622,7 +578,6 @@ const App: React.FC = () => {
                         <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 text-center">{plan.name}</h3>
                         
                         <div className="flex flex-col items-center justify-center mb-8 md:mb-10 text-center min-h-[80px] md:min-h-[100px]">
-                          {/* Lógica condicional: Si el plan es premium, mostramos el precio, si no, Coming Soon */}
                           {plan.id === 'premium' ? (
                             <>
                               <span className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter leading-none">{price}</span>
@@ -660,7 +615,6 @@ const App: React.FC = () => {
               <div className="max-w-7xl mx-auto px-6">
                 <div className="max-w-3xl mb-16 md:mb-20">
                   <span className="text-[10px] md:text-xs font-black tracking-widest uppercase text-gray-400 mb-4 md:mb-6 block">{t.team_subtitle}</span>
-                  {/* Título adaptado */}
                   <h2 className="font-claven text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter uppercase mb-6 md:mb-8 leading-none">{t.team_title}</h2>
                   <p className="text-lg md:text-xl lg:text-2xl text-gray-500 font-medium italic border-l-4 border-[#DF3265] pl-6 md:pl-8">{t.team_description}</p>
                 </div>
@@ -720,7 +674,6 @@ const App: React.FC = () => {
                   <Rocket className="text-[#DF3265] w-4 h-4 md:w-5 md:h-5 animate-bounce" />
                   <span className="text-white text-[10px] md:text-xs font-black tracking-[0.3em] uppercase">{t.launch_countdown}</span>
                 </div>
-                {/* Título adaptado */}
                 <h2 className="font-claven text-6xl md:text-8xl lg:text-[11rem] font-black italic tracking-tighter uppercase mb-8 md:mb-10 leading-[0.8] text-white">
                   {t.launch_month} <span className="text-white/10">{t.launch_year}</span>
                 </h2>
@@ -799,20 +752,24 @@ const App: React.FC = () => {
         </footer>
       )}
 
-      {/* WAITLIST MODAL PARA EL HOME */}
-      {/* Ajuste vital de padding para que los inputs no se aplasten en iPad/Móvil */}
+      {/* WAITLIST MODAL PARA EL HOME (MISMO ESTILO MORADO DE LA IMAGEN) */}
       {isWaitlistOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 md:px-6">
-          <div className="absolute inset-0 bg-brand-dark/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
-          <div className="relative bg-brand-dark w-full max-w-xl lg:max-w-2xl rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_80px_rgba(102,47,95,0.3),_inset_0_0_20px_rgba(247,232,247,0.1)] border border-brand-plum p-10 md:p-12 lg:p-20 text-center animate-in zoom-in-95 duration-300">
-            <button className="absolute top-6 right-6 md:top-10 md:right-10 p-3 md:p-4 hover:bg-brand-plum/50 rounded-full transition-all text-white" onClick={() => setIsWaitlistOpen(false)}>
-              <X size={24} className="md:w-8 md:h-8" />
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setIsWaitlistOpen(false)}></div>
+          
+          <div className="relative z-10 bg-[#2D132B] w-full max-w-[400px] rounded-[3rem] overflow-hidden shadow-2xl p-8 md:p-10 text-center animate-in zoom-in-95 duration-300">
+            <button className="absolute top-6 right-6 p-2 text-white/50 hover:text-white transition-colors" onClick={() => setIsWaitlistOpen(false)}>
+              <X size={24} />
             </button>
-            <h3 className="font-claven text-brand-pastel-plum text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter mb-4 md:mb-6 leading-none">{t.waitlist_title}</h3>
-            <p className="text-base md:text-lg lg:text-xl text-gray-400 font-medium italic mb-8 md:mb-12">{t.waitlist_subtitle}</p>
+
+            <div className="mb-10 mt-4">
+              <p className="font-sans text-lg md:text-xl text-white font-medium mb-1">{t.waitlist_pretitle}</p>
+              <h3 className="font-claven text-6xl md:text-7xl text-white font-normal tracking-tight leading-none mb-8">{t.waitlist_title}</h3>
+              <p className="font-sans text-xl md:text-2xl text-white font-bold max-w-[250px] mx-auto leading-tight">{t.waitlist_subtitle}</p>
+            </div>
             
             <form 
-              className="space-y-6 md:space-y-8" 
+              className="flex flex-col space-y-4" 
               onSubmit={async (e) => {
                 e.preventDefault();
                 setIsSending(true);
@@ -823,7 +780,7 @@ const App: React.FC = () => {
                 try {
                   await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                     method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nombre, email, address, outfitCount })
+                    body: JSON.stringify({ nombre, email, address })
                   });
                   alert(t.waitlist_success);
                   setIsWaitlistOpen(false);
@@ -834,37 +791,15 @@ const App: React.FC = () => {
                 }
               }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <input name="nombre" type="text" className="w-full bg-white rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-brand-neon-pink text-base md:text-lg text-gray-900 shadow-[inset_0_0_10px_rgba(102,47,95,0.1)] placeholder-gray-500" placeholder={t.waitlist_name} required />
-                <input name="email" type="email" className="w-full bg-white rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-brand-neon-pink text-base md:text-lg text-gray-900 shadow-[inset_0_0_10px_rgba(102,47,95,0.1)] placeholder-gray-500" placeholder={t.waitlist_email} required />
-              </div>
-              <div className="w-full">
-                <input name="address" type="text" className="w-full bg-white rounded-2xl px-6 md:px-8 py-5 md:py-6 font-bold outline-none border-b-2 border-transparent focus:border-brand-neon-pink text-base md:text-lg text-gray-900 shadow-[inset_0_0_10px_rgba(102,47,95,0.1)] placeholder-gray-500" placeholder={t.waitlist_address} required />
-              </div>
+              <input name="nombre" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_name} required />
+              <input name="email" type="email" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_email} required />
+              <input name="address" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_address} required />
 
-              <div className="mt-8 md:mt-10 lg:mt-12 border border-brand-plum rounded-3xl bg-brand-dark/50 shadow-[inset_0_0_20px_rgba(102,47,95,0.2)] p-6 md:p-8 lg:p-10">
-                <h4 className="font-sans text-[10px] md:text-xs font-black uppercase text-brand-pastel-plum tracking-widest mb-4 lg:mb-6">{t.waitlist_outfit_title}</h4>
-                <div className="flex items-center justify-center space-x-6 md:space-x-8">
-                  <button type="button" onClick={() => setOutfitCount(Math.max(1, outfitCount - 1))} className="p-3 md:p-4 bg-brand-plum hover:bg-brand-plum/80 text-brand-pastel rounded-full shadow-lg">-</button>
-                  <div className="flex items-center justify-center bg-brand-plum rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-8 lg:p-10 min-w-[100px]">
-                    <span className="text-3xl md:text-4xl lg:text-5xl font-black text-brand-pastel">{outfitCount}</span>
-                  </div>
-                  <button type="button" onClick={() => setOutfitCount(outfitCount + 1)} className="p-3 md:p-4 bg-brand-plum hover:bg-brand-plum/80 text-brand-pastel rounded-full shadow-lg">+</button>
-                </div>
-                <p className="mt-6 md:mt-8 text-gray-400 text-xs md:text-sm leading-relaxed font-medium">{t.waitlist_outfit_desc.replace('[X]', outfitCount.toString())}</p>
+              <div className="pt-6 mb-2">
+                <button type="submit" disabled={isSending} className="w-full bg-[#E61D64] text-white font-bold text-xl py-4 rounded-full hover:scale-105 transition-transform shadow-lg">
+                  {isSending ? "ENVIANDO..." : t.waitlist_button}
+                </button>
               </div>
-
-              <button type="submit" disabled={isSending} className="w-full relative group bg-brand-neon-pink text-white font-black uppercase tracking-[0.2em] p-5 md:p-6 lg:p-8 rounded-[1.5rem] md:rounded-[2rem] hover:scale-105 transition-all text-sm md:text-base lg:text-lg shadow-[0_0_50px_rgba(223,50,101,0.5)] overflow-hidden">
-                <span className="relative z-10 flex flex-col items-center justify-center text-center leading-none">
-                  <span className="font-sans text-[10px] md:text-xs font-medium tracking-widest text-brand-pastel-pink mb-1">{isSending ? "ENVIANDO..." : t.waitlist_button}</span>
-                  <span className="font-claven text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter text-white">
-                    {t.waitlist_btn_price}
-                    <span className="font-sans text-[10px] md:text-xs font-medium tracking-widest text-brand-pastel-pink ml-2">{t.waitlist_btn_per_month}</span>
-                  </span>
-                </span>
-                <div className="absolute inset-0 z-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </button>
-              <p className="mt-6 text-[10px] font-black uppercase text-brand-pastel-plum/60 tracking-widest bg-brand-plum/20 p-3 rounded-xl text-center shadow-inner">Garantía Oulalab: Cancela en cualquier momento</p>
             </form>
           </div>
         </div>
