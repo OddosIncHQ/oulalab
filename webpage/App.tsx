@@ -243,7 +243,7 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
               // CONEXIÓN A GOOGLE SHEETS ENVIANDO "telefono" y "comuna"
-              await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
+              await fetch("https://script.google.com/a/macros/oulalab.com/s/AKfycbxsPYWEG9gysS5TjglG8MIlgoGNstE7g5iafbOjWu8qiV2pcNcjTsnccyfwAYLx7z9X/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre, email, telefono, comuna: address })
               });
