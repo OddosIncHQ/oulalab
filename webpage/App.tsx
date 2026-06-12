@@ -79,6 +79,7 @@ const UI_STRINGS = {
     waitlist_subtitle: 'Tu closet infinito está a un click',
     waitlist_name: 'Nombre completo',
     waitlist_email: 'Mail',
+    waitlist_phone: 'Teléfono',
     waitlist_address: 'Comuna',
     waitlist_button: 'Inscríbete',
     waitlist_success: '¡Ya estás registrada!',
@@ -133,6 +134,7 @@ const UI_STRINGS = {
     waitlist_subtitle: 'Your infinite closet is a click away',
     waitlist_name: 'Full Name',
     waitlist_email: 'Email',
+    waitlist_phone: 'Phone Number',
     waitlist_address: 'Commune',
     waitlist_button: 'Subscribe Now!',
     waitlist_success: 'Registration succesful!',
@@ -187,6 +189,7 @@ const UI_STRINGS = {
     waitlist_subtitle: 'Seu closet infinito está a um clique',
     waitlist_name: 'Nome completo',
     waitlist_email: 'Mail',
+    waitlist_phone: 'Telefone',
     waitlist_address: 'Comuna',
     waitlist_button: 'Inscreva-se',
     waitlist_success: 'Já está registrada!',
@@ -236,12 +239,13 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             const form = e.currentTarget;
             const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
             const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+            const telefono = (form.elements.namedItem('telefono') as HTMLInputElement).value;
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
-              // CONEXIÓN A GOOGLE SHEETS ENVIANDO "comuna"
+              // CONEXIÓN A GOOGLE SHEETS ENVIANDO "telefono" y "comuna"
               await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nombre, email, comuna: address })
+                body: JSON.stringify({ nombre, email, telefono, comuna: address })
               });
               alert(t.waitlist_success);
               form.reset();
@@ -255,6 +259,7 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
           {/* Inputs redondos rosados apilados verticalmente */}
           <input name="nombre" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_name} required />
           <input name="email" type="email" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_email} required />
+          <input name="telefono" type="tel" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_phone} required />
           <input name="address" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_address} required />
 
           {/* Botón Magenta */}
@@ -778,12 +783,13 @@ const App: React.FC = () => {
                 const form = e.currentTarget;
                 const nombre = (form.elements.namedItem('nombre') as HTMLInputElement).value;
                 const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+                const telefono = (form.elements.namedItem('telefono') as HTMLInputElement).value;
                 const address = (form.elements.namedItem('address') as HTMLInputElement).value;
                 try {
-                  // CONEXIÓN A GOOGLE SHEETS ENVIANDO "comuna"
+                  // CONEXIÓN A GOOGLE SHEETS ENVIANDO "comuna" y "telefono"
                   await fetch("https://script.google.com/macros/s/AKfycbwKGfjuGtQNGMheUmvvH3qOAqxbEluDC6m_8jnphhQINUnInnR597AT1ytoMpSZ6W-e/exec", {
                     method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nombre, email, comuna: address })
+                    body: JSON.stringify({ nombre, email, telefono, comuna: address })
                   });
                   alert(t.waitlist_success);
                   setIsWaitlistOpen(false);
@@ -796,6 +802,7 @@ const App: React.FC = () => {
             >
               <input name="nombre" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_name} required />
               <input name="email" type="email" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_email} required />
+              <input name="telefono" type="tel" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_phone} required />
               <input name="address" type="text" className="w-full bg-[#F7E8F7] rounded-full px-6 py-4 font-medium text-gray-900 placeholder-gray-700 outline-none focus:ring-2 focus:ring-[#DF3265]" placeholder={t.waitlist_address} required />
 
               <div className="pt-6 mb-2">
