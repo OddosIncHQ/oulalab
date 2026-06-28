@@ -242,8 +242,8 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             const telefono = (form.elements.namedItem('telefono') as HTMLInputElement).value;
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
-              // URL ACTUALIZADA A LA VERSIÓN 12 (Termina en LttVbRz)
-              await fetch("https://script.google.com/macros/s/AKfycbzH_YPxIGHNlqptESWS_sbftxUR0iWx9iJTJQJ_6tc5I4H_GYcpWokMQcARLttVbRz/exec", {
+              // URL ACTUALIZADA A LA VERSIÓN 13 (Termina en 7nWM)
+              await fetch("https://script.google.com/macros/s/AKfycbys6AXW3ttTyxrDkrdUNwBLUjhLmOJQTeuNBrh6vd9ngo6h4mq4x-ENivWzDmWV7nWM/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre, email, telefono, comuna: address })
               });
@@ -786,8 +786,8 @@ const App: React.FC = () => {
                 const telefono = (form.elements.namedItem('telefono') as HTMLInputElement).value;
                 const address = (form.elements.namedItem('address') as HTMLInputElement).value;
                 try {
-                  // URL ACTUALIZADA A LA VERSIÓN 12 (Termina en LttVbRz)
-                  await fetch("https://script.google.com/macros/s/AKfycbzH_YPxIGHNlqptESWS_sbftxUR0iWx9iJTJQJ_6tc5I4H_GYcpWokMQcARLttVbRz/exec", {
+                  // URL ACTUALIZADA A LA VERSIÓN 13 (Termina en 7nWM)
+                  await fetch("https://script.google.com/macros/s/AKfycbys6AXW3ttTyxrDkrdUNwBLUjhLmOJQTeuNBrh6vd9ngo6h4mq4x-ENivWzDmWV7nWM/exec", {
                     method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ nombre, email, telefono, comuna: address })
                   });
