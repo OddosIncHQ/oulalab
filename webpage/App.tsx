@@ -243,7 +243,7 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
               // CONEXIÓN A GOOGLE SHEETS ENVIANDO "telefono" y "comuna"
-              await fetch("https://script.google.com/macros/s/AKfycbxU5RfUUFMZTjLXCd-K_9RfjJaxl3yzBGxZmkKdW7EQhOfV5tC0EdY4dO_Ol0yn2hUj/exec", {
+              await fetch("https://script.google.com/macros/s/AKfycbxMc3pnCBMmzHuwpkeakGJgqkmax-me2RgDizu9HFIxRQyj5e4BHIgSp1PAP95BcNsP/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre, email, telefono, comuna: address })
               });
@@ -787,7 +787,7 @@ const App: React.FC = () => {
                 const address = (form.elements.namedItem('address') as HTMLInputElement).value;
                 try {
                   // CONEXIÓN A GOOGLE SHEETS ENVIANDO "comuna" y "telefono"
-                  await fetch("https://script.google.com/macros/s/AKfycbxU5RfUUFMZTjLXCd-K_9RfjJaxl3yzBGxZmkKdW7EQhOfV5tC0EdY4dO_Ol0yn2hUj/exec", {
+                  await fetch("https://script.google.com/macros/s/AKfycbxMc3pnCBMmzHuwpkeakGJgqkmax-me2RgDizu9HFIxRQyj5e4BHIgSp1PAP95BcNsP/exec", {
                     method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ nombre, email, telefono, comuna: address })
                   });
