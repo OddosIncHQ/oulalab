@@ -243,7 +243,7 @@ const StandaloneWaitlist: React.FC<{ lang: Language }> = ({ lang }) => {
             const address = (form.elements.namedItem('address') as HTMLInputElement).value;
             try {
               // URL ACTUALIZADA A LA VERSIÓN 13 (Termina en 7nWM)
-              await fetch("https://script.google.com/macros/s/AKfycbxjC8To-_iFitLMflI34Co0Plm4zTj7tBW33DWgUYgptCac9-rfMQUiNwkPFeS4ZQbA/exec", {
+              await fetch("https://script.google.com/macros/s/AKfycbyBBeqZNrP58KbTiCmGOhc83X9e9FkKpjpiDQq07u4PJOlreBiQ_2vetXGeE0LXclE/exec", {
                 method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nombre, email, telefono, comuna: address })
               });
@@ -787,7 +787,7 @@ const App: React.FC = () => {
                 const address = (form.elements.namedItem('address') as HTMLInputElement).value;
                 try {
                   // URL ACTUALIZADA A LA VERSIÓN 13 (Termina en 7nWM)
-                  await fetch("https://script.google.com/macros/s/AKfycbxjC8To-_iFitLMflI34Co0Plm4zTj7tBW33DWgUYgptCac9-rfMQUiNwkPFeS4ZQbA/exec", {
+                  await fetch("https://script.google.com/macros/s/AKfycbyBBeqZNrP58KbTiCmGOhc83X9e9FkKpjpiDQq07u4PJOlreBiQ_2vetXGeE0LXclE/exec", {
                     method: "POST", mode: 'no-cors', headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ nombre, email, telefono, comuna: address })
                   });
