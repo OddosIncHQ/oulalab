@@ -1,0 +1,13 @@
+.oulalab-auction-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+    &:hover { transform: translateY(-3px); }
+    .card-img-top { aspect-ratio: 3 / 4; object-fit: cover; }
+}
+
+.oulalab-auction-detail {
+    .oulalab-timer .timer-value { font-variant-numeric: tabular-nums; }
+}
+
+.oulalab-bid-box {
+    .oulalab-bid-btn { min-width: 96px; }
+}
