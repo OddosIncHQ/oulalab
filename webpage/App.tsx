@@ -24,7 +24,9 @@ import LogoBlanco from './Logo_Blanco.png';
 
 // Componentes modulares
 import ComoFunciona from './components/ComoFunciona';
-import Care from './components/Care'; 
+import Care from './components/Care';
+import WhatsAppButton from './components/WhatsAppButton';
+
 
 // Videos para las secciones internas (.mp4)
 import vidValue from './src/assets/vid-2.mp4';
@@ -814,6 +816,8 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Botón flotante de WhatsApp */}
+      {!isWaitlistOpen && <WhatsAppButton lang={lang} />}
     </div>
   );
 };
