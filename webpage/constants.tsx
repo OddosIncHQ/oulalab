@@ -1,5 +1,20 @@
 import { PricingPlan, TeamMember, Currency } from './types';
 
+// ─── WhatsApp ───────────────────────────────────────────────
+export const WHATSAPP_NUMBER = '56977225904';
+
+export const WHATSAPP_MSG: Record<string, string> = {
+  es: 'Hola! Quiero saber más sobre Oulalab 💜',
+  en: "Hi! I'd like to know more about Oulalab 💜",
+  pt: 'Oi! Quero saber mais sobre a Oulalab 💜'
+};
+
+export const waLink = (lang: string = 'es', msg?: string) =>
+  `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    msg ?? WHATSAPP_MSG[lang] ?? WHATSAPP_MSG.es
+  )}`;
+// ────────────────────────────────────────────────────────────
+
 export const PRICES: Record<Currency, Record<string, string>> = {
   CLP: {
     'try-on': '$49.900',
@@ -149,7 +164,7 @@ export const CONTENT = {
         title: 'COO by Oulalab',
         experience: '17 YEARS EXPERIENCE IN FASHION PRODUCTION IN ASIA',
         description: 'Leader in large-scale industrial processes, he has worked closely with factories, suppliers, and global brands. This journey gave him a deep understanding of the textile supply chain and the environmental challenges facing the industry. His practical and visionary approach led him to drive solutions that reduce environmental impact without compromising quality or aesthetics.',
-        quote: 'Make it happens.',
+        quote: 'Make it happen.',
         image: 'https://i.imgur.com/oOpfrDY.jpeg',
         email: 'andres@oulalab.com',
         linkedin: 'linkedin.com/in/andrés-klawer-75842b67'
@@ -158,9 +173,9 @@ export const CONTENT = {
         name: 'Gaby Badagnani',
         role: 'CMO',
         title: 'CMO by Oulalab',
-        experience: '25 YEAR INTERNATIONAL BRAND CONSULTING COMPANIES',
+        experience: '25 YEARS IN INTERNATIONAL BRAND CONSULTING COMPANIES',
         description: 'With a vast track record leading the world\'s most important branding consultancies, he has helped brands in multiple categories across America and Europe create their brand and marketing strategies. Furthermore, he is a professor of branding at UDD and UC, Chairman of the Board of the Best Branding Awards in Latam, and an international speaker.',
-        quote: 'Building brands to people love.',
+        quote: 'Building brands people love.',
         image: 'https://i.imgur.com/AxJAdZi.jpeg',
         email: 'gabriel@oulalab.com',
         linkedin: 'linkedin.com/in/gabriel-badagnani-59961918'
@@ -180,9 +195,9 @@ export const CONTENT = {
         name: 'Javi Contreras',
         role: 'CEO',
         title: 'CEO by Oulalab',
-        experience: '25 YEAR EXPERIENCE IN M&A TAX',
+        experience: '25 YEARS EXPERIENCE IN M&A TAX',
         description: 'Currently leads the tax team at EY as an industry leader. With an MBA from Adolfo Ibáñez University and certification as an IDDC director, complemented by strategic leadership programs at Babson College, she stands out for her ability to innovate, adapt strategies, and lead high-performance teams. In the last two years, she has developed technological solutions in the tax field, positioning them in the local market.',
-        quote: 'If you come to the party you have to dance.',
+        quote: 'If you come to the party, you have to dance.',
         image: 'https://i.imgur.com/3hyDj6t.jpeg',
         email: 'javiera@oulalab.com',
         linkedin: 'linkedin.com/in/m-javiera-conteras'
@@ -277,7 +292,7 @@ export const CONTENT = {
         role: 'CEO',
         title: 'CEO da Oulalab',
         experience: '25 ANOS DE EXPERIÊNCIA EM TRIBUTÁRIO M&A',
-        description: 'Atualmente lidera a equipe tributária da EY como líder da indústria. Com um MBA pela Universidade Adolfo Ibáñez e certificação como diretora do IDDC, complementada por programas de liderança estratégica no Babson College, destaca-se por sua habilidade em inovar, adaptar estratégias e liderar equipes de alto desempenho.',
+        description: 'Atualmente lidera a equipe tributária da EY como líder da indústria. Com um MBA pela Universidade Adolfo Ibáñez e certificação como diretora do IDDC, complementada por programas de liderança estratégica no Babson College, destaca-se por sua habilidade em inovar, adaptar estratégias e liderar equipes de alto desempenho. Nos últimos dois anos desenvolveu soluções tecnológicas na área tributária, posicionando-as no mercado local.',
         quote: 'Se você vem para a festa, tem que dançar.',
         image: 'https://i.imgur.com/3hyDj6t.jpeg',
         email: 'javiera@oulalab.com',
@@ -287,7 +302,7 @@ export const CONTENT = {
         name: 'Angel Izurieta',
         role: 'CIO',
         title: 'CIO da Oulalab',
-        experience: '25 ANOS TRANSFORMANDO EMPRESAS ATRAVÉS DA TECNOLOGÍA',
+        experience: '25 ANOS TRANSFORMANDO EMPRESAS ATRAVÉS DA TECNOLOGIA',
         description: 'Atualmente é Vice presidente Huawei Cloud Latam e está vinculado ao mundo da tecnologia há mais de 25 anos em diferentes funções na Accenture e EY. Investidor anjo em várias startups e limited partner em dois VCs.',
         quote: 'Nunca pare de aprender porque a vida nunca para de ensinar.',
         image: 'https://i.imgur.com/K8Dk9yH.jpeg',
@@ -299,7 +314,7 @@ export const CONTENT = {
         role: 'CLO',
         title: 'CLO da Oulalab',
         experience: '20 ANOS EM ESTRUTURAÇÃO DE NEGÓCIOS E M&A',
-        description: 'Advogado with more than 20 years of experience in the legal and tax field, specializing in investment structuring, tax litigation, corporate reorganizations, and M&A. Founder of Letonja & Loy lawyers and SoothSayer, a pioneer company in Compliance Risk Analytics in Chile, implementing the first tax risk algorithm in the region. Excellent skills in creating and managing complex teams.',
+        description: 'Advogado com mais de 20 anos de experiência na área jurídica e tributária, especializado em estruturação de investimentos, litígios fiscais, reorganizações corporativas e M&A. Fundador da Letonja & Loy advogados e da SoothSayer, empresa pioneira em Compliance Risk Analytics no Chile, implementando o primeiro algoritmo de risco tributário da região. Excelentes habilidades na criação e gestão de equipes complexas.',
         quote: 'Não tenho medo de nada, tenho duas filhas.',
         image: 'https://i.imgur.com/OhaBIqp.jpeg',
         email: 'mauricio@oulalab.com',
