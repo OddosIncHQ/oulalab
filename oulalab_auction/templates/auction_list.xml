@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="auction_list_template" name="OulaLab Auctions">
+        <t t-call="website.layout">
+            <div class="container my-5 oulalab-auctions">
+                <h1 class="mb-2">Liquidación OulaLab</h1>
+                <p class="text-muted mb-4">
+                    Prendas que salen del alquiler. Los socios OulaLab pujan primero.
+                </p>
+
+                <t t-if="not auctions">
+                    <div class="alert alert-info">No hay subastas activas por ahora.</div>
+                </t>
+
+                <div class="row g-4">
+                    <t t-foreach="auctions" t-as="auction">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card h-100 shadow-sm oulalab-auction-card">
+                                <a t-attf-href="/auctions/#{auction.id}">
+                                    <img t-if="auction.image_128"
+                                         t-attf-src="/web/image/liquidation.auction/#{auction.id}/image_128"
+                                         class="card-img-top" alt="Prenda"/>
+                                </a>
+                                <div class="card-body d-flex flex-column">
+                                    <span t-attf-class="badge mb-2 #{'bg-danger' if auction.state == 'live' else 'bg-secondary'}">
+                                        <t t-out="dict(auction._fields['state'].selection).get(auction.state)"/>
+                                    </span>
+                                    <h5 class="card-title">
+                                        <t t-out="auction.product_id.name"/>
+                                    </h5>
+                                    <p class="mb-1">
+                                        <small class="text-muted">Puja actual</small><br/>
+                                        <strong t-out="auction.currency_id.symbol"/>
+                                        <strong t-out="'{:,.0f}'.format(auction.highest_amount or auction.reserve_price)"/>
+                                    </p>
+                                    <div class="oulalab-timer mt-auto"
+                                         t-att-data-end="auction.end_date"
+                                         t-att-data-now="now">
+                                        <small class="text-muted">Cierra en </small>
+                                        <span class="timer-value fw-bold">—</span>
+                                    </div>
+                                    <a t-attf-href="/auctions/#{auction.id}"
+                                       class="btn btn-dark btn-sm mt-3">Ver y pujar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

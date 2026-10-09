@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="auction_bid_view_list" model="ir.ui.view">
+        <field name="name">auction.bid.list</field>
+        <field name="model">auction.bid</field>
+        <field name="arch" type="xml">
+            <list string="Pujas" create="false">
+                <field name="auction_id"/>
+                <field name="partner_id"/>
+                <field name="amount"/>
+                <field name="is_member" widget="boolean_toggle"/>
+                <field name="create_date"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="auction_bid_action" model="ir.actions.act_window">
+        <field name="name">Pujas</field>
+        <field name="res_model">auction.bid</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

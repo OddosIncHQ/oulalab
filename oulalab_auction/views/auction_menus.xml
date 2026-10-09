@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_auction_root" name="Subastas" sequence="90"
+              web_icon="oulalab_auction,static/description/icon.png"/>
+    <menuitem id="menu_auction_auctions" name="Subastas"
+              parent="menu_auction_root" action="liquidation_auction_action" sequence="10"/>
+    <menuitem id="menu_auction_bids" name="Pujas"
+              parent="menu_auction_root" action="auction_bid_action" sequence="20"/>
+</odoo>
