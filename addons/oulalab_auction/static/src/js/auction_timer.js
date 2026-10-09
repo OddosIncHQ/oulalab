@@ -62,10 +62,53 @@
         });
     }
 
+    function initDelivery(root, auctionId) {
+        var box = root.querySelector(".oulalab-delivery-box");
+        if (!box) return;
+        var fields = box.querySelector(".oulalab-delivery-fields");
+        var dbtn = box.querySelector(".oulalab-delivery-btn");
+        var dfeedback = box.querySelector(".oulalab-delivery-feedback");
+
+        // Mostrar/ocultar los campos de despacho según la modalidad elegida.
+        box.querySelectorAll('input[name="delivmode"]').forEach(function (r) {
+            r.addEventListener("change", function () {
+                fields.style.display = (r.value === "delivery" && r.checked) ? "block" : "none";
+            });
+        });
+
+        dbtn.addEventListener("click", function () {
+            var checked = box.querySelector('input[name="delivmode"]:checked');
+            dfeedback.textContent = "";
+            if (!checked) { dfeedback.textContent = "Elige una modalidad de entrega."; return; }
+            var rutEl = box.querySelector(".oulalab-rut");
+            var payload = { mode: checked.value, rut: rutEl ? rutEl.value : "" };
+            if (checked.value === "delivery") {
+                payload.commune = box.querySelector(".oulalab-commune").value;
+                payload.street = box.querySelector(".oulalab-street").value;
+                payload.phone = box.querySelector(".oulalab-phone").value;
+            }
+            dbtn.disabled = true;
+            jsonrpc("/auctions/delivery", payload)
+                .then(function (res) {
+                    dbtn.disabled = false;
+                    if (res && res.ok) {
+                        window.location.reload();   // recarga -> muestra el form de puja
+                    } else {
+                        dfeedback.textContent = (res && res.error) || "No se pudo guardar.";
+                    }
+                })
+                .catch(function (e) {
+                    dbtn.disabled = false;
+                    dfeedback.textContent = e.message || "Error de red.";
+                });
+        });
+    }
+
     function initDetail() {
         var root = document.querySelector(".oulalab-auction-detail");
         if (!root) return;
         var auctionId = root.dataset.auctionId;
+        initDelivery(root, auctionId);
         var btn = root.querySelector(".oulalab-bid-btn");
         var input = root.querySelector(".oulalab-bid-input");
         var feedback = root.querySelector(".oulalab-bid-feedback");

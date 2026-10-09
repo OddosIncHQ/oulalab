@@ -30,6 +30,12 @@ class AuctionBid(models.Model):
         store=True,
         readonly=True,
     )
+    rejected = fields.Boolean(
+        string="Descartada",
+        default=False,
+        help="Puja descartada porque su autor no pagó dentro del plazo. "
+        "Queda fuera de la reasignación al siguiente postor.",
+    )
 
     # Toda validación de reglas (monto mínimo, ventana, estado, concurrencia)
     # vive en liquidation.auction.place_bid(). Este modelo solo persiste el hecho.

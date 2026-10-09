@@ -8,6 +8,22 @@
     .oulalab-timer .timer-value { font-variant-numeric: tabular-nums; }
 }
 
+.oulalab-carousel {
+    .carousel-item img {
+        aspect-ratio: 3 / 4;
+        object-fit: cover;
+    }
+    // Las flechas vienen blancas; sobre prendas claras no se ven.
+    // Un fondo oscuro translúcido tras el icono las hace legibles.
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, .35);
+        border-radius: 50%;
+        padding: 1rem;
+        background-size: 50%;
+    }
+}
+
 .oulalab-bid-box {
     .oulalab-bid-btn { min-width: 96px; }
 }

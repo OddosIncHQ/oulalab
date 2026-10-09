@@ -5,11 +5,54 @@
             <div class="container my-5 oulalab-auction-detail"
                  t-att-data-auction-id="auction.id">
                 <div class="row g-5">
-                    <!-- Imagen -->
+                    <!-- Imágenes (carrusel) -->
                     <div class="col-12 col-md-6">
-                        <img t-if="auction.image_128"
-                             t-attf-src="/web/image/liquidation.auction/#{auction.id}/image_128"
-                             class="img-fluid rounded shadow-sm" alt="Prenda"/>
+                        <t t-set="urls" t-value="auction._get_image_urls()"/>
+                        <t t-if="urls">
+                            <div t-attf-id="oulalabCarousel#{auction.id}"
+                                 class="carousel slide oulalab-carousel" data-bs-ride="false">
+                                <!-- Indicadores (solo si hay más de 1) -->
+                                <div class="carousel-indicators" t-if="len(urls) &gt; 1">
+                                    <t t-foreach="urls" t-as="u">
+                                        <button type="button"
+                                                t-attf-data-bs-target="#oulalabCarousel#{auction.id}"
+                                                t-att-data-bs-slide-to="u_index"
+                                                t-attf-class="#{'active' if u_index == 0 else ''}"
+                                                t-att-aria-current="'true' if u_index == 0 else None"
+                                                t-attf-aria-label="Imagen #{u_index + 1}"/>
+                                    </t>
+                                </div>
+                                <!-- Slides -->
+                                <div class="carousel-inner rounded shadow-sm">
+                                    <t t-foreach="urls" t-as="u">
+                                        <div t-attf-class="carousel-item #{'active' if u_index == 0 else ''}">
+                                            <img t-att-src="u" class="d-block w-100"
+                                                 t-attf-alt="Imagen #{u_index + 1} de la prenda"/>
+                                        </div>
+                                    </t>
+                                </div>
+                                <!-- Controles (solo si hay más de 1) -->
+                                <t t-if="len(urls) &gt; 1">
+                                    <button class="carousel-control-prev" type="button"
+                                            t-attf-data-bs-target="#oulalabCarousel#{auction.id}"
+                                            data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"/>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                            t-attf-data-bs-target="#oulalabCarousel#{auction.id}"
+                                            data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"/>
+                                        <span class="visually-hidden">Siguiente</span>
+                                    </button>
+                                </t>
+                            </div>
+                        </t>
+                        <!-- Fallback: imagen del producto si no hay URLs -->
+                        <t t-elif="auction.image_128">
+                            <img t-attf-src="/web/image/liquidation.auction/#{auction.id}/image_128"
+                                 class="img-fluid rounded shadow-sm" alt="Prenda"/>
+                        </t>
                     </div>
 
                     <!-- Info + puja -->
@@ -60,13 +103,72 @@
                             </div>
                         </t>
 
-                        <!-- Formulario de puja -->
+                        <!-- 1) Visitante sin cuenta -->
                         <t t-if="is_public">
                             <a href="/web/login" class="btn btn-dark w-100">
-                                Inicia sesión para pujar
+                                Inicia sesión o regístrate para pujar
                             </a>
                         </t>
+
+                        <!-- 2) Logueado pero sin datos de entrega -> formulario previo -->
+                        <t t-elif="not delivery_ready">
+                            <div class="oulalab-delivery-box card p-3">
+                                <h5>Antes de pujar, verifica tus datos</h5>
+                                <label class="form-label mt-2">RUT</label>
+                                <input type="text" class="form-control mb-3 oulalab-rut"
+                                       placeholder="12.345.678-5"/>
+                                <h6>¿Cómo quieres recibir la prenda?</h6>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="delivmode"
+                                           id="modePickup" value="pickup"/>
+                                    <label class="form-check-label" for="modePickup">
+                                        Retiro en showroom —
+                                        <span t-out="showroom"/>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="delivmode"
+                                           id="modeDelivery" value="delivery"/>
+                                    <label class="form-check-label" for="modeDelivery">
+                                        Despacho a domicilio
+                                    </label>
+                                </div>
+                                <!-- Campos de despacho (visibles solo si elige despacho) -->
+                                <div class="oulalab-delivery-fields mt-2" style="display:none;">
+                                    <select class="form-select mb-2 oulalab-commune">
+                                        <option value="">Comuna…</option>
+                                        <t t-foreach="communes" t-as="c">
+                                            <option t-att-value="c[0]" t-out="c[1]"/>
+                                        </t>
+                                    </select>
+                                    <input type="text" class="form-control mb-2 oulalab-street"
+                                           placeholder="Dirección de despacho"/>
+                                    <input type="text" class="form-control mb-2 oulalab-phone"
+                                           placeholder="Teléfono de contacto"/>
+                                    <p class="text-muted small mb-0">
+                                        Solo despachamos a Lo Barnechea, Las Condes y Vitacura.
+                                        Fuera de esas comunas, elige retiro en showroom.
+                                    </p>
+                                </div>
+                                <button class="btn btn-dark mt-3 oulalab-delivery-btn" type="button">
+                                    Guardar y continuar
+                                </button>
+                                <div class="oulalab-delivery-feedback small mt-2 text-danger"></div>
+                            </div>
+                        </t>
+
+                        <!-- 3) Logueado y con entrega lista -> formulario de puja -->
                         <t t-else="">
+                            <p class="small text-muted mb-2">
+                                Entrega:
+                                <strong t-if="partner.auction_delivery_mode == 'pickup'">
+                                    Retiro en showroom
+                                </strong>
+                                <strong t-else="">
+                                    Despacho a <t t-out="dict(communes).get(partner.auction_commune)"/>
+                                </strong>
+                                · <a t-attf-href="/auctions/#{auction.id}?edit_delivery=1">cambiar</a>
+                            </p>
                             <div class="oulalab-bid-box">
                                 <label class="form-label">
                                     Tu puja (mínimo

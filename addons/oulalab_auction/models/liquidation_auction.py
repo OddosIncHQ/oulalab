@@ -25,6 +25,13 @@ class LiquidationAuction(models.Model):
     )
     barcode = fields.Char(related="product_id.barcode", string="Código de barras", store=True)
     image_128 = fields.Image(related="product_id.image_128", string="Imagen", store=False)
+
+    # URLs externas de imágenes (hasta 4) para el carrusel del portal.
+    image_url_1 = fields.Char(string="URL imagen 1")
+    image_url_2 = fields.Char(string="URL imagen 2")
+    image_url_3 = fields.Char(string="URL imagen 3")
+    image_url_4 = fields.Char(string="URL imagen 4")
+
     reason = fields.Selection(
         [
             ("worn", "Muy usada"),
@@ -96,6 +103,7 @@ class LiquidationAuction(models.Model):
             ("draft", "Borrador"),
             ("published", "Publicada"),
             ("live", "En curso"),
+            ("pending_payment", "Esperando pago"),
             ("sold", "Adjudicada"),
             ("unsold", "Desierta"),
             ("cancelled", "Cancelada"),
@@ -116,6 +124,23 @@ class LiquidationAuction(models.Model):
     )
     winner_id = fields.Many2one("res.partner", string="Adjudicatario", readonly=True)
     sale_order_id = fields.Many2one("sale.order", string="Pedido generado", readonly=True)
+    current_winner_bid_id = fields.Many2one(
+        "auction.bid", string="Puja adjudicada", readonly=True
+    )
+    payment_deadline_hours = fields.Integer(
+        string="Plazo de pago (horas)",
+        default=24,
+        help="Horas que tiene el ganador para pagar antes de reasignar al siguiente postor.",
+    )
+    payment_deadline = fields.Datetime(string="Vence el pago", readonly=True)
+    payment_url = fields.Char(compute="_compute_payment_url")
+
+    def _compute_payment_url(self):
+        for rec in self:
+            if rec.sale_order_id:
+                rec.payment_url = rec.get_base_url() + rec.sale_order_id.get_portal_url()
+            else:
+                rec.payment_url = False
 
     # ==================================================================
     # Computes
@@ -124,6 +149,12 @@ class LiquidationAuction(models.Model):
     def _compute_name(self):
         for rec in self:
             rec.name = _("Subasta: %s") % (rec.product_id.name or _("(sin prenda)"))
+
+    def _get_image_urls(self):
+        """Lista ordenada de URLs de imagen no vacías (para el carrusel)."""
+        self.ensure_one()
+        urls = [self.image_url_1, self.image_url_2, self.image_url_3, self.image_url_4]
+        return [u.strip() for u in urls if u and u.strip()]
 
     @api.depends("start_date", "member_preview_hours")
     def _compute_public_start(self):
@@ -173,6 +204,11 @@ class LiquidationAuction(models.Model):
             return False, _("La subasta no está en curso.")
         if now >= self.end_date:
             return False, _("La subasta ya cerró.")
+        if not (partner and partner._auction_delivery_ready()):
+            return False, _(
+                "Antes de pujar, indica cómo quieres recibir la prenda: "
+                "retiro en showroom o despacho a Lo Barnechea, Las Condes o Vitacura."
+            )
         if not (partner and partner.is_oulalab_member) and now < self.public_start:
             return False, _(
                 "Estás en la ventana exclusiva para socios OulaLab. "
@@ -268,17 +304,45 @@ class LiquidationAuction(models.Model):
         for auction in to_close:
             auction._close_auction()
 
+        # Esperando pago: ¿pagó? ¿se venció el plazo?
+        pending = self.search([("state", "=", "pending_payment")])
+        for auction in pending:
+            if auction._is_current_order_paid():
+                auction._mark_paid()
+            elif auction.payment_deadline and now > auction.payment_deadline:
+                auction._handle_non_payment()
+
     def _close_auction(self):
+        """Al cerrar: avisa a los perdedores y adjudica al mejor postor."""
         self.ensure_one()
-        top = self.highest_bid_id
-        if top and top.amount >= self.reserve_price:
-            self.write({"state": "sold", "winner_id": top.partner_id.id})
-            self._create_winner_order(top)
-        else:
-            self.write({"state": "unsold"})
+        self._award_to_next_bidder()
+
+    def _award_to_next_bidder(self):
+        """Adjudica a la mejor puja activa sobre la reserva; si no hay, declara desierta."""
+        self.ensure_one()
+        next_bid = self.bid_ids.filtered(
+            lambda b: not b.rejected and b.amount >= self.reserve_price
+        ).sorted(lambda b: (b.amount, b.id), reverse=True)[:1]
+
+        if not next_bid:
+            self.write({"state": "unsold", "current_winner_bid_id": False,
+                        "winner_id": False})
+            self._notify_losers()
+            return
+
+        order = self._create_winner_order(next_bid)
+        self.write({
+            "state": "pending_payment",
+            "current_winner_bid_id": next_bid.id,
+            "winner_id": next_bid.partner_id.id,
+            "sale_order_id": order.id,
+            "payment_deadline": fields.Datetime.now()
+            + timedelta(hours=self.payment_deadline_hours or 24),
+        })
+        self._send_winner_email()
 
     def _create_winner_order(self, bid):
-        """Genera una cotización para el ganador -> entra a tu flujo de venta/factura."""
+        """Crea y CONFIRMA el pedido del ganador, generando el link de pago del portal."""
         self.ensure_one()
         variant = self.product_id.product_variant_id
         order = self.env["sale.order"].create(
@@ -286,21 +350,79 @@ class LiquidationAuction(models.Model):
                 "partner_id": bid.partner_id.id,
                 "origin": self.name,
                 "order_line": [
-                    (
-                        0,
-                        0,
-                        {
-                            "product_id": variant.id,
-                            "product_uom_qty": 1,
-                            "price_unit": bid.amount,
-                            "name": _("Adjudicación subasta: %s") % self.product_id.name,
-                        },
-                    )
+                    (0, 0, {
+                        "product_id": variant.id,
+                        "product_uom_qty": 1,
+                        "price_unit": bid.amount,
+                        "name": _("Adjudicación subasta: %s") % self.product_id.name,
+                    })
                 ],
             }
         )
-        self.sale_order_id = order.id
+        order.action_confirm()           # pasa a pedido en firme -> habilita el pago
+        order._portal_ensure_token()     # asegura el token del enlace de portal
         return order
+
+    # ------------------------------------------------------------------
+    # Pago / reasignación
+    # ------------------------------------------------------------------
+    def _is_current_order_paid(self):
+        self.ensure_one()
+        order = self.sale_order_id
+        if not order:
+            return False
+        return any(
+            t.state in ("done", "authorized") for t in order.transaction_ids
+        )
+
+    def _mark_paid(self):
+        self.ensure_one()
+        if self.current_winner_bid_id:
+            self.current_winner_bid_id.rejected = False
+        self.write({"state": "sold"})
+        self._notify_losers()
+
+    def _handle_non_payment(self):
+        """El ganador no pagó a tiempo: descarta su puja, cancela su pedido y reasigna."""
+        self.ensure_one()
+        if self.current_winner_bid_id:
+            self.current_winner_bid_id.rejected = True
+        if self.sale_order_id:
+            self.sale_order_id._action_cancel()
+            self.sale_order_id = False
+        self.message_post(
+            body=_("El ganador no pagó dentro del plazo. Reasignando al siguiente postor.")
+        )
+        self._award_to_next_bidder()
+
+    # ------------------------------------------------------------------
+    # Emails
+    # ------------------------------------------------------------------
+    def _send_winner_email(self):
+        self.ensure_one()
+        template = self.env.ref(
+            "oulalab_auction.mail_template_auction_winner", raise_if_not_found=False
+        )
+        if template and self.winner_id:
+            template.send_mail(self.id, force_send=True)
+
+    def _notify_losers(self):
+        """Avisa a cada postor que no resultó adjudicado (una sola vez)."""
+        self.ensure_one()
+        template = self.env.ref(
+            "oulalab_auction.mail_template_auction_loser", raise_if_not_found=False
+        )
+        if not template:
+            return
+        winner = self.current_winner_bid_id.partner_id if self.current_winner_bid_id else self.env["res.partner"]
+        losers = self.bid_ids.mapped("partner_id") - winner
+        for partner in losers:
+            if not partner.email:
+                continue
+            template.send_mail(
+                self.id, force_send=True,
+                email_values={"email_to": partner.email},
+            )
 
     def action_view_order(self):
         self.ensure_one()

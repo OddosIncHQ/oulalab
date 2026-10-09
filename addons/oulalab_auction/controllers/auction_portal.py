@@ -1,6 +1,8 @@
 from odoo import fields, http
 from odoo.http import request
 
+from ..models.res_partner import validate_rut
+
 
 class AuctionPortal(http.Controller):
 
@@ -30,6 +32,7 @@ class AuctionPortal(http.Controller):
         partner = request.env.user.partner_id if not request.env.user._is_public() else None
         is_member = bool(partner and partner.is_oulalab_member)
         min_next = auction._min_next_bid_for(partner)
+        communes = request.env["res.partner"]._fields["auction_commune"].selection
 
         return request.render(
             "oulalab_auction.auction_detail_template",
@@ -38,10 +41,50 @@ class AuctionPortal(http.Controller):
                 "partner": partner,
                 "is_member": is_member,
                 "is_public": request.env.user._is_public(),
+                "delivery_ready": bool(partner and partner._auction_delivery_ready())
+                and not kw.get("edit_delivery"),
+                "communes": communes,
+                "showroom": "Av. La Dehesa 222 of. 817, Lo Barnechea",
                 "min_next": min_next,
                 "server_now": fields.Datetime.now(),
             },
         )
+
+    @http.route("/auctions/delivery", type="jsonrpc", auth="user")
+    def save_delivery(self, mode, rut=None, commune=None, street=None, phone=None, **kw):
+        """Guarda RUT + modalidad de entrega del postor antes de permitirle pujar."""
+        partner = request.env.user.partner_id
+        Partner = request.env["res.partner"].sudo()
+
+        # RUT obligatorio para todos (verificación de identidad).
+        clean_rut = validate_rut(rut)
+        if not clean_rut:
+            return {"ok": False, "error": "El RUT no es válido. Revísalo (ej: 12.345.678-5)."}
+
+        valid_communes = dict(Partner._fields["auction_commune"].selection)
+        if mode == "delivery":
+            if commune not in valid_communes:
+                return {"ok": False, "error": "Comuna fuera de cobertura de despacho."}
+            if not street:
+                return {"ok": False, "error": "Indica la dirección de despacho."}
+            ok, reason = Partner._auction_verify_address(street, valid_communes[commune])
+            if not ok:
+                return {"ok": False, "error": reason}
+            vals = {
+                "auction_delivery_mode": "delivery",
+                "auction_commune": commune,
+                "street": street,
+            }
+        elif mode == "pickup":
+            vals = {"auction_delivery_mode": "pickup", "auction_commune": False}
+        else:
+            return {"ok": False, "error": "Modalidad inválida."}
+
+        vals["vat"] = clean_rut
+        if phone:
+            vals["phone"] = phone
+        partner.sudo().write(vals)
+        return {"ok": True}
 
     # ------------------------------------------------------------------
     # Estado en vivo (polling ligero para reflejar pujas ajenas / extensiones)

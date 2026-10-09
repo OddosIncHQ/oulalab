@@ -35,7 +35,7 @@
                     <button name="action_view_order" type="object" string="Ver pedido"
                             class="btn-secondary" invisible="not sale_order_id"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,published,live,sold"/>
+                           statusbar_visible="draft,published,live,pending_payment,sold"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
@@ -49,6 +49,10 @@
                                    readonly="state not in ('draft','published')"/>
                             <field name="barcode"/>
                             <field name="reason"/>
+                            <field name="image_url_1" widget="url" placeholder="https://..."/>
+                            <field name="image_url_2" widget="url" placeholder="https://..."/>
+                            <field name="image_url_3" widget="url" placeholder="https://..."/>
+                            <field name="image_url_4" widget="url" placeholder="https://..."/>
                         </group>
                         <group string="Precios">
                             <field name="currency_id" groups="base.group_multi_currency"/>
@@ -70,6 +74,11 @@
                         <group string="Resultado">
                             <field name="highest_amount"/>
                             <field name="bid_count"/>
+                            <field name="payment_deadline_hours"/>
+                            <field name="payment_deadline" readonly="1"
+                                   invisible="state != 'pending_payment'"/>
+                            <field name="current_winner_bid_id" readonly="1"
+                                   invisible="state not in ('pending_payment','sold')"/>
                             <field name="winner_id"/>
                             <field name="sale_order_id"/>
                         </group>
