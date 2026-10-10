@@ -32,6 +32,9 @@
                             invisible="state not in ('draft','published')"/>
                     <button name="action_back_to_draft" type="object" string="Volver a borrador"
                             invisible="state not in ('published','cancelled')"/>
+                    <button name="action_open_web" type="object" string="Ver en web"
+                            class="btn-secondary"
+                            invisible="state not in ('published','live')"/>
                     <button name="action_view_order" type="object" string="Ver pedido"
                             class="btn-secondary" invisible="not sale_order_id"/>
                     <field name="state" widget="statusbar"
