@@ -291,6 +291,15 @@ class LiquidationAuction(models.Model):
     def action_back_to_draft(self):
         self.write({"state": "draft"})
 
+    def action_open_web(self):
+        """Abre la ficha pública de esta subasta en una pestaña nueva."""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_url",
+            "url": "/auctions/%s" % self.id,
+            "target": "new",
+        }
+
     @api.model
     def _cron_manage_states(self):
         """Cron de 1 minuto: abre y cierra subastas según reloj del servidor."""
