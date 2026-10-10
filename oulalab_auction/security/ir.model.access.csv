@@ -1,8 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_liquidation_auction_manager,liquidation.auction.manager,model_liquidation_auction,sales_team.group_sale_manager,1,1,1,1
-access_liquidation_auction_user,liquidation.auction.user,model_liquidation_auction,base.group_user,1,1,1,0
-access_liquidation_auction_portal,liquidation.auction.portal,model_liquidation_auction,base.group_portal,1,0,0,0
-access_liquidation_auction_public,liquidation.auction.public,model_liquidation_auction,base.group_public,1,0,0,0
-access_auction_bid_manager,auction.bid.manager,model_auction_bid,sales_team.group_sale_manager,1,1,1,1
-access_auction_bid_user,auction.bid.user,model_auction_bid,base.group_user,1,1,1,0
-access_auction_bid_portal,auction.bid.portal,model_auction_bid,base.group_portal,1,0,0,0
