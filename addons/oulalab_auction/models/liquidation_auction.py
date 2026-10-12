@@ -150,6 +150,56 @@ class LiquidationAuction(models.Model):
         for rec in self:
             rec.name = _("Subasta: %s") % (rec.product_id.name or _("(sin prenda)"))
 
+    winning_amount_untaxed = fields.Monetary(
+        string="Puja sin impuesto",
+        currency_field="currency_id",
+        compute="_compute_winning_untaxed",
+        help="Puja adjudicada descontando el impuesto del producto. Es el precio "
+        "unitario del pedido; luego el impuesto se vuelve a aplicar en la línea.",
+    )
+
+    @api.depends("current_winner_bid_id.amount", "highest_amount", "product_id")
+    def _compute_winning_untaxed(self):
+        for rec in self:
+            gross = (rec.current_winner_bid_id.amount
+                     if rec.current_winner_bid_id else rec.highest_amount) or 0.0
+            rec.winning_amount_untaxed = rec._untaxed_from_gross(gross)
+
+    def _auction_taxes(self):
+        """Impuestos de venta del producto (taxes_id), filtrados por compañía."""
+        self.ensure_one()
+        variant = self.product_id.product_variant_id
+        return variant.taxes_id.filtered(
+            lambda t: not t.company_id or t.company_id == self.company_id
+        ) if variant else self.env["account.tax"]
+
+    def _untaxed_from_gross(self, gross):
+        """Neto a partir de un monto con impuesto incluido (la puja es C/IVA),
+        usando el impuesto registrado en el producto (taxes_id)."""
+        self.ensure_one()
+        if not gross:
+            return 0.0
+        taxes = self._auction_taxes()
+        percent = sum(t.amount for t in taxes if t.amount_type == "percent")
+        if percent:
+            net = gross / (1.0 + percent / 100.0)
+        else:
+            net = gross
+        return self.currency_id.round(net) if self.currency_id else round(net, 2)
+
+    def _get_primary_image_url(self):
+        """Foto representativa de la prenda: URL 4 primero (suele ser la prenda
+        sola), luego 3, 2, 1. Si no hay ninguna URL, la foto del producto de
+        Alquiler. Devuelve una URL absoluta o la ruta /web/image del producto."""
+        self.ensure_one()
+        for url in (self.image_url_4, self.image_url_3, self.image_url_2, self.image_url_1):
+            if url and url.strip():
+                return url.strip()
+        if self.product_id:
+            return "%s/web/image/product.template/%s/image_1024" % (
+                self.get_base_url(), self.product_id.id)
+        return ""
+
     def _get_image_urls(self):
         """Lista ordenada de URLs de imagen no vacías (para el carrusel)."""
         self.ensure_one()
@@ -354,6 +404,8 @@ class LiquidationAuction(models.Model):
         """Crea y CONFIRMA el pedido del ganador, generando el link de pago del portal."""
         self.ensure_one()
         variant = self.product_id.product_variant_id
+        taxes = self._auction_taxes()
+        net = self._untaxed_from_gross(bid.amount)   # la puja es C/IVA -> precio neto
         order = self.env["sale.order"].create(
             {
                 "partner_id": bid.partner_id.id,
@@ -362,7 +414,8 @@ class LiquidationAuction(models.Model):
                     (0, 0, {
                         "product_id": variant.id,
                         "product_uom_qty": 1,
-                        "price_unit": bid.amount,
+                        "price_unit": net,
+                        "tax_id": [(6, 0, taxes.ids)],
                         "name": _("Adjudicación subasta: %s") % self.product_id.name,
                     })
                 ],
@@ -408,12 +461,13 @@ class LiquidationAuction(models.Model):
     # Emails
     # ------------------------------------------------------------------
     def _send_winner_email(self):
+        """Confirmación de la orden al ganador (plantilla sobre sale.order)."""
         self.ensure_one()
         template = self.env.ref(
-            "oulalab_auction.mail_template_auction_winner", raise_if_not_found=False
+            "oulalab_auction.mail_template_auction_winner_order", raise_if_not_found=False
         )
-        if template and self.winner_id:
-            template.send_mail(self.id, force_send=True)
+        if template and self.sale_order_id:
+            template.send_mail(self.sale_order_id.id, force_send=True)
 
     def _notify_losers(self):
         """Avisa a cada postor que no resultó adjudicado (una sola vez)."""

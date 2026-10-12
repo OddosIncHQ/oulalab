@@ -91,17 +91,42 @@ class ResPartner(models.Model):
         string="Socio OulaLab",
         compute="_compute_is_oulalab_member",
         store=True,
-        help="Suscriptor activo del alquiler. Recibe acceso anticipado (preview) "
-        "y menor incremento mínimo de puja en las subastas de liquidación.",
+        readonly=False,
+        help="Suscriptor con plan de alquiler ACTIVO. Recibe acceso anticipado "
+        "(preview) y menor incremento mínimo de puja. Se calcula solo, pero "
+        "puedes forzarlo a mano.",
+    )
+    auction_source = fields.Selection(
+        [("portal", "Cuenta en Odoo"), ("guest", "Dejó sus datos (sin cuenta)")],
+        string="Origen en subastas",
+        compute="_compute_auction_source",
+        store=True,
+        help="Cómo llegó el postor: con cuenta de portal en Odoo o dejando sus datos.",
     )
 
-    # NOTE: Ajusta el origen del cálculo a TU modelo real de suscripción.
-    # Aquí lo derivamos de tener al menos un pedido de venta confirmado.
-    # Si usas 'sale.subscription' o un modelo propio, cambia el @api.depends
-    # y la condición interna por el estado 'activo' de ese modelo.
-    @api.depends("sale_order_ids.state")
+    @api.depends("sale_order_ids.subscription_state", "sale_order_ids.state")
     def _compute_is_oulalab_member(self):
+        # Socio = tiene una suscripción de alquiler ACTIVA.
+        # En Odoo 19 la suscripción activa es subscription_state == '3_progress'.
+        # Ajusta aquí si tu operación usa otro criterio de "plan activo".
         for partner in self:
             partner.is_oulalab_member = any(
-                order.state == "sale" for order in partner.sale_order_ids
+                getattr(o, "subscription_state", False) == "3_progress"
+                for o in partner.sale_order_ids
             )
+
+    @api.depends("user_ids")
+    def _compute_auction_source(self):
+        for partner in self:
+            partner.auction_source = "portal" if partner.user_ids else "guest"
+
+    auction_bid_ids = fields.One2many(
+        "auction.bid", "partner_id", string="Pujas en subastas"
+    )
+    auction_bid_count = fields.Integer(
+        string="N.º de pujas", compute="_compute_auction_bid_count"
+    )
+
+    def _compute_auction_bid_count(self):
+        for partner in self:
+            partner.auction_bid_count = len(partner.auction_bid_ids)
