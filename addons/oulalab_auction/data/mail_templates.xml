@@ -53,5 +53,44 @@
             </field>
         </record>
 
+
+        <!-- Confirmación de la orden al GANADOR de la subasta (sobre sale.order) -->
+        <record id="mail_template_auction_winner_order" model="mail.template">
+            <field name="name">Subasta: confirmación de orden al ganador</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Ganaste la subasta de {{ object.auction_ids[:1].product_id.name or '' }} (Orden {{ object.name }})</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="report_template_ids" eval="[(4, ref('sale.action_report_saleorder'))]"/>
+            <field name="body_html" type="html">
+                <div style="font-family:Arial,sans-serif;color:#31112C;max-width:600px;">
+                    <p>Hola <t t-out="object.partner_id.name or ''"/>,</p>
+                    <p>¡Felicitaciones! Tu puja fue la ganadora de
+                        <strong t-out="object.auction_ids[:1].product_id.name or ''"/>.</p>
+                    <p><img t-att-src="object._get_auction_photo_src()" style="max-height:220px;border-radius:6px;"/></p>
+                    <p>Orden: <strong t-out="object.name or ''"/><br/>
+                       Monto: <strong>$<t t-out="'{:,.0f}'.format(object.amount_total)"/></strong></p>
+                    <p t-if="object.auction_ids[:1].payment_deadline">
+                        Para confirmar tu compra, paga antes del
+                        <strong t-out="format_datetime(object.auction_ids[:1].payment_deadline, tz=object.partner_id.tz or 'America/Santiago', dt_format='dd-MM-yyyy HH:mm')"/>.
+                        Si no recibimos el pago en ese plazo, la prenda se ofrecerá al siguiente postor.
+                    </p>
+                    <p t-if="object.partner_id.auction_delivery_mode == 'pickup'">
+                        <strong>Entrega:</strong> retiro en nuestro showroom, Av. La Dehesa 222, of. 817, Lo Barnechea.
+                    </p>
+                    <p t-else="">
+                        <strong>Entrega:</strong> despacho gratis a tu comuna (Lo Barnechea, Las Condes o Vitacura).
+                    </p>
+                    <p style="margin:24px 0;">
+                        <a t-att-href="object.get_base_url() + object.get_portal_url()"
+                           style="background:#BC6C4C;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;">
+                            Pagar ahora
+                        </a>
+                    </p>
+                    <p style="font-size:12px;color:#888;">OulaLab · Liquidación de prendas</p>
+                </div>
+            </field>
+        </record>
     </data>
 </odoo>
