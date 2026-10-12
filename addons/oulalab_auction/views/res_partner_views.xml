@@ -44,12 +44,13 @@
         </field>
     </record>
 
+    <!-- Búsqueda heredada para contactos de subastas -->
     <record id="res_partner_auction_search" model="ir.ui.view">
         <field name="name">res.partner.search.auction</field>
         <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
         <field name="arch" type="xml">
-            <search>
-                <field name="name"/>
+            <xpath expr="//search" position="inside">
                 <field name="vat"/>
                 <filter name="members" string="Socios OulaLab"
                         domain="[('is_oulalab_member','=',True)]"/>
@@ -57,13 +58,12 @@
                         domain="[('auction_source','=','portal')]"/>
                 <filter name="guest" string="Sin cuenta (dejaron datos)"
                         domain="[('auction_source','=','guest')]"/>
-                <group expand="0" string="Agrupar por">
-                    <filter name="g_source" string="Origen"
-                            context="{'group_by':'auction_source'}"/>
-                    <filter name="g_member" string="Socio"
-                            context="{'group_by':'is_oulalab_member'}"/>
-                </group>
-            </search>
+                <separator/>
+                <filter name="g_source" string="Origen Subasta"
+                        context="{'group_by':'auction_source'}"/>
+                <filter name="g_member" string="Socio OulaLab"
+                        context="{'group_by':'is_oulalab_member'}"/>
+            </xpath>
         </field>
     </record>
 
