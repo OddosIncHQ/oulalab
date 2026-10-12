@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Pestaña en la ficha del contacto -->
     <record id="res_partner_form_auction" model="ir.ui.view">
         <field name="name">res.partner.form.auction</field>
         <field name="model">res.partner</field>
@@ -8,13 +9,75 @@
             <notebook position="inside">
                 <page string="Subastas OulaLab" name="oulalab_auction">
                     <group>
-                        <field name="is_oulalab_member"/>
-                        <field name="auction_delivery_mode"/>
-                        <field name="auction_commune"
-                               invisible="auction_delivery_mode != 'delivery'"/>
+                        <group string="Estado">
+                            <field name="is_oulalab_member"/>
+                            <field name="auction_source"/>
+                            <field name="auction_bid_count"/>
+                        </group>
+                        <group string="Entrega">
+                            <field name="auction_delivery_mode"/>
+                            <field name="auction_commune"
+                                   invisible="auction_delivery_mode != 'delivery'"/>
+                        </group>
                     </group>
                 </page>
             </notebook>
+        </field>
+    </record>
+
+    <!-- Lista de contactos de subastas -->
+    <record id="res_partner_auction_list" model="ir.ui.view">
+        <field name="name">res.partner.list.auction</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <list string="Contactos de subastas">
+                <field name="name"/>
+                <field name="vat" string="RUT"/>
+                <field name="email"/>
+                <field name="phone"/>
+                <field name="auction_source"/>
+                <field name="is_oulalab_member" widget="boolean_toggle"/>
+                <field name="auction_delivery_mode"/>
+                <field name="auction_commune"/>
+                <field name="auction_bid_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="res_partner_auction_search" model="ir.ui.view">
+        <field name="name">res.partner.search.auction</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="vat"/>
+                <filter name="members" string="Socios OulaLab"
+                        domain="[('is_oulalab_member','=',True)]"/>
+                <filter name="portal" string="Con cuenta en Odoo"
+                        domain="[('auction_source','=','portal')]"/>
+                <filter name="guest" string="Sin cuenta (dejaron datos)"
+                        domain="[('auction_source','=','guest')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_source" string="Origen"
+                            context="{'group_by':'auction_source'}"/>
+                    <filter name="g_member" string="Socio"
+                            context="{'group_by':'is_oulalab_member'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_auction_contacts" model="ir.actions.act_window">
+        <field name="name">Contactos de subastas</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('auction_bid_ids','!=',False)]</field>
+        <field name="search_view_id" ref="res_partner_auction_search"/>
+        <field name="context">{'list_view_ref': 'oulalab_auction.res_partner_auction_list'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no hay contactos que hayan pujado.</p>
+            <p>Aquí verás a todos los postores: con cuenta en Odoo o que dejaron sus datos,
+               y cuáles son socios OulaLab con plan activo.</p>
         </field>
     </record>
 </odoo>

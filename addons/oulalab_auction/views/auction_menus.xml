@@ -6,4 +6,6 @@
               parent="menu_auction_root" action="liquidation_auction_action" sequence="10"/>
     <menuitem id="menu_auction_bids" name="Pujas"
               parent="menu_auction_root" action="auction_bid_action" sequence="20"/>
+    <menuitem id="menu_auction_contacts" name="Contactos"
+              parent="menu_auction_root" action="action_auction_contacts" sequence="30"/>
 </odoo>
