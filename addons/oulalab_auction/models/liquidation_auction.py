@@ -168,11 +168,23 @@ class LiquidationAuction(models.Model):
                      if rec.current_winner_bid_id else rec.highest_amount) or 0.0
             rec.winning_amount_untaxed = rec._untaxed_from_gross(gross)
 
+    def _auction_company(self):
+        """Compañía de la venta: la del producto; si no tiene, la de sus
+        impuestos; y solo como último recurso la compañía del usuario actual
+        (el cron corre como OdooBot, cuya compañía puede ser otra)."""
+        self.ensure_one()
+        variant = self.product_id.product_variant_id
+        return (
+            self.product_id.company_id
+            or variant.taxes_id[:1].company_id
+            or self.env.company
+        )
+
     def _auction_taxes(self):
         """Impuestos de venta del producto (taxes_id), filtrados por compañía."""
         self.ensure_one()
         variant = self.product_id.product_variant_id
-        company = self.product_id.company_id or self.env.company
+        company = self._auction_company()
         return variant.taxes_id.filtered(
             lambda t: not t.company_id or t.company_id == company
         ) if variant else self.env["account.tax"]
@@ -418,8 +430,10 @@ class LiquidationAuction(models.Model):
         variant = self.product_id.product_variant_id
         taxes = self._auction_taxes()
         net = self._untaxed_from_gross(bid.amount)   # la puja es C/IVA -> precio neto
-        order = self.env["sale.order"].create(
+        company = self._auction_company()
+        order = self.env["sale.order"].with_company(company).create(
             {
+                "company_id": company.id,
                 "partner_id": bid.partner_id.id,
                 "origin": self.name,
                 "order_line": [
