@@ -1,7 +1,10 @@
+import logging
 from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class LiquidationAuction(models.Model):
@@ -169,8 +172,9 @@ class LiquidationAuction(models.Model):
         """Impuestos de venta del producto (taxes_id), filtrados por compañía."""
         self.ensure_one()
         variant = self.product_id.product_variant_id
+        company = self.product_id.company_id or self.env.company
         return variant.taxes_id.filtered(
-            lambda t: not t.company_id or t.company_id == self.company_id
+            lambda t: not t.company_id or t.company_id == company
         ) if variant else self.env["account.tax"]
 
     def _untaxed_from_gross(self, gross):
@@ -361,15 +365,23 @@ class LiquidationAuction(models.Model):
         # En curso -> cierre
         to_close = self.search([("state", "=", "live"), ("end_date", "<=", now)])
         for auction in to_close:
-            auction._close_auction()
+            try:
+                with self.env.cr.savepoint():
+                    auction._close_auction()
+            except Exception:
+                _logger.exception("Subasta %s: error al cerrar", auction.id)
 
         # Esperando pago: ¿pagó? ¿se venció el plazo?
         pending = self.search([("state", "=", "pending_payment")])
         for auction in pending:
-            if auction._is_current_order_paid():
-                auction._mark_paid()
-            elif auction.payment_deadline and now > auction.payment_deadline:
-                auction._handle_non_payment()
+            try:
+                with self.env.cr.savepoint():
+                    if auction._is_current_order_paid():
+                        auction._mark_paid()
+                    elif auction.payment_deadline and now > auction.payment_deadline:
+                        auction._handle_non_payment()
+            except Exception:
+                _logger.exception("Subasta %s: error en control de pago", auction.id)
 
     def _close_auction(self):
         """Al cerrar: avisa a los perdedores y adjudica al mejor postor."""
@@ -415,7 +427,7 @@ class LiquidationAuction(models.Model):
                         "product_id": variant.id,
                         "product_uom_qty": 1,
                         "price_unit": net,
-                        "tax_id": [(6, 0, taxes.ids)],
+                        "tax_ids": [(6, 0, taxes.ids)],
                         "name": _("Adjudicación subasta: %s") % self.product_id.name,
                     })
                 ],
