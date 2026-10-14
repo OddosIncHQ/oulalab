@@ -244,12 +244,6 @@ class LiquidationAuction(models.Model):
     # Lógica de negocio: preferencia de socio
     # ==================================================================
     def _min_next_bid_for(self, partner):
-        """Puja mínima válida para ESTE partner.
-
-        La preferencia de socio se materializa de dos formas:
-          1) Ventana de preview (gestionada en place_bid / puede pujar antes).
-          2) Incremento porcentual menor -> le cuesta menos mantenerse arriba.
-        """
         self.ensure_one()
         highest = self.highest_amount
         if not highest:
@@ -263,7 +257,6 @@ class LiquidationAuction(models.Model):
         return self.currency_id.round(highest + step)
 
     def _can_bid_now(self, partner):
-        """(bool, motivo) — ¿puede este partner pujar en este instante?"""
         self.ensure_one()
         now = fields.Datetime.now()
         if self.state != "live":
@@ -286,21 +279,12 @@ class LiquidationAuction(models.Model):
     # Núcleo transaccional de puja (concurrencia segura)
     # ==================================================================
     def place_bid(self, partner, amount):
-        """Registra una puja de forma atómica.
-
-        Se bloquea la fila de la subasta (SELECT ... FOR UPDATE) para serializar
-        pujas concurrentes: dos usuarios pujando en el mismo milisegundo no pueden
-        ambos 'ganar' contra el mismo highest. El segundo espera al commit del
-        primero y revalida contra el estado ya actualizado.
-        """
         self.ensure_one()
 
-        # 1) Bloqueo pesimista de la fila.
         self.env.cr.execute(
             "SELECT id FROM liquidation_auction WHERE id = %s FOR UPDATE NOWAIT",
             (self.id,),
         )
-        # 2) Releer valores frescos tras el lock (el cache podría estar viejo).
         self.invalidate_recordset(
             ["highest_amount", "highest_bid_id", "state", "end_date"]
         )
@@ -327,7 +311,6 @@ class LiquidationAuction(models.Model):
             }
         )
 
-        # 3) Anti-sniping (soft close): extiende el cierre si la puja entra al final.
         now = fields.Datetime.now()
         remaining = (self.end_date - now).total_seconds()
         if remaining < (self.anti_sniping_minutes or 0) * 60:
@@ -358,7 +341,6 @@ class LiquidationAuction(models.Model):
         self.write({"state": "draft"})
 
     def action_open_web(self):
-        """Abre la ficha pública de esta subasta en una pestaña nueva."""
         self.ensure_one()
         return {
             "type": "ir.actions.act_url",
@@ -368,13 +350,11 @@ class LiquidationAuction(models.Model):
 
     @api.model
     def _cron_manage_states(self):
-        """Cron de 1 minuto: abre y cierra subastas según reloj del servidor."""
         now = fields.Datetime.now()
-        # Publicada -> En curso
         self.search(
             [("state", "=", "published"), ("start_date", "<=", now)]
         ).write({"state": "live"})
-        # En curso -> cierre
+
         to_close = self.search([("state", "=", "live"), ("end_date", "<=", now)])
         for auction in to_close:
             try:
@@ -383,7 +363,6 @@ class LiquidationAuction(models.Model):
             except Exception:
                 _logger.exception("Subasta %s: error al cerrar", auction.id)
 
-        # Esperando pago: ¿pagó? ¿se venció el plazo?
         pending = self.search([("state", "=", "pending_payment")])
         for auction in pending:
             try:
@@ -396,12 +375,10 @@ class LiquidationAuction(models.Model):
                 _logger.exception("Subasta %s: error en control de pago", auction.id)
 
     def _close_auction(self):
-        """Al cerrar: avisa a los perdedores y adjudica al mejor postor."""
         self.ensure_one()
         self._award_to_next_bidder()
 
     def _award_to_next_bidder(self):
-        """Adjudica a la mejor puja activa sobre la reserva; si no hay, declara desierta."""
         self.ensure_one()
         next_bid = self.bid_ids.filtered(
             lambda b: not b.rejected and b.amount >= self.reserve_price
@@ -429,9 +406,19 @@ class LiquidationAuction(models.Model):
         self.ensure_one()
         variant = self.product_id.product_variant_id
         taxes = self._auction_taxes()
-        net = self._untaxed_from_gross(bid.amount)   # la puja es C/IVA -> precio neto
+        net = self._untaxed_from_gross(bid.amount)
         company = self._auction_company()
         SaleOrder = self.env["sale.order"].with_company(company)
+
+        # 1. Secuencia personalizada para subastas (auction.order -> LIQSUB-...)
+        seq_name = self.env["ir.sequence"].next_by_code("auction.order")
+
+        # 2. Plantilla de cotización especializada 'Subastas'
+        auction_tmpl = self.env["sale.order.template"].search([
+            ("name", "=", "Subastas"),
+            ("company_id", "in", [False, company.id]),
+        ], limit=1)
+
         vals = {
             "company_id": company.id,
             "partner_id": bid.partner_id.id,
@@ -446,12 +433,30 @@ class LiquidationAuction(models.Model):
                 })
             ],
         }
-        # Venta única, NO suscripción: sin plantilla de presupuesto (la plantilla
-        # por defecto de la compañía trae un plan recurrente) y sin plan recurrente.
+
+        # Aplicar el correlativo de subasta si la secuencia existe
+        if seq_name:
+            vals["name"] = seq_name
+
+        # Asignar plantilla de cotización especializada
         if "sale_order_template_id" in SaleOrder._fields:
-            vals["sale_order_template_id"] = False
+            vals["sale_order_template_id"] = auction_tmpl.id if auction_tmpl else False
+
+        # Configurar diario de facturación asociado a la plantilla (ej. Boleta Electrónica)
+        if auction_tmpl and hasattr(auction_tmpl, "journal_id") and auction_tmpl.journal_id:
+            vals["journal_id"] = auction_tmpl.journal_id.id
+
+        # Configuración de pago en línea si la plantilla lo define
+        if auction_tmpl:
+            if hasattr(auction_tmpl, "require_payment") and "require_payment" in SaleOrder._fields:
+                vals["require_payment"] = auction_tmpl.require_payment
+            if hasattr(auction_tmpl, "prepayment_percent") and "prepayment_percent" in SaleOrder._fields:
+                vals["prepayment_percent"] = auction_tmpl.prepayment_percent
+
+        # Venta única, NO suscripción recurrente
         if "plan_id" in SaleOrder._fields:
             vals["plan_id"] = False
+
         order = SaleOrder.create(vals)
         order.action_confirm()           # pasa a pedido en firme -> habilita el pago
         order._portal_ensure_token()     # asegura el token del enlace de portal
@@ -477,7 +482,6 @@ class LiquidationAuction(models.Model):
         self._notify_losers()
 
     def _handle_non_payment(self):
-        """El ganador no pagó a tiempo: descarta su puja, cancela su pedido y reasigna."""
         self.ensure_one()
         if self.current_winner_bid_id:
             self.current_winner_bid_id.rejected = True
@@ -493,7 +497,6 @@ class LiquidationAuction(models.Model):
     # Emails
     # ------------------------------------------------------------------
     def _send_winner_email(self):
-        """Confirmación de la orden al ganador (plantilla sobre sale.order)."""
         self.ensure_one()
         template = self.env.ref(
             "oulalab_auction.mail_template_auction_winner_order", raise_if_not_found=False
@@ -502,7 +505,6 @@ class LiquidationAuction(models.Model):
             template.send_mail(self.sale_order_id.id, force_send=True)
 
     def _notify_losers(self):
-        """Avisa a cada postor que no resultó adjudicado (una sola vez)."""
         self.ensure_one()
         template = self.env.ref(
             "oulalab_auction.mail_template_auction_loser", raise_if_not_found=False
