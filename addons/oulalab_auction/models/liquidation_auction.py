@@ -431,22 +431,28 @@ class LiquidationAuction(models.Model):
         taxes = self._auction_taxes()
         net = self._untaxed_from_gross(bid.amount)   # la puja es C/IVA -> precio neto
         company = self._auction_company()
-        order = self.env["sale.order"].with_company(company).create(
-            {
-                "company_id": company.id,
-                "partner_id": bid.partner_id.id,
-                "origin": self.name,
-                "order_line": [
-                    (0, 0, {
-                        "product_id": variant.id,
-                        "product_uom_qty": 1,
-                        "price_unit": net,
-                        "tax_ids": [(6, 0, taxes.ids)],
-                        "name": _("Adjudicación subasta: %s") % self.product_id.name,
-                    })
-                ],
-            }
-        )
+        SaleOrder = self.env["sale.order"].with_company(company)
+        vals = {
+            "company_id": company.id,
+            "partner_id": bid.partner_id.id,
+            "origin": self.name,
+            "order_line": [
+                (0, 0, {
+                    "product_id": variant.id,
+                    "product_uom_qty": 1,
+                    "price_unit": net,
+                    "tax_ids": [(6, 0, taxes.ids)],
+                    "name": _("Adjudicación subasta: %s") % self.product_id.name,
+                })
+            ],
+        }
+        # Venta única, NO suscripción: sin plantilla de presupuesto (la plantilla
+        # por defecto de la compañía trae un plan recurrente) y sin plan recurrente.
+        if "sale_order_template_id" in SaleOrder._fields:
+            vals["sale_order_template_id"] = False
+        if "plan_id" in SaleOrder._fields:
+            vals["plan_id"] = False
+        order = SaleOrder.create(vals)
         order.action_confirm()           # pasa a pedido en firme -> habilita el pago
         order._portal_ensure_token()     # asegura el token del enlace de portal
         return order
