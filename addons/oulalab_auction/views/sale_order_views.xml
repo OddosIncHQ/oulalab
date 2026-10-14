@@ -15,27 +15,20 @@
         </field>
     </record>
 
-    <!-- Plantilla de reporte PDF especializada para Subastas -->
+    <!-- Bloque informativo y distinción de subasta en el PDF de venta -->
     <template id="report_saleorder_document_auction" inherit_id="sale.report_saleorder_document">
-        <!-- Reemplazar título de cotización cuando la orden proviene de una subasta -->
-        <xpath expr="//h2[@class='mt-4']" position="replace">
-            <h2 class="mt-4" t-if="doc.auction_ids">
-                <span>Comprobante de Adjudicación de Subasta</span><br/>
-                <small class="text-muted" t-field="doc.name"/>
-            </h2>
-            <h2 class="mt-4" t-else="">
-                <span t-if="env.context.get('proforma', False) or is_pro_forma">Factura pro-forma # </span>
-                <span t-elif="doc.state in ['draft','sent']">Cotización # </span>
-                <span t-else="">Pedido # </span>
-                <span t-field="doc.name">SO0001</span>
-            </h2>
+        <xpath expr="//div[hasclass('page')]" position="before">
+            <t t-if="doc.auction_ids">
+                <div class="alert alert-secondary d-flex justify-content-between align-items-center mb-3 p-2">
+                    <span class="fw-bold">COMPROBANTE DE ADJUDICACIÓN DE SUBASTA</span>
+                    <span class="badge bg-dark" t-field="doc.name"/>
+                </div>
+            </t>
         </xpath>
-
-        <!-- Bloque informativo con condiciones de liquidación y retiro/despacho -->
-        <xpath expr="//div[@id='informations']" position="after">
-            <div t-if="doc.auction_ids" class="alert alert-info mt-3 p-2" style="font-size: 13px;">
-                <strong>Condiciones de Liquidación OulaLab:</strong>
-                <ul class="mb-0 ps-3">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <div t-if="doc.auction_ids" class="mt-4 p-3 bg-light rounded" style="font-size: 13px; border-left: 4px solid #BC6C4C;">
+                <strong style="color: #31112C;">Condiciones de Liquidación OulaLab:</strong>
+                <ul class="mb-0 mt-1 ps-3">
                     <li>Prenda adjudicada mediante subasta digital.</li>
                     <li t-if="doc.partner_id.auction_delivery_mode == 'pickup'">
                         Modalidad: Retiro en Showroom (Av. La Dehesa 222, of. 817, Lo Barnechea).
