@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Vista Formulario de Orden de Venta en Backend -->
     <record id="sale_order_form_auction" model="ir.ui.view">
         <field name="name">sale.order.form.auction</field>
         <field name="model">sale.order</field>
@@ -13,4 +14,37 @@
             </xpath>
         </field>
     </record>
+
+    <!-- Plantilla de reporte PDF especializada para Subastas -->
+    <template id="report_saleorder_document_auction" inherit_id="sale.report_saleorder_document">
+        <!-- Reemplazar título de cotización cuando la orden proviene de una subasta -->
+        <xpath expr="//h2[@class='mt-4']" position="replace">
+            <h2 class="mt-4" t-if="doc.auction_ids">
+                <span>Comprobante de Adjudicación de Subasta</span><br/>
+                <small class="text-muted" t-field="doc.name"/>
+            </h2>
+            <h2 class="mt-4" t-else="">
+                <span t-if="env.context.get('proforma', False) or is_pro_forma">Factura pro-forma # </span>
+                <span t-elif="doc.state in ['draft','sent']">Cotización # </span>
+                <span t-else="">Pedido # </span>
+                <span t-field="doc.name">SO0001</span>
+            </h2>
+        </xpath>
+
+        <!-- Bloque informativo con condiciones de liquidación y retiro/despacho -->
+        <xpath expr="//div[@id='informations']" position="after">
+            <div t-if="doc.auction_ids" class="alert alert-info mt-3 p-2" style="font-size: 13px;">
+                <strong>Condiciones de Liquidación OulaLab:</strong>
+                <ul class="mb-0 ps-3">
+                    <li>Prenda adjudicada mediante subasta digital.</li>
+                    <li t-if="doc.partner_id.auction_delivery_mode == 'pickup'">
+                        Modalidad: Retiro en Showroom (Av. La Dehesa 222, of. 817, Lo Barnechea).
+                    </li>
+                    <li t-else="">
+                        Modalidad: Despacho a domicilio registrado.
+                    </li>
+                </ul>
+            </div>
+        </xpath>
+    </template>
 </odoo>
