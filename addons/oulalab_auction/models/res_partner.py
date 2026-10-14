@@ -104,7 +104,16 @@ class ResPartner(models.Model):
         help="Cómo llegó el postor: con cuenta de portal en Odoo o dejando sus datos.",
     )
 
-    @api.depends("sale_order_ids.subscription_state", "sale_order_ids.state")
+    def _member_depends(self):
+        # Solo depende de subscription_state si el módulo de suscripciones
+        # (sale_subscription) está instalado; si no, ese campo no existe y
+        # Odoo rechaza el @depends al cargar/actualizar el módulo.
+        deps = ["sale_order_ids.state"]
+        if "subscription_state" in self.env["sale.order"]._fields:
+            deps.append("sale_order_ids.subscription_state")
+        return deps
+
+    @api.depends(lambda self: self._member_depends())
     def _compute_is_oulalab_member(self):
         # Socio = tiene una suscripción de alquiler ACTIVA.
         # En Odoo 19 la suscripción activa es subscription_state == '3_progress'.
