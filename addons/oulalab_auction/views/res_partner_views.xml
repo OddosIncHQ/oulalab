@@ -57,7 +57,7 @@
                         domain="[('auction_source','=','portal')]"/>
                 <filter name="guest" string="Sin cuenta (dejaron datos)"
                         domain="[('auction_source','=','guest')]"/>
-                <group expand="0" string="Agrupar por">
+                <group>
                     <filter name="g_source" string="Origen"
                             context="{'group_by':'auction_source'}"/>
                     <filter name="g_member" string="Socio"
