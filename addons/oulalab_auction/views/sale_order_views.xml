@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Vista Formulario de Orden de Venta en Backend -->
     <record id="sale_order_form_auction" model="ir.ui.view">
         <field name="name">sale.order.form.auction</field>
         <field name="model">sale.order</field>
@@ -14,30 +13,4 @@
             </xpath>
         </field>
     </record>
-
-    <!-- Bloque informativo y distinción de subasta en el PDF de venta -->
-    <template id="report_saleorder_document_auction" inherit_id="sale.report_saleorder_document">
-        <xpath expr="//div[hasclass('page')]" position="before">
-            <t t-if="doc.auction_ids">
-                <div class="alert alert-secondary d-flex justify-content-between align-items-center mb-3 p-2">
-                    <span class="fw-bold">COMPROBANTE DE ADJUDICACIÓN DE SUBASTA</span>
-                    <span class="badge bg-dark" t-field="doc.name"/>
-                </div>
-            </t>
-        </xpath>
-        <xpath expr="//div[hasclass('page')]" position="inside">
-            <div t-if="doc.auction_ids" class="mt-4 p-3 bg-light rounded" style="font-size: 13px; border-left: 4px solid #BC6C4C;">
-                <strong style="color: #31112C;">Condiciones de Liquidación OulaLab:</strong>
-                <ul class="mb-0 mt-1 ps-3">
-                    <li>Prenda adjudicada mediante subasta digital.</li>
-                    <li t-if="doc.partner_id.auction_delivery_mode == 'pickup'">
-                        Modalidad: Retiro en Showroom (Av. La Dehesa 222, of. 817, Lo Barnechea).
-                    </li>
-                    <li t-else="">
-                        Modalidad: Despacho a domicilio registrado.
-                    </li>
-                </ul>
-            </div>
-        </xpath>
-    </template>
 </odoo>

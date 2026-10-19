@@ -7,7 +7,6 @@
     "license": "LGPL-3",
     "depends": [
         "base",
-        "mail",
         "sale_management",
         "product",
         "website",

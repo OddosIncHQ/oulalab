@@ -104,11 +104,73 @@
         });
     }
 
+    function initGuest(root) {
+        var box = root.querySelector(".oulalab-guest-box");
+        if (!box) return;
+        var step1 = box.querySelector(".oulalab-g-step1");
+        var step2 = box.querySelector(".oulalab-g-step2");
+        var fb = box.querySelector(".oulalab-g-feedback");
+        var fields = box.querySelector(".oulalab-g-fields");
+        var sentTo = null;
+
+        box.querySelectorAll('input[name="gdelivmode"]').forEach(function (r) {
+            r.addEventListener("change", function () {
+                fields.style.display = (r.value === "delivery" && r.checked) ? "block" : "none";
+            });
+        });
+
+        function val(sel) { var el = box.querySelector(sel); return el ? el.value.trim() : ""; }
+
+        box.querySelector(".oulalab-g-send").addEventListener("click", function (ev) {
+            var btn = ev.currentTarget;
+            var checked = box.querySelector('input[name="gdelivmode"]:checked');
+            fb.textContent = "";
+            if (!checked) { fb.textContent = "Elige una modalidad de entrega."; return; }
+            var payload = {
+                name: val(".oulalab-g-name"), rut: val(".oulalab-g-rut"),
+                email: val(".oulalab-g-email"), phone: val(".oulalab-g-phone"),
+                mode: checked.value,
+            };
+            if (checked.value === "delivery") {
+                payload.commune = val(".oulalab-g-commune");
+                payload.street = val(".oulalab-g-street");
+            }
+            btn.disabled = true;
+            jsonrpc("/auctions/guest/start", payload)
+                .then(function (res) {
+                    btn.disabled = false;
+                    if (res && res.ok) {
+                        sentTo = res.sent_to;
+                        box.querySelector(".oulalab-g-sent-to").textContent = sentTo;
+                        step1.style.display = "none";
+                        step2.style.display = "block";
+                    } else {
+                        fb.textContent = (res && res.error) || "No se pudo enviar el código.";
+                    }
+                })
+                .catch(function (e) { btn.disabled = false; fb.textContent = e.message || "Error de red."; });
+        });
+
+        box.querySelector(".oulalab-g-verify").addEventListener("click", function (ev) {
+            var btn = ev.currentTarget;
+            fb.textContent = "";
+            btn.disabled = true;
+            jsonrpc("/auctions/guest/verify", { email: sentTo, code: val(".oulalab-g-code") })
+                .then(function (res) {
+                    btn.disabled = false;
+                    if (res && res.ok) { window.location.reload(); }
+                    else { fb.textContent = (res && res.error) || "Código incorrecto."; }
+                })
+                .catch(function (e) { btn.disabled = false; fb.textContent = e.message || "Error de red."; });
+        });
+    }
+
     function initDetail() {
         var root = document.querySelector(".oulalab-auction-detail");
         if (!root) return;
         var auctionId = root.dataset.auctionId;
         initDelivery(root, auctionId);
+        initGuest(root);
         var btn = root.querySelector(".oulalab-bid-btn");
         var input = root.querySelector(".oulalab-bid-input");
         var feedback = root.querySelector(".oulalab-bid-feedback");

@@ -103,11 +103,70 @@
                             </div>
                         </t>
 
-                        <!-- 1) Visitante sin cuenta -->
+                        <!-- 1) Sin cuenta ni sesión verificada -> registro con código por correo -->
                         <t t-if="is_public">
-                            <a href="/web/login" class="btn btn-dark w-100">
-                                Inicia sesión o regístrate para pujar
-                            </a>
+                            <div class="oulalab-guest-box card p-3">
+                                <h5>Regístrate para pujar</h5>
+                                <p class="small text-muted">
+                                    Solo pedimos estos datos para confirmar si eres socia y para
+                                    contactarte si ganas. No necesitas crear una cuenta.
+                                </p>
+                                <div class="oulalab-g-step1">
+                                    <label class="form-label mt-2">Nombre completo</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-name"/>
+                                    <label class="form-label">RUT</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-rut"
+                                           placeholder="12.345.678-5"/>
+                                    <label class="form-label">Correo electrónico</label>
+                                    <input type="email" class="form-control mb-2 oulalab-g-email"/>
+                                    <label class="form-label">Teléfono de contacto</label>
+                                    <input type="tel" class="form-control mb-3 oulalab-g-phone"/>
+                                    <h6>¿Cómo quieres recibir la prenda?</h6>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="radio" name="gdelivmode"
+                                               id="gModePickup" value="pickup"/>
+                                        <label class="form-check-label" for="gModePickup">
+                                            Retiro en showroom — <span t-out="showroom"/>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gdelivmode"
+                                               id="gModeDelivery" value="delivery"/>
+                                        <label class="form-check-label" for="gModeDelivery">
+                                            Despacho a domicilio
+                                        </label>
+                                    </div>
+                                    <div class="oulalab-g-fields mt-2" style="display:none;">
+                                        <select class="form-select mb-2 oulalab-g-commune">
+                                            <option value="">Comuna…</option>
+                                            <t t-foreach="communes" t-as="c">
+                                                <option t-att-value="c[0]" t-out="c[1]"/>
+                                            </t>
+                                        </select>
+                                        <input type="text" class="form-control mb-2 oulalab-g-street"
+                                               placeholder="Dirección de despacho"/>
+                                        <p class="text-muted small mb-0">
+                                            Solo despachamos a Lo Barnechea, Las Condes y Vitacura.
+                                        </p>
+                                    </div>
+                                    <button class="btn btn-dark mt-3 w-100 oulalab-g-send" type="button">
+                                        Enviar código a mi correo
+                                    </button>
+                                </div>
+                                <div class="oulalab-g-step2" style="display:none;">
+                                    <p class="small">
+                                        Te enviamos un código de 6 dígitos a
+                                        <strong class="oulalab-g-sent-to"/>.
+                                    </p>
+                                    <input type="text" inputmode="numeric" maxlength="6"
+                                           class="form-control mb-2 oulalab-g-code"
+                                           placeholder="000000"/>
+                                    <button class="btn btn-dark w-100 oulalab-g-verify" type="button">
+                                        Verificar y continuar
+                                    </button>
+                                </div>
+                                <div class="oulalab-g-feedback small mt-2 text-danger"></div>
+                            </div>
                         </t>
 
                         <!-- 2) Logueado pero sin datos de entrega -> formulario previo -->

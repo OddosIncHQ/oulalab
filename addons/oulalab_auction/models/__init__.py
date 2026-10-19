@@ -4,3 +4,4 @@ from . import product_product
 from . import sale_order
 from . import liquidation_auction
 from . import auction_bid
+from . import auction_guest_otp
