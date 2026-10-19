@@ -90,7 +90,7 @@
                         <page string="Descripción pública">
                             <field name="description"/>
                         </page>
-                        <page string="Pujas">
+                        <page string="Ofertas">
                             <field name="bid_ids" readonly="1">
                                 <list default_order="amount desc">
                                     <field name="partner_id"/>

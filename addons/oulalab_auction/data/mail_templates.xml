@@ -13,7 +13,7 @@
             <field name="body_html" type="html">
                 <div style="font-family:Arial,sans-serif;color:#31112C;">
                     <p>Hola <t t-out="object.winner_id.name or ''"/>,</p>
-                    <p>¡Tu puja fue la ganadora de
+                    <p>¡Tu oferta fue la ganadora de
                         <strong t-out="object.product_id.name or ''"/>!</p>
                     <p>Monto adjudicado:
                         <strong>$<t t-out="'{:,.0f}'.format(object.current_winner_bid_id.amount or 0)"/></strong>
@@ -45,7 +45,7 @@
                 <div style="font-family:Arial,sans-serif;color:#31112C;">
                     <p>Hola,</p>
                     <p>La subasta de <strong t-out="object.product_id.name or ''"/> ya cerró
-                        y en esta ocasión tu puja no resultó adjudicada.</p>
+                        y en esta ocasión tu oferta no resultó adjudicada.</p>
                     <p>Gracias por participar. Pronto liberaremos nuevas prendas —
                         te esperamos en la próxima.</p>
                     <p style="font-size:12px;color:#888;">OulaLab · Liquidación de prendas</p>
@@ -66,7 +66,7 @@
             <field name="body_html" type="html">
                 <div style="font-family:Arial,sans-serif;color:#31112C;max-width:600px;">
                     <p>Hola <t t-out="object.partner_id.name or ''"/>,</p>
-                    <p>¡Felicitaciones! Tu puja fue la ganadora de
+                    <p>¡Felicitaciones! Tu oferta fue la ganadora de
                         <strong t-out="object.auction_ids[:1].product_id.name or ''"/>.</p>
                     <p><img t-att-src="object._get_auction_photo_src()" style="max-height:220px;border-radius:6px;"/></p>
                     <p>Orden: <strong t-out="object.name or ''"/><br/>

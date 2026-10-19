@@ -56,18 +56,18 @@ class LiquidationAuction(models.Model):
         string="Precio mínimo (reserva)",
         required=True,
         currency_field="currency_id",
-        help="Puja mínima aceptable. Bajo este monto la subasta se declara desierta.",
+        help="Oferta mínima aceptable. Bajo este monto la subasta se declara desierta.",
     )
     min_increment = fields.Monetary(
         string="Incremento mínimo fijo",
         currency_field="currency_id",
         default=1000.0,
-        help="Piso absoluto del salto entre pujas (además del porcentaje).",
+        help="Piso absoluto del salto entre ofertas (además del porcentaje).",
     )
     member_increment_pct = fields.Float(
         string="Incremento socio (%)",
         default=2.0,
-        help="Los socios pueden superar la puja actual con un salto porcentual menor.",
+        help="Los socios pueden superar la oferta actual con un salto porcentual menor.",
     )
     public_increment_pct = fields.Float(
         string="Incremento público (%)",
@@ -86,7 +86,7 @@ class LiquidationAuction(models.Model):
     member_preview_hours = fields.Integer(
         string="Preview socios (horas)",
         default=24,
-        help="Ventana en la que SOLO los socios OulaLab pueden pujar.",
+        help="Ventana en la que SOLO los socios OulaLab pueden subastar.",
     )
     public_start = fields.Datetime(
         string="Apertura pública",
@@ -97,7 +97,7 @@ class LiquidationAuction(models.Model):
     anti_sniping_minutes = fields.Integer(
         string="Anti-sniping (min)",
         default=5,
-        help="Si entra una puja dentro de estos minutos finales, el cierre se extiende "
+        help="Si entra una oferta dentro de estos minutos finales, el cierre se extiende "
         "ese mismo lapso. Evita el 'francotirador' del último segundo.",
     )
 
@@ -117,9 +117,9 @@ class LiquidationAuction(models.Model):
     )
 
     # ------------------------------------------------------------------
-    # Pujas / resultado
+    # Ofertas / resultado
     # ------------------------------------------------------------------
-    bid_ids = fields.One2many("auction.bid", "auction_id", string="Pujas")
+    bid_ids = fields.One2many("auction.bid", "auction_id", string="Ofertas")
     bid_count = fields.Integer(compute="_compute_bid_stats", store=True)
     highest_bid_id = fields.Many2one("auction.bid", compute="_compute_bid_stats", store=True)
     highest_amount = fields.Monetary(
@@ -128,7 +128,7 @@ class LiquidationAuction(models.Model):
     winner_id = fields.Many2one("res.partner", string="Adjudicatario", readonly=True)
     sale_order_id = fields.Many2one("sale.order", string="Pedido generado", readonly=True)
     current_winner_bid_id = fields.Many2one(
-        "auction.bid", string="Puja adjudicada", readonly=True
+        "auction.bid", string="Oferta adjudicada", readonly=True
     )
     payment_deadline_hours = fields.Integer(
         string="Plazo de pago (horas)",
@@ -154,10 +154,10 @@ class LiquidationAuction(models.Model):
             rec.name = _("Subasta: %s") % (rec.product_id.name or _("(sin prenda)"))
 
     winning_amount_untaxed = fields.Monetary(
-        string="Puja sin impuesto",
+        string="Oferta sin impuesto",
         currency_field="currency_id",
         compute="_compute_winning_untaxed",
-        help="Puja adjudicada descontando el impuesto del producto. Es el precio "
+        help="Oferta adjudicada descontando el impuesto del producto. Es el precio "
         "unitario del pedido; luego el impuesto se vuelve a aplicar en la línea.",
     )
 
@@ -190,7 +190,7 @@ class LiquidationAuction(models.Model):
         ) if variant else self.env["account.tax"]
 
     def _untaxed_from_gross(self, gross):
-        """Neto a partir de un monto con impuesto incluido (la puja es C/IVA),
+        """Neto a partir de un monto con impuesto incluido (la oferta es C/IVA),
         usando el impuesto registrado en el producto (taxes_id)."""
         self.ensure_one()
         if not gross:
@@ -244,10 +244,10 @@ class LiquidationAuction(models.Model):
     # Lógica de negocio: preferencia de socio
     # ==================================================================
     def _min_next_bid_for(self, partner):
-        """Puja mínima válida para ESTE partner.
+        """Oferta mínima válida para ESTE partner.
 
         La preferencia de socio se materializa de dos formas:
-          1) Ventana de preview (gestionada en place_bid / puede pujar antes).
+          1) Ventana de preview (gestionada en place_bid / puede subastar antes).
           2) Incremento porcentual menor -> le cuesta menos mantenerse arriba.
         """
         self.ensure_one()
@@ -263,7 +263,7 @@ class LiquidationAuction(models.Model):
         return self.currency_id.round(highest + step)
 
     def _can_bid_now(self, partner):
-        """(bool, motivo) — ¿puede este partner pujar en este instante?"""
+        """(bool, motivo) — ¿puede este partner subastar en este instante?"""
         self.ensure_one()
         now = fields.Datetime.now()
         if self.state != "live":
@@ -272,7 +272,7 @@ class LiquidationAuction(models.Model):
             return False, _("La subasta ya cerró.")
         if not (partner and partner._auction_delivery_ready()):
             return False, _(
-                "Antes de pujar, indica cómo quieres recibir la prenda: "
+                "Antes de subastar, indica cómo quieres recibir la prenda: "
                 "retiro en showroom o despacho a Lo Barnechea, Las Condes o Vitacura."
             )
         if not (partner and partner.is_oulalab_member) and now < self.public_start:
@@ -283,13 +283,13 @@ class LiquidationAuction(models.Model):
         return True, ""
 
     # ==================================================================
-    # Núcleo transaccional de puja (concurrencia segura)
+    # Núcleo transaccional de oferta (concurrencia segura)
     # ==================================================================
     def place_bid(self, partner, amount):
-        """Registra una puja de forma atómica.
+        """Registra una oferta de forma atómica.
 
         Se bloquea la fila de la subasta (SELECT ... FOR UPDATE) para serializar
-        pujas concurrentes: dos usuarios pujando en el mismo milisegundo no pueden
+        ofertas concurrentes: dos usuarios subastando en el mismo milisegundo no pueden
         ambos 'ganar' contra el mismo highest. El segundo espera al commit del
         primero y revalida contra el estado ya actualizado.
         """
@@ -313,10 +313,10 @@ class LiquidationAuction(models.Model):
         min_required = self._min_next_bid_for(partner)
         if amount < min_required:
             raise ValidationError(
-                _("Tu puja debe ser al menos %(min)s.")
+                _("Tu oferta debe ser al menos %(min)s.")
                 % {"min": self.currency_id.format(min_required)}
                 if hasattr(self.currency_id, "format")
-                else _("Tu puja debe ser al menos %s.") % min_required
+                else _("Tu oferta debe ser al menos %s.") % min_required
             )
 
         bid = self.env["auction.bid"].create(
@@ -327,14 +327,14 @@ class LiquidationAuction(models.Model):
             }
         )
 
-        # 3) Anti-sniping (soft close): extiende el cierre si la puja entra al final.
+        # 3) Anti-sniping (soft close): extiende el cierre si la oferta entra al final.
         now = fields.Datetime.now()
         remaining = (self.end_date - now).total_seconds()
         if remaining < (self.anti_sniping_minutes or 0) * 60:
             self.end_date = now + timedelta(minutes=self.anti_sniping_minutes)
 
         self.message_post(
-            body=_("Nueva puja: %(amt)s por %(name)s")
+            body=_("Nueva oferta: %(amt)s por %(name)s")
             % {"amt": amount, "name": partner.name}
         )
         return bid
@@ -351,7 +351,7 @@ class LiquidationAuction(models.Model):
     def action_cancel(self):
         for rec in self:
             if rec.bid_ids:
-                raise UserError(_("No puedes cancelar una subasta con pujas."))
+                raise UserError(_("No puedes cancelar una subasta con ofertas."))
             rec.state = "cancelled"
 
     def action_back_to_draft(self):
@@ -401,7 +401,7 @@ class LiquidationAuction(models.Model):
         self._award_to_next_bidder()
 
     def _award_to_next_bidder(self):
-        """Adjudica a la mejor puja activa sobre la reserva; si no hay, declara desierta."""
+        """Adjudica a la mejor oferta activa sobre la reserva; si no hay, declara desierta."""
         self.ensure_one()
         next_bid = self.bid_ids.filtered(
             lambda b: not b.rejected and b.amount >= self.reserve_price
@@ -429,7 +429,7 @@ class LiquidationAuction(models.Model):
         self.ensure_one()
         variant = self.product_id.product_variant_id
         taxes = self._auction_taxes()
-        net = self._untaxed_from_gross(bid.amount)   # la puja es C/IVA -> precio neto
+        net = self._untaxed_from_gross(bid.amount)   # la oferta es C/IVA -> precio neto
         company = self._auction_company()
         SaleOrder = self.env["sale.order"].with_company(company)
         vals = {
@@ -477,7 +477,7 @@ class LiquidationAuction(models.Model):
         self._notify_losers()
 
     def _handle_non_payment(self):
-        """El ganador no pagó a tiempo: descarta su puja, cancela su pedido y reasigna."""
+        """El ganador no pagó a tiempo: descarta su oferta, cancela su pedido y reasigna."""
         self.ensure_one()
         if self.current_winner_bid_id:
             self.current_winner_bid_id.rejected = True

@@ -4,6 +4,10 @@
         <t t-call="website.layout">
             <div class="container my-5 oulalab-auction-detail"
                  t-att-data-auction-id="auction.id">
+                <div class="mb-3 d-flex gap-2 flex-wrap">
+                    <a href="/auctions" class="btn btn-outline-dark btn-sm">← Volver a las subastas</a>
+                    <a href="/auctions/mis-subastas" class="btn btn-outline-secondary btn-sm">Mis subastas</a>
+                </div>
                 <div class="row g-5">
                     <!-- Imágenes (carrusel) -->
                     <div class="col-12 col-md-6">
@@ -55,7 +59,7 @@
                         </t>
                     </div>
 
-                    <!-- Info + puja -->
+                    <!-- Info + oferta -->
                     <div class="col-12 col-md-6">
                         <h1 t-out="auction.product_id.name"/>
                         <p class="text-muted" t-out="auction.description"/>
@@ -70,14 +74,14 @@
 
                         <div class="card p-3 mb-3">
                             <div class="d-flex justify-content-between">
-                                <span class="text-muted">Puja más alta</span>
+                                <span class="text-muted">Oferta más alta</span>
                                 <strong class="oulalab-highest">
                                     <t t-out="auction.currency_id.symbol"/>
                                     <t t-out="'{:,.0f}'.format(auction.highest_amount or 0)"/>
                                 </strong>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span class="text-muted">N.º de pujas</span>
+                                <span class="text-muted">N.º de ofertas</span>
                                 <span class="oulalab-bidcount" t-out="auction.bid_count"/>
                             </div>
                             <hr class="my-2"/>
@@ -93,7 +97,7 @@
                         <t t-if="auction.public_start and server_now &lt; auction.public_start">
                             <div t-attf-class="alert #{'alert-success' if is_member else 'alert-warning'}">
                                 <t t-if="is_member">
-                                    Estás en la <strong>ventana exclusiva para socios</strong>. ¡Puja antes que el público!
+                                    Estás en la <strong>ventana exclusiva para socios</strong>. ¡Subasta antes que el público!
                                 </t>
                                 <t t-else="">
                                     Ventana exclusiva para socios OulaLab.
@@ -103,20 +107,32 @@
                             </div>
                         </t>
 
-                        <!-- 1) Sin cuenta ni sesión verificada -> registro con código por correo -->
+                        <!-- 1) Sin cuenta ni sesión verificada -> identificación por RUT + código -->
                         <t t-if="is_public">
                             <div class="oulalab-guest-box card p-3">
-                                <h5>Regístrate para pujar</h5>
+                                <h5>Ingresa para subastar</h5>
                                 <p class="small text-muted">
-                                    Solo pedimos estos datos para confirmar si eres socia y para
-                                    contactarte si ganas. No necesitas crear una cuenta.
+                                    Si eres socia OulaLab, ingresa tu RUT y te enviaremos un código
+                                    al correo que ya tenemos registrado. Si es tu primera vez, completa tus datos.
                                 </p>
-                                <div class="oulalab-g-step1">
-                                    <label class="form-label mt-2">Nombre completo</label>
-                                    <input type="text" class="form-control mb-2 oulalab-g-name"/>
+
+                                <!-- Paso A: RUT -->
+                                <div class="oulalab-g-rutstep">
                                     <label class="form-label">RUT</label>
-                                    <input type="text" class="form-control mb-2 oulalab-g-rut"
+                                    <input type="text" class="form-control mb-2 oulalab-g-rut-only"
                                            placeholder="12.345.678-5"/>
+                                    <button class="btn btn-dark w-100 oulalab-g-lookup" type="button">
+                                        Continuar
+                                    </button>
+                                </div>
+
+                                <!-- Paso B: datos completos (RUT nuevo) -->
+                                <div class="oulalab-g-step1" style="display:none;">
+                                    <p class="small mb-2 oulalab-g-newnote"></p>
+                                    <label class="form-label">RUT</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-rut" readonly="readonly"/>
+                                    <label class="form-label">Nombre completo</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-name"/>
                                     <label class="form-label">Correo electrónico</label>
                                     <input type="email" class="form-control mb-2 oulalab-g-email"/>
                                     <label class="form-label">Teléfono de contacto</label>
@@ -153,11 +169,10 @@
                                         Enviar código a mi correo
                                     </button>
                                 </div>
+
+                                <!-- Paso C: código (correo ya registrado o recién ingresado) -->
                                 <div class="oulalab-g-step2" style="display:none;">
-                                    <p class="small">
-                                        Te enviamos un código de 6 dígitos a
-                                        <strong class="oulalab-g-sent-to"/>.
-                                    </p>
+                                    <p class="small mb-2 oulalab-g-sent-msg"></p>
                                     <input type="text" inputmode="numeric" maxlength="6"
                                            class="form-control mb-2 oulalab-g-code"
                                            placeholder="000000"/>
@@ -169,10 +184,25 @@
                             </div>
                         </t>
 
+                        <!-- 1b) Socio en ventana de preview: el público aún no puede subastar -->
+                        <t t-elif="preview_locked">
+                            <div class="oulalab-lock-box card p-3 text-center"
+                                 t-att-data-remaining-ms="remaining_ms">
+                                <h5>Subasta exclusiva para socias por ahora</h5>
+                                <p class="mb-1">
+                                    El público general podrá subastar a partir de
+                                </p>
+                                <p class="fs-5 fw-bold mb-2" t-out="auction.public_start"/>
+                                <p class="small text-muted mb-0">
+                                    La página se actualizará sola cuando se abra.
+                                </p>
+                            </div>
+                        </t>
+
                         <!-- 2) Logueado pero sin datos de entrega -> formulario previo -->
                         <t t-elif="not delivery_ready">
                             <div class="oulalab-delivery-box card p-3">
-                                <h5>Antes de pujar, verifica tus datos</h5>
+                                <h5>Antes de subastar, verifica tus datos</h5>
                                 <label class="form-label mt-2">RUT</label>
                                 <input type="text" class="form-control mb-3 oulalab-rut"
                                        placeholder="12.345.678-5"/>
@@ -216,7 +246,7 @@
                             </div>
                         </t>
 
-                        <!-- 3) Logueado y con entrega lista -> formulario de puja -->
+                        <!-- 3) Logueado y con entrega lista -> formulario de oferta -->
                         <t t-else="">
                             <p class="small text-muted mb-2">
                                 Entrega:
@@ -230,7 +260,7 @@
                             </p>
                             <div class="oulalab-bid-box">
                                 <label class="form-label">
-                                    Tu puja (mínimo
+                                    Tu oferta (mínimo
                                     <span class="oulalab-minnext fw-bold">
                                         <t t-out="auction.currency_id.symbol"/><t t-out="'{:,.0f}'.format(min_next)"/>
                                     </span>)
@@ -240,7 +270,7 @@
                                            t-att-min="min_next" t-att-value="int(min_next)"
                                            t-att-data-min="min_next"/>
                                     <button class="btn btn-danger oulalab-bid-btn" type="button">
-                                        Pujar
+                                        Subastar
                                     </button>
                                 </div>
                                 <div class="oulalab-bid-feedback small mt-2"></div>

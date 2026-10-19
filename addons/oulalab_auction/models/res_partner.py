@@ -47,9 +47,9 @@ class ResPartner(models.Model):
     )
 
     def _auction_delivery_ready(self):
-        """¿El postor completó RUT + una modalidad de entrega válida para pujar?"""
+        """¿El postor completó RUT + una modalidad de entrega válida para subastar?"""
         self.ensure_one()
-        if not self.vat:  # RUT obligatorio para todo pujador
+        if not self.vat:  # RUT obligatorio para todo ofertador
             return False
         if self.auction_delivery_mode == "pickup":
             return True
@@ -74,7 +74,7 @@ class ResPartner(models.Model):
                 timeout=5,
             )
             data = resp.json()
-        except Exception as e:  # red/timeout: no bloquear la puja
+        except Exception as e:  # red/timeout: no bloquear la oferta
             _logger.warning("Geocoding OulaLab falló: %s", e)
             return True, None
         if data.get("status") != "OK" or not data.get("results"):
@@ -93,7 +93,7 @@ class ResPartner(models.Model):
         store=True,
         readonly=False,
         help="Suscriptor con plan de alquiler ACTIVO. Recibe acceso anticipado "
-        "(preview) y menor incremento mínimo de puja. Se calcula solo, pero "
+        "(preview) y menor incremento mínimo de oferta. Se calcula solo, pero "
         "puedes forzarlo a mano.",
     )
     auction_source = fields.Selection(
@@ -130,10 +130,10 @@ class ResPartner(models.Model):
             partner.auction_source = "portal" if partner.user_ids else "guest"
 
     auction_bid_ids = fields.One2many(
-        "auction.bid", "partner_id", string="Pujas en subastas"
+        "auction.bid", "partner_id", string="Ofertas en subastas"
     )
     auction_bid_count = fields.Integer(
-        string="N.º de pujas", compute="_compute_auction_bid_count"
+        string="N.º de ofertas", compute="_compute_auction_bid_count"
     )
 
     def _compute_auction_bid_count(self):

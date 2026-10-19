@@ -13,7 +13,7 @@ OTP_RESEND_SECONDS = 60
 class AuctionGuestOtp(models.Model):
     """Código de verificación por correo para postores sin cuenta en Odoo.
 
-    Demuestra que quien puja controla el email declarado antes de que el
+    Demuestra que quien oferta controla el email declarado antes de que el
     postor quede asociado a un contacto (y a una dirección de despacho).
     """
 
@@ -69,3 +69,8 @@ class AuctionGuestOtp(models.Model):
         payload = json.loads(otp.payload)
         otp.unlink()
         return payload
+
+    def _cron_purge_expired(self):
+        """Borra códigos vencidos: contienen RUT, correo y dirección del postor."""
+        expired = self.sudo().search([("expires_at", "<=", fields.Datetime.now())])
+        expired.unlink()

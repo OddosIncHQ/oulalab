@@ -3,7 +3,7 @@ from odoo import fields, models
 
 class AuctionBid(models.Model):
     _name = "auction.bid"
-    _description = "Puja de subasta"
+    _description = "Oferta de subasta"
     _order = "amount desc, id desc"
 
     auction_id = fields.Many2one(
@@ -33,7 +33,7 @@ class AuctionBid(models.Model):
     rejected = fields.Boolean(
         string="Descartada",
         default=False,
-        help="Puja descartada porque su autor no pagó dentro del plazo. "
+        help="Oferta descartada porque su autor no pagó dentro del plazo. "
         "Queda fuera de la reasignación al siguiente postor.",
     )
 

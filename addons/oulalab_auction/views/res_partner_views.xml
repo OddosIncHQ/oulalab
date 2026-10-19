@@ -75,7 +75,7 @@
         <field name="search_view_id" ref="res_partner_auction_search"/>
         <field name="context">{'list_view_ref': 'oulalab_auction.res_partner_auction_list'}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">Aún no hay contactos que hayan pujado.</p>
+            <p class="o_view_nocontent_smiling_face">Aún no hay contactos que hayan ofertado.</p>
             <p>Aquí verás a todos los postores: con cuenta en Odoo o que dejaron sus datos,
                y cuáles son socios OulaLab con plan activo.</p>
         </field>

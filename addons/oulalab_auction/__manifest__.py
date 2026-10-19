@@ -1,6 +1,6 @@
 {
     "name": "OulaLab Auction (Liquidación de prendas)",
-    "version": "19.0.1.0.16",
+    "version": "19.0.1.0.19",
     "category": "Website/Website",
     "summary": "Subasta de prendas retiradas del alquiler, con preferencia para socios OulaLab.",
     "author": "OulaLab",
@@ -24,6 +24,7 @@
         "views/auction_menus.xml",
         "templates/auction_list.xml",
         "templates/auction_detail.xml",
+        "templates/auction_my.xml",
     ],
     "assets": {
         "web.assets_frontend": [

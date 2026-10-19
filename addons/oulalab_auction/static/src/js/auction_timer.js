@@ -1,4 +1,4 @@
-/* OulaLab Auctions — timer, live polling y envío de pujas.
+/* OulaLab Auctions — timer, live polling y envío de ofertas.
    Vanilla JS registrado en web.assets_frontend. */
 (function () {
     "use strict";
@@ -92,7 +92,7 @@
                 .then(function (res) {
                     dbtn.disabled = false;
                     if (res && res.ok) {
-                        window.location.reload();   // recarga -> muestra el form de puja
+                        window.location.reload();   // recarga -> muestra el form de oferta
                     } else {
                         dfeedback.textContent = (res && res.error) || "No se pudo guardar.";
                     }
@@ -107,11 +107,22 @@
     function initGuest(root) {
         var box = root.querySelector(".oulalab-guest-box");
         if (!box) return;
+        var rutStep = box.querySelector(".oulalab-g-rutstep");
         var step1 = box.querySelector(".oulalab-g-step1");
         var step2 = box.querySelector(".oulalab-g-step2");
         var fb = box.querySelector(".oulalab-g-feedback");
         var fields = box.querySelector(".oulalab-g-fields");
-        var sentTo = null;
+        var rutValue = "";
+
+        function val(sel) { var el = box.querySelector(sel); return el ? el.value.trim() : ""; }
+        function setFb(msg) { fb.textContent = msg || ""; }
+        function showCode(masked) {
+            box.querySelector(".oulalab-g-sent-msg").textContent =
+                "Tu correo ya está registrado. Enviamos un código de 6 dígitos a " + masked + ".";
+            rutStep.style.display = "none";
+            step1.style.display = "none";
+            step2.style.display = "block";
+        }
 
         box.querySelectorAll('input[name="gdelivmode"]').forEach(function (r) {
             r.addEventListener("change", function () {
@@ -119,17 +130,37 @@
             });
         });
 
-        function val(sel) { var el = box.querySelector(sel); return el ? el.value.trim() : ""; }
+        // Paso A: RUT -> ¿existe con correo registrado?
+        box.querySelector(".oulalab-g-lookup").addEventListener("click", function (ev) {
+            var btn = ev.currentTarget;
+            setFb("");
+            rutValue = val(".oulalab-g-rut-only");
+            btn.disabled = true;
+            jsonrpc("/auctions/guest/lookup", { rut: rutValue })
+                .then(function (res) {
+                    btn.disabled = false;
+                    if (!res || !res.ok) { setFb((res && res.error) || "No se pudo continuar."); return; }
+                    if (res.mode === "code") { showCode(res.masked); return; }
+                    // RUT nuevo: pedir datos completos
+                    box.querySelector(".oulalab-g-rut").value = rutValue;
+                    box.querySelector(".oulalab-g-newnote").textContent =
+                        "No encontramos tu RUT. Completa tus datos para continuar.";
+                    rutStep.style.display = "none";
+                    step1.style.display = "block";
+                })
+                .catch(function (e) { btn.disabled = false; setFb(e.message || "Error de red."); });
+        });
 
+        // Paso B: datos completos (RUT nuevo) -> envía código
         box.querySelector(".oulalab-g-send").addEventListener("click", function (ev) {
             var btn = ev.currentTarget;
             var checked = box.querySelector('input[name="gdelivmode"]:checked');
-            fb.textContent = "";
-            if (!checked) { fb.textContent = "Elige una modalidad de entrega."; return; }
+            setFb("");
+            if (!checked) { setFb("Elige una modalidad de entrega."); return; }
             var payload = {
-                name: val(".oulalab-g-name"), rut: val(".oulalab-g-rut"),
-                email: val(".oulalab-g-email"), phone: val(".oulalab-g-phone"),
-                mode: checked.value,
+                rut: rutValue,
+                name: val(".oulalab-g-name"), email: val(".oulalab-g-email"),
+                phone: val(".oulalab-g-phone"), mode: checked.value,
             };
             if (checked.value === "delivery") {
                 payload.commune = val(".oulalab-g-commune");
@@ -139,30 +170,35 @@
             jsonrpc("/auctions/guest/start", payload)
                 .then(function (res) {
                     btn.disabled = false;
-                    if (res && res.ok) {
-                        sentTo = res.sent_to;
-                        box.querySelector(".oulalab-g-sent-to").textContent = sentTo;
-                        step1.style.display = "none";
-                        step2.style.display = "block";
-                    } else {
-                        fb.textContent = (res && res.error) || "No se pudo enviar el código.";
-                    }
+                    if (res && res.ok) { showCode(res.masked); }
+                    else { setFb((res && res.error) || "No se pudo enviar el código."); }
                 })
-                .catch(function (e) { btn.disabled = false; fb.textContent = e.message || "Error de red."; });
+                .catch(function (e) { btn.disabled = false; setFb(e.message || "Error de red."); });
         });
 
+        // Paso C: código
         box.querySelector(".oulalab-g-verify").addEventListener("click", function (ev) {
             var btn = ev.currentTarget;
-            fb.textContent = "";
+            setFb("");
             btn.disabled = true;
-            jsonrpc("/auctions/guest/verify", { email: sentTo, code: val(".oulalab-g-code") })
+            jsonrpc("/auctions/guest/verify", { code: val(".oulalab-g-code") })
                 .then(function (res) {
                     btn.disabled = false;
                     if (res && res.ok) { window.location.reload(); }
-                    else { fb.textContent = (res && res.error) || "Código incorrecto."; }
+                    else { setFb((res && res.error) || "Código incorrecto."); }
                 })
-                .catch(function (e) { btn.disabled = false; fb.textContent = e.message || "Error de red."; });
+                .catch(function (e) { btn.disabled = false; setFb(e.message || "Error de red."); });
         });
+    }
+
+    function initPreviewLock(root) {
+        var el = root.querySelector(".oulalab-lock-box");
+        if (!el) return;
+        var ms = Number(el.dataset.remainingMs || 0);
+        if (ms > 0) {
+            // Recarga al abrir la ventana pública (el servidor decide si ya puede subastar).
+            setTimeout(function () { window.location.reload(); }, ms + 1000);
+        }
     }
 
     function initDetail() {
@@ -171,6 +207,7 @@
         var auctionId = root.dataset.auctionId;
         initDelivery(root, auctionId);
         initGuest(root);
+        initPreviewLock(root);
         var btn = root.querySelector(".oulalab-bid-btn");
         var input = root.querySelector(".oulalab-bid-input");
         var feedback = root.querySelector(".oulalab-bid-feedback");
@@ -192,7 +229,7 @@
             }
         }
 
-        // Puja
+        // Oferta
         if (btn) {
             btn.addEventListener("click", function () {
                 var amount = parseFloat(input.value);
@@ -200,7 +237,7 @@
                 feedback.className = "oulalab-bid-feedback small mt-2";
                 if (isNaN(amount) || amount < min) {
                     feedback.classList.add("text-danger");
-                    feedback.textContent = "La puja debe ser al menos " + Number(min).toLocaleString("es-CL");
+                    feedback.textContent = "La oferta debe ser al menos " + Number(min).toLocaleString("es-CL");
                     return;
                 }
                 btn.disabled = true;
@@ -209,11 +246,11 @@
                         btn.disabled = false;
                         if (res && res.ok) {
                             feedback.classList.add("text-success");
-                            feedback.textContent = "¡Puja registrada!";
+                            feedback.textContent = "¡Oferta registrada!";
                             applyState(Object.assign({ ok: true }, res));
                         } else {
                             feedback.classList.add("text-danger");
-                            feedback.textContent = (res && res.error) || "No se pudo registrar la puja.";
+                            feedback.textContent = (res && res.error) || "No se pudo registrar la oferta.";
                         }
                     })
                     .catch(function (e) {
@@ -224,7 +261,7 @@
             });
         }
 
-        // Polling ligero cada 8s para reflejar pujas de otros / extensiones.
+        // Polling ligero cada 8s para reflejar ofertas de otros / extensiones.
         setInterval(function () {
             jsonrpc("/auctions/" + auctionId + "/state", { auction_id: Number(auctionId) })
                 .then(applyState)

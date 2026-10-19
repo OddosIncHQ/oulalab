@@ -7,6 +7,7 @@ from ..models.res_partner import validate_rut
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SESSION_KEY = "auction_guest_partner_id"
+PENDING_KEY = "auction_pending_email"
 
 
 class AuctionPortal(http.Controller):
@@ -70,6 +71,16 @@ class AuctionPortal(http.Controller):
         is_member = bool(partner and partner.is_oulalab_member)
         min_next = auction._min_next_bid_for(partner)
         communes = request.env["res.partner"]._fields["auction_commune"].selection
+        server_now = fields.Datetime.now()
+        preview_locked = bool(
+            partner and not partner.is_oulalab_member
+            and auction.state == "live"
+            and auction.public_start and server_now < auction.public_start
+        )
+        remaining_ms = (
+            int((auction.public_start - server_now).total_seconds() * 1000)
+            if preview_locked else 0
+        )
 
         return request.render(
             "oulalab_auction.auction_detail_template",
@@ -83,13 +94,15 @@ class AuctionPortal(http.Controller):
                 "communes": communes,
                 "showroom": "Av. La Dehesa 222 of. 817, Lo Barnechea",
                 "min_next": min_next,
-                "server_now": fields.Datetime.now(),
+                "server_now": server_now,
+                "preview_locked": preview_locked,
+                "remaining_ms": remaining_ms,
             },
         )
 
     @http.route("/auctions/delivery", type="jsonrpc", auth="public")
     def save_delivery(self, mode, rut=None, commune=None, street=None, phone=None, **kw):
-        """Guarda RUT + modalidad de entrega del postor antes de permitirle pujar."""
+        """Guarda RUT + modalidad de entrega del postor antes de permitirle subastar."""
         partner = self._current_partner()
         if not partner:
             return {"ok": False, "error": "Verifica tu correo antes de continuar."}
@@ -109,21 +122,65 @@ class AuctionPortal(http.Controller):
     # ------------------------------------------------------------------
     # Registro sin cuenta: datos básicos + código por correo
     # ------------------------------------------------------------------
+    def _find_partner_by_rut(self, clean_rut):
+        Partner = request.env["res.partner"].sudo()
+        body = clean_rut.split("-")[0]
+        candidates = Partner.search([("vat", "ilike", body)], limit=50)
+        return candidates.filtered(lambda p: validate_rut(p.vat) == clean_rut)[:1]
+
+    @staticmethod
+    def _mask_email(email):
+        local, _, domain = email.partition("@")
+        return "%s***@%s" % (local[:1], domain)
+
+    def _start_code(self, email, payload, name):
+        """Envía el código y deja el correo pendiente en la sesión. Devuelve error o None."""
+        Otp = request.env["auction.guest.otp"]
+        if Otp.recently_sent(email):
+            return "Ya te enviamos un código. Espera un minuto para pedir otro."
+        code = Otp.issue(email, payload)
+        self._send_code(email, name, code)
+        request.session[PENDING_KEY] = email
+        return None
+
+    @http.route("/auctions/guest/lookup", type="jsonrpc", auth="public")
+    def guest_lookup(self, rut=None, **kw):
+        """Paso 1: con el RUT, si ya existe un correo registrado se envía el código a ese correo."""
+        clean = validate_rut(rut)
+        if not clean:
+            return {"ok": False, "error": "El RUT no es válido. Revísalo (ej: 12.345.678-5)."}
+        partner = self._find_partner_by_rut(clean)
+        if partner and partner.email:
+            email = partner.email.strip().lower()
+            error = self._start_code(email, {"partner_id": partner.id}, partner.name)
+            if error:
+                return {"ok": False, "error": error}
+            return {"ok": True, "mode": "code", "masked": self._mask_email(email)}
+        return {"ok": True, "mode": "new", "rut": clean}
+
     @http.route("/auctions/guest/start", type="jsonrpc", auth="public")
     def guest_start(self, name=None, rut=None, email=None, phone=None,
                     mode=None, commune=None, street=None, **kw):
-        """Valida los datos y envía un código de 6 dígitos al correo indicado."""
+        """Paso 2 (RUT nuevo): valida los datos completos y envía el código."""
         Partner = request.env["res.partner"].sudo()
-        Otp = request.env["auction.guest.otp"]
+        clean_rut = validate_rut(rut)
+        if not clean_rut:
+            return {"ok": False, "error": "El RUT no es válido. Revísalo (ej: 12.345.678-5)."}
+
+        partner = self._find_partner_by_rut(clean_rut)
+        if partner and partner.email:
+            # Ya tiene correo: el código va a ese correo, no al que escriban aquí.
+            email = partner.email.strip().lower()
+            error = self._start_code(email, {"partner_id": partner.id}, partner.name)
+            if error:
+                return {"ok": False, "error": error}
+            return {"ok": True, "mode": "code", "masked": self._mask_email(email)}
 
         name = (name or "").strip()
         email = (email or "").strip().lower()
         phone = (phone or "").strip()
         if len(name) < 3:
             return {"ok": False, "error": "Indica tu nombre completo."}
-        clean_rut = validate_rut(rut)
-        if not clean_rut:
-            return {"ok": False, "error": "El RUT no es válido. Revísalo (ej: 12.345.678-5)."}
         if not EMAIL_RE.match(email):
             return {"ok": False, "error": "El correo no es válido."}
         if len(re.sub(r"\D", "", phone)) < 8:
@@ -132,49 +189,55 @@ class AuctionPortal(http.Controller):
         if error:
             return {"ok": False, "error": error}
 
-        # Si ya existe un contacto con ese correo, su RUT debe coincidir.
-        # Así nadie puede usar el correo de otra persona con un RUT distinto.
+        # Un correo ya usado por otro RUT no se puede reclamar.
         existing = Partner.search([("email", "=ilike", email)], limit=5)
         existing = existing.filtered(lambda p: (p.email or "").lower() == email)[:1]
         if existing and existing.vat and validate_rut(existing.vat) != clean_rut:
             return {"ok": False, "error": (
-                "Los datos no coinciden con nuestro registro. "
+                "Ese correo ya está asociado a otro RUT. "
                 "Escríbenos a hola@oulalab.com para ayudarte."
             )}
-
-        if Otp.recently_sent(email):
-            return {"ok": False, "error": "Ya te enviamos un código. Espera un minuto para pedir otro."}
+        target = partner or existing
 
         payload = dict(vals, name=name, vat=clean_rut, phone=phone, email=email,
-                       partner_id=existing.id or False)
-        code = Otp.issue(email, payload)
-        self._send_code(email, name, code)
-        return {"ok": True, "sent_to": email}
+                       partner_id=target.id or False)
+        error = self._start_code(email, payload, name)
+        if error:
+            return {"ok": False, "error": error}
+        return {"ok": True, "mode": "code", "masked": self._mask_email(email)}
 
     @http.route("/auctions/guest/verify", type="jsonrpc", auth="public")
-    def guest_verify(self, email=None, code=None, **kw):
-        email = (email or "").strip().lower()
-        code = (code or "").strip()
-        payload = request.env["auction.guest.otp"].consume(email, code)
+    def guest_verify(self, code=None, **kw):
+        email = request.session.get(PENDING_KEY)
+        if not email:
+            return {"ok": False, "error": "Vuelve a empezar: ingresa tu RUT otra vez."}
+        payload = request.env["auction.guest.otp"].consume(email, (code or "").strip())
         if payload is None:
             return {"ok": False, "error": "Código incorrecto o vencido. Pide uno nuevo."}
 
         Partner = request.env["res.partner"].sudo()
-        delivery = {k: payload[k] for k in ("auction_delivery_mode", "auction_commune", "street") if k in payload}
         if payload.get("partner_id"):
             partner = Partner.browse(payload["partner_id"]).exists()
             if not partner:
-                return {"ok": False, "error": "No pudimos completar el registro. Intenta de nuevo."}
-            partner.write(dict(delivery, vat=payload["vat"], phone=payload["phone"]))
+                return {"ok": False, "error": "No pudimos completar el ingreso. Intenta de nuevo."}
+            if not partner.email:
+                partner.email = email
+            if not partner.vat and payload.get("vat"):
+                partner.vat = payload["vat"]
+            updates = {k: payload[k] for k in ("auction_delivery_mode", "auction_commune", "street", "phone")
+                       if payload.get(k)}
+            if "auction_delivery_mode" in payload:
+                updates["auction_commune"] = payload.get("auction_commune") or False
+            if updates:
+                partner.write(updates)
         else:
             partner = Partner.create(dict(
-                delivery,
-                name=payload["name"],
-                email=payload["email"],
-                vat=payload["vat"],
-                phone=payload["phone"],
+                {k: payload[k] for k in ("auction_delivery_mode", "auction_commune", "street")},
+                name=payload["name"], email=payload["email"],
+                vat=payload["vat"], phone=payload["phone"],
             ))
         request.session[SESSION_KEY] = partner.id
+        request.session.pop(PENDING_KEY, None)
         return {"ok": True}
 
     def _send_code(self, email, name, code):
@@ -194,7 +257,83 @@ class AuctionPortal(http.Controller):
         }).send()
 
     # ------------------------------------------------------------------
-    # Estado en vivo (polling ligero para reflejar pujas ajenas / extensiones)
+    # Resumen del postor: estado de cada subasta en la que ha ofertado
+    # ------------------------------------------------------------------
+    @http.route("/auctions/mis-subastas", type="http", auth="public", website=True)
+    def my_auctions(self, **kw):
+        partner = self._current_partner()
+        rows = self._my_auction_rows(partner) if partner else []
+        alerts = sum(1 for r in rows if r["alert"])
+        return request.render(
+            "oulalab_auction.auction_my_template",
+            {
+                "partner": partner,
+                "rows": rows,
+                "alerts": alerts,
+                "now": fields.Datetime.now(),
+            },
+        )
+
+    def _fmt_clp(self, amount):
+        return "{:,.0f}".format(amount or 0).replace(",", ".")
+
+    def _my_auction_rows(self, partner):
+        bids = request.env["auction.bid"].sudo().search([("partner_id", "=", partner.id)])
+        by_auction = {}
+        for bid in bids:
+            by_auction.setdefault(bid.auction_id, []).append(bid)
+
+        rows = []
+        for auction, abids in by_auction.items():
+            active = [b for b in abids if not b.rejected] or abids
+            my_best = max(active, key=lambda b: b.amount)
+            state = auction.state
+            leader = bool(auction.highest_bid_id and auction.highest_bid_id.partner_id == partner)
+            winner = auction.winner_id == partner
+
+            if state == "published":
+                key, label, tone = "upcoming", "Próxima", "info"
+            elif state == "live":
+                if leader:
+                    key, label, tone = "winning", "Vas ganando", "success"
+                else:
+                    key, label, tone = "outbid", "¡Te superaron!", "danger"
+            elif state == "pending_payment":
+                if winner:
+                    key, label, tone = "pay", "Adjudicada: pendiente de pago", "warning"
+                else:
+                    key, label, tone = "lost", "No adjudicada", "secondary"
+            elif state == "sold":
+                key, label, tone = (("won", "Ganaste", "success") if winner
+                                    else ("lost", "No adjudicada", "secondary"))
+            elif state == "unsold":
+                key, label, tone = "unsold", "Desierta", "secondary"
+            elif state == "cancelled":
+                key, label, tone = "cancelled", "Cancelada", "secondary"
+            else:
+                key, label, tone = "other", "Sin estado", "secondary"
+
+            min_next = auction._min_next_bid_for(partner) if state == "live" else None
+            rows.append({
+                "id": auction.id,
+                "name": auction.product_id.name,
+                "state": state,
+                "key": key,
+                "label": label,
+                "tone": tone,
+                "alert": key == "outbid",
+                "my_amount": self._fmt_clp(my_best.amount),
+                "highest": self._fmt_clp(auction.highest_amount),
+                "bid_count": auction.bid_count,
+                "min_next": self._fmt_clp(min_next) if min_next is not None else None,
+                "end_date": auction.end_date,
+                "sort": {"outbid": 0, "winning": 1, "pay": 2, "upcoming": 3}.get(key, 4),
+            })
+        rows.sort(key=lambda r: (r["sort"], r["end_date"] or fields.Datetime.now()))
+        return rows
+
+    # ------------------------------------------------------------------
+    # Estado en vivo (polling ligero para reflejar ofertas ajenas / extensiones)
     # ------------------------------------------------------------------
     @http.route("/auctions/<int:auction_id>/state", type="jsonrpc", auth="public")
     def auction_state(self, auction_id, **kw):
@@ -213,7 +352,7 @@ class AuctionPortal(http.Controller):
         }
 
     # ------------------------------------------------------------------
-    # Registro de puja (requiere sesión iniciada)
+    # Registro de oferta (requiere sesión iniciada)
     # ------------------------------------------------------------------
     @http.route("/auctions/<int:auction_id>/bid", type="jsonrpc", auth="public")
     def submit_bid(self, auction_id, amount, **kw):
@@ -223,7 +362,7 @@ class AuctionPortal(http.Controller):
 
         partner = self._current_partner()
         if not partner:
-            return {"ok": False, "error": "Verifica tu correo antes de pujar."}
+            return {"ok": False, "error": "Verifica tu correo antes de subastar."}
         try:
             # place_bid corre con sudo: la validación está centralizada ahí,
             # el portal user no escribe auction.bid directamente.
