@@ -4,17 +4,23 @@
         <field name="name">liquidation.auction.list</field>
         <field name="model">liquidation.auction</field>
         <field name="arch" type="xml">
-            <list string="Subastas" decoration-success="state == 'sold'"
+            <list string="Subastas" editable="bottom" multi_edit="1"
+                  decoration-success="state == 'sold'"
                   decoration-muted="state in ('unsold','cancelled')"
                   decoration-bf="state == 'live'">
-                <field name="name"/>
-                <field name="product_id"/>
+                <field name="name" readonly="1"/>
+                <field name="product_id" readonly="1"/>
                 <field name="reserve_price"/>
-                <field name="highest_amount"/>
-                <field name="bid_count"/>
+                <field name="retail_price"/>
+                <field name="highest_amount" readonly="1"/>
+                <field name="bid_count" readonly="1"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
-                <field name="state" widget="badge"/>
+                <field name="member_preview_hours"/>
+                <field name="public_increment_pct"/>
+                <field name="member_increment_pct"/>
+                <field name="payment_deadline_hours"/>
+                <field name="state" widget="badge" readonly="1"/>
                 <field name="currency_id" column_invisible="1"/>
             </list>
         </field>
