@@ -11,6 +11,39 @@
                     Prendas que salen del alquiler. Los socios OulaLab subastan primero.
                 </p>
 
+                <form method="get" action="/auctions" class="row g-2 mb-4">
+                    <div class="col-12 col-md-4">
+                        <select name="marca" class="form-select" aria-label="Marca">
+                            <option value="">Todas las marcas</option>
+                            <t t-foreach="marcas" t-as="m">
+                                <option t-att-value="m" t-att-selected="m == marca_sel" t-out="m"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select name="tipo" class="form-select" aria-label="Tipo de prenda">
+                            <option value="">Todos los tipos</option>
+                            <t t-foreach="tipos" t-as="tp">
+                                <option t-att-value="tp.id" t-att-selected="str(tp.id) == tipo_sel" t-out="tp.name"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select name="ocasion" class="form-select" aria-label="Ocasión">
+                            <option value="">Todas las ocasiones</option>
+                            <t t-foreach="ocasiones" t-as="oc">
+                                <option t-att-value="oc.id" t-att-selected="str(oc.id) == ocasion_sel" t-out="oc.display_name"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <button type="submit" class="btn btn-dark w-100">Filtrar</button>
+                    </div>
+                    <div class="col-6 col-md-1">
+                        <a href="/auctions" class="btn btn-outline-secondary w-100">Limpiar</a>
+                    </div>
+                </form>
+
                 <t t-if="not auctions">
                     <div class="alert alert-info">No hay subastas activas por ahora.</div>
                 </t>
@@ -28,7 +61,7 @@
                                         <t t-out="dict(auction._fields['state'].selection).get(auction.state)"/>
                                     </span>
                                     <h5 class="card-title">
-                                        <t t-out="auction.product_id.name"/>
+                                        <t t-out="auction.web_title or 'Prenda en subasta'"/>
                                     </h5>
                                     <p class="mb-1">
                                         <small class="text-muted">Oferta actual</small><br/>

@@ -1,4 +1,5 @@
 import re
+import time
 
 from odoo import fields, http
 from odoo.http import request
@@ -8,6 +9,8 @@ from ..models.res_partner import validate_rut
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SESSION_KEY = "auction_guest_partner_id"
 PENDING_KEY = "auction_pending_email"
+GUEST_AT_KEY = "auction_guest_at"
+GUEST_TTL = 2 * 3600  # 2 horas sin usar el sitio: se pide el RUT otra vez
 
 
 class AuctionPortal(http.Controller):
@@ -20,9 +23,15 @@ class AuctionPortal(http.Controller):
         if not user._is_public():
             return user.partner_id
         pid = request.session.get(SESSION_KEY)
-        if pid:
+        since = request.session.get(GUEST_AT_KEY) or 0
+        if pid and time.time() - since < GUEST_TTL:
             return request.env["res.partner"].sudo().browse(pid).exists()
+        self._guest_logout_session()
         return request.env["res.partner"]
+
+    def _guest_logout_session(self):
+        for key in (SESSION_KEY, PENDING_KEY, GUEST_AT_KEY):
+            request.session.pop(key, None)
 
     def _validate_delivery(self, Partner, mode, commune, street):
         """Devuelve (vals, error). Reutilizado por el registro sin cuenta y por la entrega."""
@@ -48,14 +57,41 @@ class AuctionPortal(http.Controller):
     # Listado público
     # ------------------------------------------------------------------
     @http.route("/auctions", type="http", auth="public", website=True)
-    def auctions_list(self, **kw):
+    def auctions_list(self, marca=None, tipo=None, ocasion=None, **kw):
         now = fields.Datetime.now()
-        auctions = request.env["liquidation.auction"].sudo().search(
+        base = request.env["liquidation.auction"].sudo().search(
             [("state", "in", ["published", "live"]), ("end_date", ">", now)]
         )
+        # Opciones de los filtros: solo valores que existen en subastas activas
+        marcas = sorted({a.brand for a in base if a.brand})
+        tipos = {a.categ.id: a.categ for a in base if a.categ}
+        ocasiones = {}
+        for a in base:
+            for o in a.occasion_ids:
+                ocasiones[o.id] = o
+        tipos = sorted(tipos.values(), key=lambda r: r.complete_name or r.name)
+        ocasiones = sorted(ocasiones.values(), key=lambda r: r.display_name or "")
+
+        auctions = base
+        if marca:
+            auctions = auctions.filtered(lambda a: a.brand == marca)
+        if tipo and tipo.isdigit():
+            auctions = auctions.filtered(lambda a: a.categ.id == int(tipo))
+        if ocasion and ocasion.isdigit():
+            auctions = auctions.filtered(lambda a: int(ocasion) in a.occasion_ids.ids)
+
         return request.render(
             "oulalab_auction.auction_list_template",
-            {"auctions": auctions, "now": now},
+            {
+                "auctions": auctions,
+                "now": now,
+                "marcas": marcas,
+                "tipos": tipos,
+                "ocasiones": ocasiones,
+                "marca_sel": marca or "",
+                "tipo_sel": tipo or "",
+                "ocasion_sel": ocasion or "",
+            },
         )
 
     # ------------------------------------------------------------------
@@ -95,6 +131,9 @@ class AuctionPortal(http.Controller):
                 "showroom": "Av. La Dehesa 222 of. 817, Lo Barnechea",
                 "min_next": min_next,
                 "server_now": server_now,
+                "guest_session": bool(partner) and request.env.user._is_public(),
+                "guest_name": partner.name if partner else "",
+                "guest_rut": partner.vat if partner else "",
                 "preview_locked": preview_locked,
                 "remaining_ms": remaining_ms,
             },
@@ -142,6 +181,13 @@ class AuctionPortal(http.Controller):
         self._send_code(email, name, code)
         request.session[PENDING_KEY] = email
         return None
+
+    @http.route("/auctions/guest/logout", type="http", auth="public", website=True)
+    def guest_logout(self, **kw):
+        """Cierra la sesión del postor sin cuenta (dispositivo compartido o cambio de RUT).
+        No cierra una sesión de Odoo con cuenta: esa se cierra desde el menú del usuario."""
+        self._guest_logout_session()
+        return request.redirect("/auctions")
 
     @http.route("/auctions/guest/lookup", type="jsonrpc", auth="public")
     def guest_lookup(self, rut=None, **kw):
@@ -237,6 +283,7 @@ class AuctionPortal(http.Controller):
                 vat=payload["vat"], phone=payload["phone"],
             ))
         request.session[SESSION_KEY] = partner.id
+        request.session[GUEST_AT_KEY] = time.time()
         request.session.pop(PENDING_KEY, None)
         return {"ok": True}
 
@@ -316,7 +363,7 @@ class AuctionPortal(http.Controller):
             min_next = auction._min_next_bid_for(partner) if state == "live" else None
             rows.append({
                 "id": auction.id,
-                "name": auction.product_id.name,
+                "name": auction.web_title or "Prenda en subasta",
                 "state": state,
                 "key": key,
                 "label": label,

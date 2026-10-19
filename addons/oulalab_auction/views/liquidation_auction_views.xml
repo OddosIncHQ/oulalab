@@ -10,6 +10,10 @@
                   decoration-bf="state == 'live'">
                 <field name="name" readonly="1"/>
                 <field name="product_id" readonly="1"/>
+                <field name="brand" optional="show"/>
+                <field name="categ" optional="show"/>
+                <button name="action_open_product" type="object"
+                        icon="fa-external-link" title="Abrir ficha de la prenda"/>
                 <field name="reserve_price"/>
                 <field name="retail_price"/>
                 <field name="highest_amount" readonly="1"/>
@@ -115,9 +119,35 @@
         </field>
     </record>
 
+    <record id="liquidation_auction_view_search" model="ir.ui.view">
+        <field name="name">liquidation.auction.search</field>
+        <field name="model">liquidation.auction</field>
+        <field name="arch" type="xml">
+            <search string="Buscar subastas">
+                <field name="name" string="Subasta"/>
+                <field name="product_id" string="Prenda"/>
+                <field name="brand" string="Marca"/>
+                <field name="categ" string="Tipo de prenda"/>
+                <field name="occasion_ids" string="Ocasión"/>
+                <filter name="f_draft" string="Borrador" domain="[('state','=','draft')]"/>
+                <filter name="f_published" string="Publicadas" domain="[('state','=','published')]"/>
+                <filter name="f_live" string="En curso" domain="[('state','=','live')]"/>
+                <separator/>
+                <filter name="f_sold" string="Adjudicadas" domain="[('state','=','sold')]"/>
+                <filter name="f_unsold" string="Desiertas" domain="[('state','=','unsold')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_brand" string="Marca" context="{'group_by': 'brand'}"/>
+                    <filter name="g_categ" string="Tipo de prenda" context="{'group_by': 'categ'}"/>
+                    <filter name="g_state" string="Estado" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="liquidation_auction_action" model="ir.actions.act_window">
         <field name="name">Subastas</field>
         <field name="res_model">liquidation.auction</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="liquidation_auction_view_search"/>
     </record>
 </odoo>

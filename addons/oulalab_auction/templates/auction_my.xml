@@ -7,6 +7,12 @@
                     <a href="/auctions" class="btn btn-outline-dark btn-sm">← Volver a las subastas</a>
                 </div>
                 <h1 class="mb-2">Mis subastas</h1>
+                <t t-if="partner and request.env.user._is_public()">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <span class="small text-muted">Sesión de <strong t-out="partner.name"/> (RUT <t t-out="partner.vat"/>).</span>
+                        <a href="/auctions/guest/logout" class="btn btn-sm btn-outline-danger">Salir / cambiar de RUT</a>
+                    </div>
+                </t>
 
                 <t t-if="not partner">
                     <div class="alert alert-info">

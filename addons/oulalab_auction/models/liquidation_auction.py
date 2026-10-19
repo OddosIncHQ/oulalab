@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import timedelta
 
 from odoo import _, api, fields, models
@@ -151,6 +152,30 @@ class LiquidationAuction(models.Model):
                 rec.payment_url = False
 
     # ==================================================================
+    # Catálogo (filtros): marca, tipo de prenda y ocasión vienen del producto
+    brand = fields.Char(related="product_id.x_studio_marca", string="Marca", store=True)
+    categ = fields.Many2one(related="product_id.categ_id", string="Tipo de prenda", store=True)
+    occasion_ids = fields.Many2many(related="product_id.x_studio_ocasiones", string="Ocasión")
+
+    # Título y descripción para el sitio web (no se muestra el nombre de la base de datos)
+    web_title = fields.Char(compute="_compute_web_title", string="Título web")
+    web_description = fields.Html(compute="_compute_web_title", string="Descripción web")
+
+    def _compute_web_title(self):
+        for rec in self:
+            seo = rec.product_id.seo_name if "seo_name" in rec.product_id._fields else False
+            desc = rec.description or ""
+            m = re.search(r"<strong>(.*?)</strong>", desc, re.S)
+            if seo:
+                rec.web_title = seo
+                rec.web_description = desc
+            elif m:
+                rec.web_title = re.sub(r"<[^>]+>", "", m.group(1)).strip()
+                rec.web_description = re.sub(r"<p>\s*<strong>.*?</strong>\s*</p>", "", desc, count=1, flags=re.S)
+            else:
+                rec.web_title = False
+                rec.web_description = desc
+
     # Computes
     # ==================================================================
     @api.depends("product_id")
@@ -378,6 +403,17 @@ class LiquidationAuction(models.Model):
 
     def action_back_to_draft(self):
         self.write({"state": "draft"})
+
+    def action_open_product(self):
+        """Abre la ficha del producto (plantilla) de la subasta."""
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "product.template",
+            "res_id": self.product_id.id,
+            "view_mode": "form",
+            "target": "current",
+        }
 
     def action_open_web(self):
         """Abre la ficha pública de esta subasta en una pestaña nueva."""
