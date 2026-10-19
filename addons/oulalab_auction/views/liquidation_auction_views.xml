@@ -60,6 +60,7 @@
                         <group string="Precios">
                             <field name="currency_id" groups="base.group_multi_currency"/>
                             <field name="reserve_price"/>
+                            <field name="retail_price"/>
                             <field name="min_increment"/>
                             <field name="member_increment_pct"/>
                             <field name="public_increment_pct"/>

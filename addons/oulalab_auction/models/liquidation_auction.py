@@ -58,6 +58,11 @@ class LiquidationAuction(models.Model):
         currency_field="currency_id",
         help="Oferta mínima aceptable. Bajo este monto la subasta se declara desierta.",
     )
+    retail_price = fields.Monetary(
+        string="Precio retail de referencia",
+        currency_field="currency_id",
+        help="Precio de venta retail del producto, solo como referencia para el público.",
+    )
     min_increment = fields.Monetary(
         string="Incremento mínimo fijo",
         currency_field="currency_id",
@@ -167,6 +172,23 @@ class LiquidationAuction(models.Model):
             gross = (rec.current_winner_bid_id.amount
                      if rec.current_winner_bid_id else rec.highest_amount) or 0.0
             rec.winning_amount_untaxed = rec._untaxed_from_gross(gross)
+
+    def _auction_warehouse(self, variant, company):
+        """Almacén del pedido de subasta.
+
+        Odoo solo aplica una regla de reabastecimiento si el almacén de la regla
+        coincide con el del pedido. Usamos el almacén que suministra la ruta de
+        subastas del producto; si no tiene, el almacén por defecto de la compañía.
+        """
+        route = variant.route_ids.filtered(
+            lambda r: r.supplied_wh_id
+            and (not r.company_id or r.company_id == company)
+        )[:1]
+        if route:
+            return route.supplied_wh_id
+        return self.env["stock.warehouse"].with_company(company).search(
+            [("company_id", "=", company.id)], limit=1
+        )
 
     def _auction_company(self):
         """Compañía de la venta: la del producto; si no tiene, la de sus
@@ -432,10 +454,12 @@ class LiquidationAuction(models.Model):
         net = self._untaxed_from_gross(bid.amount)   # la oferta es C/IVA -> precio neto
         company = self._auction_company()
         SaleOrder = self.env["sale.order"].with_company(company)
+        warehouse = self._auction_warehouse(variant, company)
         vals = {
             "company_id": company.id,
             "partner_id": bid.partner_id.id,
             "origin": self.name,
+            "warehouse_id": warehouse.id if warehouse else False,
             "order_line": [
                 (0, 0, {
                     "product_id": variant.id,
@@ -452,7 +476,16 @@ class LiquidationAuction(models.Model):
             vals["sale_order_template_id"] = False
         if "plan_id" in SaleOrder._fields:
             vals["plan_id"] = False
+        # Numeración propia de subastas (secuencia auction.order, prefijo LIQSUB-).
+        # Si la compañía no la tiene, Odoo usa su numeración de ventas habitual.
+        seq_name = self.env["ir.sequence"].with_company(company).next_by_code("auction.order")
+        if seq_name:
+            vals["name"] = seq_name
         order = SaleOrder.create(vals)
+        # El cron corre en la compañía por defecto de OdooBot. Las reglas de
+        # reabastecimiento son por compañía: sin este contexto, Odoo no ve la
+        # regla de la compañía 2 y falla con 'No rule has been found'.
+        order = order.with_company(company).with_context(allowed_company_ids=[company.id])
         order.action_confirm()           # pasa a pedido en firme -> habilita el pago
         order._portal_ensure_token()     # asegura el token del enlace de portal
         return order

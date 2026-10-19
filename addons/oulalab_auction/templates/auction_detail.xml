@@ -71,6 +71,13 @@
                                 <t t-out="'{:,.0f}'.format(auction.reserve_price)"/>
                             </strong>
                         </div>
+                        <div class="mb-3" t-if="auction.retail_price">
+                            <span class="text-muted">Precio retail de referencia: </span>
+                            <strong>
+                                <t t-out="auction.currency_id.symbol"/>
+                                <t t-out="'{:,.0f}'.format(auction.retail_price)"/>
+                            </strong>
+                        </div>
 
                         <div class="card p-3 mb-3">
                             <div class="d-flex justify-content-between">
