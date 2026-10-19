@@ -135,7 +135,7 @@
                 <separator/>
                 <filter name="f_sold" string="Adjudicadas" domain="[('state','=','sold')]"/>
                 <filter name="f_unsold" string="Desiertas" domain="[('state','=','unsold')]"/>
-                <group expand="0" string="Agrupar por">
+                <group>
                     <filter name="g_brand" string="Marca" context="{'group_by': 'brand'}"/>
                     <filter name="g_categ" string="Tipo de prenda" context="{'group_by': 'categ'}"/>
                     <filter name="g_state" string="Estado" context="{'group_by': 'state'}"/>
