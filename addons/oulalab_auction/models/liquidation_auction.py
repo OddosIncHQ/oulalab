@@ -154,7 +154,7 @@ class LiquidationAuction(models.Model):
     # ==================================================================
     # Catálogo (filtros): marca, tipo de prenda y ocasión vienen del producto
     brand = fields.Char(related="product_id.x_studio_marca", string="Marca", store=True)
-    size = fields.Char(related="product_id.x_studio_talla", string="Talla")
+    size = fields.Char(compute="_compute_size", string="Talla")
     barcode = fields.Char(related="product_id.barcode", string="Código de barras")
     categ = fields.Many2one(related="product_id.categ_id", string="Tipo de prenda", store=True)
     occasion_ids = fields.Many2many(related="product_id.x_studio_ocasiones", string="Ocasión")
@@ -162,6 +162,13 @@ class LiquidationAuction(models.Model):
     # Título y descripción para el sitio web (no se muestra el nombre de la base de datos)
     web_title = fields.Char(compute="_compute_web_title", string="Título web")
     web_description = fields.Html(compute="_compute_web_title", string="Descripción web")
+
+    def _compute_size(self):
+        # x_studio_talla es un campo de selección en product.template: se lee como texto
+        # (un related Char fallaba al cargar el registro).
+        for rec in self:
+            value = rec.product_id.x_studio_talla if rec.product_id else False
+            rec.size = str(value) if value else False
 
     def _compute_web_title(self):
         for rec in self:
