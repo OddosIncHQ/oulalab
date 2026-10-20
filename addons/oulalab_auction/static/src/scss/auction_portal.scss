@@ -27,3 +27,38 @@
 .oulalab-bid-box {
     .oulalab-bid-btn { min-width: 96px; }
 }
+
+// Estado de la subasta: texto discreto, nunca con aspecto de botón.
+.oulalab-auction-card {
+    .oulalab-state {
+        align-self: flex-start;
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+        color: #6b2160;
+        background: none;
+        padding: 0;
+        border: 0;
+
+        &::before {
+            content: "";
+            display: inline-block;
+            width: 0.4rem;
+            height: 0.4rem;
+            border-radius: 50%;
+            background: currentColor;
+            margin-right: 0.35rem;
+            vertical-align: 0.1em;
+        }
+    }
+
+    .oulalab-state--live {
+        color: #d81b7a;
+        font-weight: 600;
+    }
+}
+
+// La última oferta es el dato que se mueve: se destaca sobre el precio mínimo.
+.oulalab-auction-card .oulalab-last-bid {
+    color: #d81b7a;
+    font-size: 1.15rem;
+}

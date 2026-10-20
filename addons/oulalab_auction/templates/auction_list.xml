@@ -76,7 +76,7 @@
                                     </a>
                                 </t>
                                 <div class="card-body d-flex flex-column">
-                                    <span t-attf-class="badge mb-2 #{'bg-danger' if auction.state == 'live' else 'bg-secondary'}">
+                                    <span t-attf-class="oulalab-state mb-2 #{'oulalab-state--live' if auction.state == 'live' else ''}">
                                         <t t-out="dict(auction._fields['state'].selection).get(auction.state)"/>
                                     </span>
                                     <h5 class="card-title">
@@ -86,14 +86,21 @@
                                         Talla: <strong t-out="auction.size"/>
                                     </p>
                                     <p class="mb-1">
-                                        <small class="text-muted">Oferta actual</small><br/>
-                                        <strong t-out="auction.currency_id.symbol"/>
-                                        <strong t-out="'{:,.0f}'.format(auction.highest_amount or auction.reserve_price)"/>
+                                        <small class="text-muted">Precio mínimo</small><br/>
+                                        <strong><t t-out="auction.currency_id.symbol"/><t t-out="'{:,.0f}'.format(auction.reserve_price)"/></strong>
+                                    </p>
+                                    <p class="mb-1">
+                                        <small class="text-muted">Última oferta</small><br/>
+                                        <t t-if="auction.highest_amount">
+                                            <strong class="oulalab-last-bid"><t t-out="auction.currency_id.symbol"/><t t-out="'{:,.0f}'.format(auction.highest_amount)"/></strong>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">Sin ofertas todavía</span>
+                                        </t>
                                     </p>
                                     <p class="mb-1 small text-muted" t-if="auction.retail_price">
                                         Precio retail de referencia:
-                                        <strong t-out="auction.currency_id.symbol"/>
-                                        <t t-out="'{:,.0f}'.format(auction.retail_price)"/>
+                                        <strong><t t-out="auction.currency_id.symbol"/><t t-out="'{:,.0f}'.format(auction.retail_price)"/></strong>
                                     </p>
                                     <div class="oulalab-timer mt-auto"
                                          t-att-data-end="auction.end_date"
@@ -102,7 +109,7 @@
                                         <span class="timer-value fw-bold">—</span>
                                     </div>
                                     <a t-attf-href="/auctions/#{auction.id}"
-                                       class="btn btn-dark btn-sm mt-3">Ver y subastar</a>
+                                       class="btn btn-dark btn-lg w-100 mt-3">Ver y subastar</a>
                                 </div>
                             </div>
                         </div>

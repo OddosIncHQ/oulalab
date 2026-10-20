@@ -168,10 +168,18 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
+    function boot() {
         var root = document.querySelector(".oulalab-app-install");
         if (root) {
             init(root);
         }
-    });
+    }
+
+    // El bundle de assets suele cargarse DESPUÉS de DOMContentLoaded: si solo
+    // escuchamos ese evento, el listener nunca se ejecuta y los botones no hacen nada.
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+    } else {
+        boot();
+    }
 })();
