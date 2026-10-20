@@ -23,10 +23,13 @@ class AuctionPortal(http.Controller):
         if not user._is_public():
             return user.partner_id
         pid = request.session.get(SESSION_KEY)
-        since = request.session.get(GUEST_AT_KEY) or 0
-        if pid and time.time() - since < GUEST_TTL:
-            return request.env["res.partner"].sudo().browse(pid).exists()
-        self._guest_logout_session()
+        if pid:
+            since = request.session.get(GUEST_AT_KEY) or 0
+            if time.time() - since < GUEST_TTL:
+                return request.env["res.partner"].sudo().browse(pid).exists()
+            # Sesión vencida: se cierra. Solo en este caso; sin sesión no se toca
+            # el correo pendiente de verificación (la pantalla hace polling cada pocos segundos).
+            self._guest_logout_session()
         return request.env["res.partner"]
 
     def _guest_logout_session(self):
