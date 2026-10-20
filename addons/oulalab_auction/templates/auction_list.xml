@@ -63,6 +63,9 @@
                                     <h5 class="card-title">
                                         <t t-out="auction.web_title or 'Prenda en subasta'"/>
                                     </h5>
+                                    <p class="small text-muted mb-1" t-if="auction.size">
+                                        Talla: <strong t-out="auction.size"/>
+                                    </p>
                                     <p class="mb-1">
                                         <small class="text-muted">Oferta actual</small><br/>
                                         <strong t-out="auction.currency_id.symbol"/>

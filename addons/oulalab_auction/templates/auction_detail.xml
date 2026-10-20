@@ -68,6 +68,8 @@
                     <!-- Info + oferta -->
                     <div class="col-12 col-md-6">
                         <h1 t-out="auction.web_title or 'Prenda en subasta'"/>
+                        <p class="mb-2" t-if="auction.size">Talla: <strong t-out="auction.size"/></p>
+                        <p class="mb-2 small text-muted" t-if="auction.barcode">Código de barras: <span t-out="auction.barcode"/></p>
                         <div class="text-muted" t-out="auction.web_description"/>
 
                         <div class="mb-3">
