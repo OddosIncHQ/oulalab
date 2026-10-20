@@ -154,6 +154,8 @@ class LiquidationAuction(models.Model):
     # ==================================================================
     # Catálogo (filtros): marca, tipo de prenda y ocasión vienen del producto
     brand = fields.Char(related="product_id.x_studio_marca", string="Marca", store=True)
+    size = fields.Char(related="product_id.x_studio_talla", string="Talla")
+    barcode = fields.Char(related="product_id.barcode", string="Código de barras")
     categ = fields.Many2one(related="product_id.categ_id", string="Tipo de prenda", store=True)
     occasion_ids = fields.Many2many(related="product_id.x_studio_ocasiones", string="Ocasión")
 
