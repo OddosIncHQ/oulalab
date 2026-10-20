@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Bloque de identificación por RUT + código, compartido por la ficha de
+         subasta y por "Mis subastas". El texto del encabezado se pasa por
+         contexto para que cada página use el suyo. -->
+    <template id="guest_login_box" name="OulaLab: ingreso por RUT">
+        <div class="oulalab-guest-box card p-3">
+            <h5 t-out="guest_box_title or 'Ingresa para subastar'"/>
+
+                                <p class="small text-muted">
+                                    Si eres socia OulaLab, ingresa tu RUT y te enviaremos un código
+                                    al correo que ya tenemos registrado. Si es tu primera vez, completa tus datos.
+                                </p>
+
+                                <!-- Paso A: RUT -->
+                                <div class="oulalab-g-rutstep">
+                                    <label class="form-label">RUT</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-rut-only"
+                                           placeholder="12.345.678-5"/>
+                                    <button class="btn btn-dark w-100 oulalab-g-lookup" type="button">
+                                        Continuar
+                                    </button>
+                                </div>
+
+                                <!-- Paso B: datos completos (RUT nuevo) -->
+                                <div class="oulalab-g-step1" style="display:none;">
+                                    <p class="small mb-2 oulalab-g-newnote"></p>
+                                    <label class="form-label">RUT</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-rut" readonly="readonly"/>
+                                    <label class="form-label">Nombre completo</label>
+                                    <input type="text" class="form-control mb-2 oulalab-g-name"/>
+                                    <label class="form-label">Correo electrónico</label>
+                                    <input type="email" class="form-control mb-2 oulalab-g-email"/>
+                                    <label class="form-label">Teléfono de contacto</label>
+                                    <input type="tel" class="form-control mb-3 oulalab-g-phone"/>
+                                    <h6>¿Cómo quieres recibir la prenda?</h6>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="radio" name="gdelivmode"
+                                               id="gModePickup" value="pickup"/>
+                                        <label class="form-check-label" for="gModePickup">
+                                            Retiro en showroom — <span t-out="showroom"/>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gdelivmode"
+                                               id="gModeDelivery" value="delivery"/>
+                                        <label class="form-check-label" for="gModeDelivery">
+                                            Despacho a domicilio
+                                        </label>
+                                    </div>
+                                    <div class="oulalab-g-fields mt-2" style="display:none;">
+                                        <select class="form-select mb-2 oulalab-g-commune">
+                                            <option value="">Comuna…</option>
+                                            <t t-foreach="communes" t-as="c">
+                                                <option t-att-value="c[0]" t-out="c[1]"/>
+                                            </t>
+                                        </select>
+                                        <input type="text" class="form-control mb-2 oulalab-g-street"
+                                               placeholder="Dirección de despacho"/>
+                                        <p class="text-muted small mb-0">
+                                            Solo despachamos a Lo Barnechea, Las Condes y Vitacura.
+                                        </p>
+                                    </div>
+                                    <button class="btn btn-dark mt-3 w-100 oulalab-g-send" type="button">
+                                        Enviar código a mi correo
+                                    </button>
+                                </div>
+
+                                <!-- Paso C: código (correo ya registrado o recién ingresado) -->
+                                <div class="oulalab-g-step2" style="display:none;">
+                                    <p class="small mb-2 oulalab-g-sent-msg"></p>
+                                    <input type="text" inputmode="numeric" maxlength="6"
+                                           class="form-control mb-2 oulalab-g-code"
+                                           placeholder="000000"/>
+                                    <button class="btn btn-dark w-100 oulalab-g-verify" type="button">
+                                        Verificar y continuar
+                                    </button>
+                                </div>
+                                <div class="oulalab-g-feedback small mt-2 text-danger"></div>
+        </div>
+    </template>
+</odoo>

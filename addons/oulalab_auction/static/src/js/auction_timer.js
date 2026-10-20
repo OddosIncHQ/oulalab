@@ -269,7 +269,14 @@
         }, 8000);
     }
 
-    function boot() { initTimers(); initDetail(); }
+    // El bloque de ingreso por RUT también vive en "Mis subastas", fuera del
+    // detalle: ahí se inicializa con el documento como raíz.
+    function initGuestStandalone() {
+        if (document.querySelector(".oulalab-auction-detail")) return;
+        if (document.querySelector(".oulalab-guest-box")) initGuest(document);
+    }
+
+    function boot() { initTimers(); initDetail(); initGuestStandalone(); }
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", boot);

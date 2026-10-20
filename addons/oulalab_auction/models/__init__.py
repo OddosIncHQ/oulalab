@@ -6,3 +6,4 @@ from . import liquidation_auction
 from . import auction_bid
 from . import auction_guest_otp
 from . import website
+from . import website_home_hook

@@ -15,9 +15,15 @@
                 </t>
 
                 <t t-if="not partner">
-                    <div class="alert alert-info">
-                        Para ver tus subastas primero ingresa con tu correo.
-                        <a href="/auctions">Ir a las subastas</a>.
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-7 col-lg-5">
+                            <t t-call="oulalab_auction.guest_login_box">
+                                <t t-set="guest_box_title" t-value="'Ingresa para ver tus subastas'"/>
+                            </t>
+                            <p class="text-center mt-3 mb-0">
+                                <a href="/auctions">Ver las subastas activas</a>
+                            </p>
+                        </div>
                     </div>
                 </t>
                 <t t-else="">

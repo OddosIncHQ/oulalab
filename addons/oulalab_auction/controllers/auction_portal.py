@@ -339,6 +339,9 @@ class AuctionPortal(http.Controller):
                 "rows": rows,
                 "alerts": alerts,
                 "now": fields.Datetime.now(),
+                # El bloque de ingreso por RUT necesita los mismos datos que en la ficha.
+                "communes": request.env["res.partner"]._fields["auction_commune"].selection,
+                "showroom": "Av. La Dehesa 222 of. 817, Lo Barnechea",
             },
         )
 
