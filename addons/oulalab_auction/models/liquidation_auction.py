@@ -303,7 +303,7 @@ class LiquidationAuction(models.Model):
         """Lee los atributos de Studio del producto. Cada campo puede no existir
         en esta base, así que se consulta antes de leerlo."""
         mapping = {
-            "ai_description": "x_studio_descripcion_ia",
+            "ai_description": "x_studio_ia_description",
             "care_tips": "x_studio_tips_cuidado",
             "materials": "x_studio_materialidad",
             "occasions": "x_studio_ocasiones",
