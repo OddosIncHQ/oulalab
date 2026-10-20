@@ -1,3 +1,4 @@
+import base64
 import logging
 import re
 from datetime import timedelta
@@ -576,8 +577,35 @@ class LiquidationAuction(models.Model):
         template = self.env.ref(
             "oulalab_auction.mail_template_auction_winner_order", raise_if_not_found=False
         )
-        if template and self.sale_order_id:
-            template.send_mail(self.sale_order_id.id, force_send=True)
+        if not (template and self.sale_order_id):
+            return
+        # Adjunta el comprobante de subasta (informe propio), no el documento de
+        # pedido de venta, que el negocio usa para las suscripciones de arriendo.
+        attachment_ids = []
+        report = self.env.ref(
+            "oulalab_auction.action_report_auction_receipt", raise_if_not_found=False
+        )
+        if report:
+            try:
+                pdf, _ = report.sudo()._render_qweb_pdf(
+                    "oulalab_auction.report_auction_receipt", res_ids=self.ids
+                )
+                name = "Comprobante %s.pdf" % (self.sale_order_id.name or self.name)
+                attachment = self.env["ir.attachment"].sudo().create({
+                    "name": name,
+                    "type": "binary",
+                    "datas": base64.b64encode(pdf),
+                    "res_model": "liquidation.auction",
+                    "res_id": self.id,
+                    "mimetype": "application/pdf",
+                })
+                attachment_ids.append(attachment.id)
+            except Exception:
+                _logger.exception("No se pudo generar el comprobante de la subasta %s", self.id)
+        template.send_mail(
+            self.sale_order_id.id, force_send=True,
+            email_values={"attachment_ids": [(6, 0, attachment_ids)]} if attachment_ids else None,
+        )
 
     def _notify_losers(self):
         """Avisa a cada postor que no resultó adjudicado (una sola vez)."""
