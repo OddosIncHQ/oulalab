@@ -195,6 +195,11 @@ class AuctionPortal(http.Controller):
         request.session[PENDING_KEY] = email
         return None
 
+    @http.route(["/app", "/auctions/app"], type="http", auth="public", website=True, sitemap=True)
+    def app_install(self, **kw):
+        """Guía para dejar OulaLab en la pantalla de inicio del teléfono."""
+        return request.render("oulalab_auction.app_install_template", {})
+
     @http.route("/auctions/guest/logout", type="http", auth="public", website=True)
     def guest_logout(self, **kw):
         """Cierra la sesión del postor sin cuenta (dispositivo compartido o cambio de RUT).
