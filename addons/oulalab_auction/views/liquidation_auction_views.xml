@@ -66,6 +66,12 @@
                             <field name="image_url_2" widget="url" placeholder="https://..."/>
                             <field name="image_url_3" widget="url" placeholder="https://..."/>
                             <field name="image_url_4" widget="url" placeholder="https://..."/>
+                            <field name="image_url_5" widget="url" placeholder="https://..."/>
+                            <field name="image_url_6" widget="url" placeholder="https://..."/>
+                            <field name="image_url_7" widget="url" placeholder="https://..."/>
+                            <field name="image_url_8" widget="url" placeholder="https://..."/>
+                            <field name="image_url_9" widget="url" placeholder="https://..."/>
+                            <field name="image_url_10" widget="url" placeholder="https://..."/>
                         </group>
                         <group string="Precios">
                             <field name="currency_id" groups="base.group_multi_currency"/>

@@ -52,10 +52,29 @@
                     <t t-foreach="auctions" t-as="auction">
                         <div class="col-12 col-md-6 col-lg-4">
                             <div class="card h-100 shadow-sm oulalab-auction-card">
-                                <a t-attf-href="/auctions/#{auction.id}">
-                                    <img t-att-src="auction._get_primary_image_url()"
-                                         class="card-img-top" alt="Prenda"/>
-                                </a>
+                                <t t-set="imgs" t-value="auction._get_image_urls()"/>
+                                <t t-if="len(imgs) &gt; 1">
+                                    <div t-attf-id="auctionCarousel#{auction.id}"
+                                         class="carousel slide oulalab-auction-carousel"
+                                         data-bs-ride="carousel" data-bs-pause="hover"
+                                         t-att-data-bs-interval="6000 + (auction.id % 5) * 400">
+                                        <div class="carousel-inner">
+                                            <t t-foreach="imgs" t-as="img">
+                                                <div t-attf-class="carousel-item #{'active' if img_index == 0 else ''}">
+                                                    <a t-attf-href="/auctions/#{auction.id}">
+                                                        <img t-att-src="img" class="card-img-top d-block w-100" alt="Prenda"/>
+                                                    </a>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <a t-attf-href="/auctions/#{auction.id}">
+                                        <img t-att-src="auction._get_primary_image_url()"
+                                             class="card-img-top" alt="Prenda"/>
+                                    </a>
+                                </t>
                                 <div class="card-body d-flex flex-column">
                                     <span t-attf-class="badge mb-2 #{'bg-danger' if auction.state == 'live' else 'bg-secondary'}">
                                         <t t-out="dict(auction._fields['state'].selection).get(auction.state)"/>

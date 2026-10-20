@@ -1,3 +1,4 @@
+import random
 import re
 import time
 
@@ -82,6 +83,15 @@ class AuctionPortal(http.Controller):
             auctions = auctions.filtered(lambda a: a.categ.id == int(tipo))
         if ocasion and ocasion.isdigit():
             auctions = auctions.filtered(lambda a: int(ocasion) in a.occasion_ids.ids)
+
+        # Orden al azar, estable durante la sesión para que el filtro no reordene todo.
+        seed = request.session.get("auction_shuffle_seed")
+        if not seed:
+            seed = random.randint(1, 10 ** 9)
+            request.session["auction_shuffle_seed"] = seed
+        shuffled = list(auctions)
+        random.Random(seed).shuffle(shuffled)
+        auctions = request.env["liquidation.auction"].sudo().browse([a.id for a in shuffled])
 
         return request.render(
             "oulalab_auction.auction_list_template",
@@ -280,8 +290,11 @@ class AuctionPortal(http.Controller):
             if updates:
                 partner.write(updates)
         else:
+            # Con retiro en showroom el payload no trae "street": usar get() evita
+            # el KeyError que mostraba "street" como error al verificar el código.
             partner = Partner.create(dict(
-                {k: payload[k] for k in ("auction_delivery_mode", "auction_commune", "street")},
+                {k: payload.get(k) for k in ("auction_delivery_mode", "auction_commune", "street")
+                 if payload.get(k)},
                 name=payload["name"], email=payload["email"],
                 vat=payload["vat"], phone=payload["phone"],
             ))

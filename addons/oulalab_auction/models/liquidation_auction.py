@@ -31,11 +31,17 @@ class LiquidationAuction(models.Model):
     barcode = fields.Char(related="product_id.barcode", string="Código de barras", store=True)
     image_128 = fields.Image(related="product_id.image_128", string="Imagen", store=False)
 
-    # URLs externas de imágenes (hasta 4) para el carrusel del portal.
+    # URLs externas de imágenes (hasta 10) para el carrusel del portal.
     image_url_1 = fields.Char(string="URL imagen 1")
     image_url_2 = fields.Char(string="URL imagen 2")
     image_url_3 = fields.Char(string="URL imagen 3")
     image_url_4 = fields.Char(string="URL imagen 4")
+    image_url_5 = fields.Char(string="URL imagen 5")
+    image_url_6 = fields.Char(string="URL imagen 6")
+    image_url_7 = fields.Char(string="URL imagen 7")
+    image_url_8 = fields.Char(string="URL imagen 8")
+    image_url_9 = fields.Char(string="URL imagen 9")
+    image_url_10 = fields.Char(string="URL imagen 10")
 
     reason = fields.Selection(
         [
@@ -55,7 +61,7 @@ class LiquidationAuction(models.Model):
         required=True,
     )
     reserve_price = fields.Monetary(
-        string="Precio mínimo (reserva)",
+        string="Precio mínimo",
         required=True,
         currency_field="currency_id",
         help="Oferta mínima aceptable. Bajo este monto la subasta se declara desierta.",
@@ -260,12 +266,15 @@ class LiquidationAuction(models.Model):
             net = gross
         return self.currency_id.round(net) if self.currency_id else round(net, 2)
 
+    def _image_url_fields(self):
+        return ["image_url_%d" % i for i in range(1, 11)]
+
     def _get_primary_image_url(self):
-        """Foto representativa de la prenda: URL 4 primero (suele ser la prenda
-        sola), luego 3, 2, 1. Si no hay ninguna URL, la foto del producto de
-        Alquiler. Devuelve una URL absoluta o la ruta /web/image del producto."""
+        """Foto representativa: la ÚLTIMA cargada, que por convención es la
+        prenda sola. Si no hay URLs, la foto del producto de Alquiler."""
         self.ensure_one()
-        for url in (self.image_url_4, self.image_url_3, self.image_url_2, self.image_url_1):
+        for name in reversed(self._image_url_fields()):
+            url = self[name]
             if url and url.strip():
                 return url.strip()
         if self.product_id:
@@ -274,10 +283,50 @@ class LiquidationAuction(models.Model):
         return ""
 
     def _get_image_urls(self):
-        """Lista ordenada de URLs de imagen no vacías (para el carrusel)."""
+        """URLs para el carrusel: primero la prenda sola (la última cargada),
+        después las de contexto en su orden original."""
         self.ensure_one()
-        urls = [self.image_url_1, self.image_url_2, self.image_url_3, self.image_url_4]
-        return [u.strip() for u in urls if u and u.strip()]
+        urls = [self[n].strip() for n in self._image_url_fields() if self[n] and self[n].strip()]
+        if len(urls) > 1:
+            urls = [urls[-1]] + urls[:-1]
+        return urls
+
+    # Datos del producto que enriquecen la ficha pública
+    ai_description = fields.Text(compute="_compute_product_info", string="Descripción IA")
+    care_tips = fields.Text(compute="_compute_product_info", string="Tips de cuidado")
+    materials = fields.Char(compute="_compute_product_info", string="Materialidad")
+    occasions = fields.Char(compute="_compute_product_info", string="Ocasiones")
+    colorimetry = fields.Char(compute="_compute_product_info", string="Clasificación colorimétrica")
+    ideal_weather = fields.Char(compute="_compute_product_info", string="Clima ideal")
+
+    def _compute_product_info(self):
+        """Lee los atributos de Studio del producto. Cada campo puede no existir
+        en esta base, así que se consulta antes de leerlo."""
+        mapping = {
+            "ai_description": "x_studio_descripcion_ia",
+            "care_tips": "x_studio_tips_cuidado",
+            "materials": "x_studio_materialidad",
+            "occasions": "x_studio_ocasiones",
+            "colorimetry": "x_studio_clasificacion_colorimetrica",
+            "ideal_weather": "x_studio_clima_ideal",
+        }
+        for rec in self:
+            product = rec.product_id
+            for target, source in mapping.items():
+                value = False
+                if product and source in product._fields:
+                    raw = product[source]
+                    if raw:
+                        field = product._fields[source]
+                        if field.type in ("many2many", "one2many"):
+                            value = ", ".join(raw.mapped("display_name"))
+                        elif field.type == "many2one":
+                            value = raw.display_name
+                        elif field.type == "selection":
+                            value = dict(field._description_selection(self.env)).get(raw, raw)
+                        else:
+                            value = raw
+                rec[target] = value or False
 
     @api.depends("start_date", "member_preview_hours")
     def _compute_public_start(self):
