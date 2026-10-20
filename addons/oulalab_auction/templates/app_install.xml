@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="app_install_template" name="OulaLab: instalar la app">
+        <t t-call="website.layout">
+            <div id="wrap" class="oulalab-app-install">
+                <div class="container py-5">
+
+                    <div class="oai-head">
+                        <h1 class="oai-title">Deja OulaLab en tu pantalla de inicio</h1>
+                        <p class="oai-lead">
+                            OulaLab funciona desde el navegador, sin pasar por una tienda de
+                            aplicaciones. En dos toques queda como un ícono más en tu teléfono.
+                        </p>
+                    </div>
+
+                    <!-- Paso 1: dispositivo -->
+                    <section class="oai-step" data-oai-step="device">
+                        <p class="oai-step-label">¿Desde dónde estás entrando?</p>
+                        <div class="oai-choices">
+                            <button type="button" class="oai-choice" data-oai-device="ios">
+                                <span class="oai-choice-name">iPhone o iPad</span>
+                                <span class="oai-choice-note">Apple</span>
+                            </button>
+                            <button type="button" class="oai-choice" data-oai-device="android">
+                                <span class="oai-choice-name">Android</span>
+                                <span class="oai-choice-note">Samsung, Xiaomi, Motorola y otros</span>
+                            </button>
+                            <button type="button" class="oai-choice" data-oai-device="desktop">
+                                <span class="oai-choice-name">Computador</span>
+                                <span class="oai-choice-note">Mac o Windows</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Paso 2: navegador -->
+                    <section class="oai-step d-none" data-oai-step="browser">
+                        <p class="oai-step-label">¿Qué navegador tienes abierto ahora?</p>
+                        <div class="oai-choices" data-oai-browsers="ios">
+                            <button type="button" class="oai-choice" data-oai-browser="safari">
+                                <span class="oai-choice-name">Safari</span>
+                                <span class="oai-choice-note">La brújula azul</span>
+                            </button>
+                            <button type="button" class="oai-choice" data-oai-browser="other-ios">
+                                <span class="oai-choice-name">Chrome u otro</span>
+                                <span class="oai-choice-note">Instagram, Gmail, Firefox</span>
+                            </button>
+                        </div>
+                        <div class="oai-choices d-none" data-oai-browsers="android">
+                            <button type="button" class="oai-choice" data-oai-browser="chrome">
+                                <span class="oai-choice-name">Chrome</span>
+                                <span class="oai-choice-note">El círculo de colores</span>
+                            </button>
+                            <button type="button" class="oai-choice" data-oai-browser="samsung">
+                                <span class="oai-choice-name">Samsung Internet</span>
+                                <span class="oai-choice-note">Viene en los Galaxy</span>
+                            </button>
+                            <button type="button" class="oai-choice" data-oai-browser="other-android">
+                                <span class="oai-choice-name">Otro</span>
+                                <span class="oai-choice-note">Firefox, Edge, Opera</span>
+                            </button>
+                        </div>
+                        <button type="button" class="oai-back" data-oai-back="device">Cambiar de dispositivo</button>
+                    </section>
+
+                    <!-- Paso 3: instrucciones -->
+                    <section class="oai-step d-none" data-oai-step="guide">
+                        <div class="oai-guide">
+
+                            <div class="oai-guide-text">
+                                <h2 class="oai-guide-title" data-oai-guide-title=""/>
+                                <ol class="oai-list" data-oai-guide-steps=""/>
+                                <p class="oai-note d-none" data-oai-guide-note=""/>
+                                <div class="oai-actions">
+                                    <a class="oai-cta" href="https://mobile.oulalab.com"
+                                       target="_blank" rel="noopener">Abrir OulaLab</a>
+                                    <button type="button" class="oai-back" data-oai-back="device">Empezar de nuevo</button>
+                                </div>
+                            </div>
+
+                            <!-- Demostración animada: no es un video, es la pantalla dibujada -->
+                            <div class="oai-demo" aria-hidden="true">
+                                <div class="oai-phone" data-oai-demo="">
+                                    <div class="oai-screen">
+                                        <div class="oai-screen-bar" data-oai-bar="top">oulalab.com</div>
+                                        <div class="oai-screen-body">
+                                            <span class="oai-screen-logo">OulaLab</span>
+                                        </div>
+                                        <div class="oai-screen-bar" data-oai-bar="bottom">
+                                            <span class="oai-share">Compartir</span>
+                                            <span class="oai-dots">Menú</span>
+                                        </div>
+                                        <div class="oai-sheet">
+                                            <span class="oai-sheet-row">Copiar</span>
+                                            <span class="oai-sheet-row oai-sheet-row--target">Añadir a pantalla de inicio</span>
+                                            <span class="oai-sheet-row">Marcadores</span>
+                                        </div>
+                                        <span class="oai-finger"/>
+                                    </div>
+                                </div>
+                                <p class="oai-demo-caption">Así se ve en tu teléfono</p>
+                            </div>
+
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
