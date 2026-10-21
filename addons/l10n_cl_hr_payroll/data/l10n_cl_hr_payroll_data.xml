@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="hr_indicadores_diciembre" model="hr.indicadores">
+            <field name="name">Diciembre 2024 (Base)</field>
+            <field name="uf">38000.00</field>
+            <field name="utm">66000.00</field>
+            <field name="asignacion_familiar_primer">539328</field>
+            <field name="asignacion_familiar_segundo">787746</field>
+            <field name="asignacion_familiar_tercer">1228614</field>
+            <field name="asignacion_familiar_monto_a">21243</field>
+            <field name="asignacion_familiar_monto_b">13032</field>
+            <field name="asignacion_familiar_monto_c">4119</field>
+            <field name="caja_compensacion">0.60</field>
+            <field name="fonasa">7.0</field>
+            <field name="mutual_seguridad">0.90</field>
+            <field name="pensiones_ips">18.84</field>
+            <field name="sueldo_minimo">500000</field>
+            <field name="tope_imponible_afp">84.3</field>
+            <field name="tope_imponible_ips">60</field>
+            <field name="tope_imponible_salud">84.3</field>
+            <field name="tope_imponible_seguro_cesantia">126.6</field>
+            <field name="uta">792000</field>
+            <field name="deposito_convenido">900</field>
+            <field name="sueldo_minimo_otro">328230</field>
+            <field name="contrato_plazo_fijo_empleador">3.0</field>
+            <field name="contrato_plazo_fijo_trabajador">0.0</field>
+            <field name="contrato_plazo_indefinido_empleador">2.4</field>
+            <field name="contrato_plazo_indefinido_empleador_otro">0.8</field>
+            <field name="tasa_afp_cuprum">11.44</field>
+            <field name="tasa_afp_capital">11.44</field>
+            <field name="tasa_afp_provida">11.45</field>
+            <field name="tasa_afp_modelo">10.58</field>
+            <field name="tasa_afp_planvital">11.16</field>
+            <field name="tasa_afp_habitat">11.27</field>
+            <field name="tasa_sis_cuprum">1.49</field>
+            <field name="tasa_sis_capital">1.49</field>
+            <field name="tasa_sis_provida">1.49</field>
+            <field name="tasa_sis_planvital">1.49</field>
+            <field name="tasa_sis_habitat">1.49</field>
+            <field name="tasa_sis_modelo">1.49</field>
+            <field name="tope_anual_apv">600</field>
+            <field name="tope_mensual_apv">50</field>
+        </record>
+
+        <record id="hr_isapre_fonasa" model="hr.isapre">
+            <field name="rut">61.603.000-0</field>
+            <field name="name">FONASA</field>
+        </record>
+        <record id="hr_isapre_colmena" model="hr.isapre">
+            <field name="rut">94.954.000-6</field>
+            <field name="name">COLMENA</field>
+        </record>
+
+        <record id="hr_afp_modelo" model="hr.afp">
+            <field name="codigo">34</field>
+            <field name="rut">76.084.001-2</field>
+            <field name="name">MODELO</field>
+            <field name="rate">10.58</field>
+            <field name="sis">1.49</field>
+            <field name="independiente">12.07</field>
+        </record>
+
+        <record id="IMPONIBLE" model="hr.salary.rule.category">
+            <field name="name">Imponible</field>
+            <field name="code">IMPONIBLE</field>
+        </record>
+        <record id="NOIMPO" model="hr.salary.rule.category">
+            <field name="name">No Imponible</field>
+            <field name="code">NOIMPO</field>
+        </record>
+        <record id="DED" model="hr.salary.rule.category">
+            <field name="name">Descuentos</field>
+            <field name="code">DED</field>
+        </record>
+
+        <record id="hr_contract_type_indefinido" model="hr.contract.type">
+            <field name="name">Plazo Indefinido</field>
+        </record>
+
+        <record id="hr_rule_sueldo_base" model="hr.salary.rule">
+            <field name="name">SUELDO BASE</field>
+            <field name="sequence" eval="1"/>
+            <field name="code">SUELDO</field>
+            <field name="category_id" ref="IMPONIBLE"/>
+            <field name="condition_select">none</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">
+# En Odoo 19, worked_days es un objeto accesible por código
+dias_no_trabajados = worked_days.Licencia.number_of_days if 'Licencia' in worked_days.dict else 0.0
+dias_no_trabajados += worked_days.No_Trabajado.number_of_days if 'No_Trabajado' in worked_days.dict else 0.0
+
+wage = contract.wage
+# Lógica para sueldo empresarial o proporcional
+if 'WORK100' in worked_days.dict and worked_days.WORK100.number_of_days &lt; 3:
+    result = round((wage / 30) * worked_days.WORK100.number_of_days)
+else:
+    result = round(wage - ((wage / 30) * dias_no_trabajados))
+            </field>
+        </record>
+
+        <record id="hr_rule_gratificacion" model="hr.salary.rule">
+            <field name="name">GRATIFICACION LEGAL (25%)</field>
+            <field name="sequence" eval="10"/>
+            <field name="code">GRAT</field>
+            <field name="category_id" ref="IMPONIBLE"/>
+            <field name="condition_select">python</field>
+            <field name="condition_python">result = not contract.gratificacion_legal</field>
+            <field name="amount_select">code</field>
+            <field name="amount_python_compute">
+limite = (4.75 * payslip.indicadores_id.sueldo_minimo) / 12
+calculo = categories.IMPONIBLE * 0.25
+result = round(min(calculo, limite))
+            </field>
+        </record>
+
+        <record id="hr_struct_cl" model="hr.payroll.structure">
+            <field name="name">Chile: Código del Trabajo</field>
+            <field name="type_id" ref="hr_payroll.structure_type_employee"/>
+            <field name="rule_ids" eval="[(6, 0, [ref('hr_rule_sueldo_base'), ref('hr_rule_gratificacion')])]"/>
+        </record>
+
+    </data>
+</odoo>
