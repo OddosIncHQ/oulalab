@@ -1,0 +1,87 @@
+<odoo>
+
+    <!-- Search View -->
+    <record id="view_arriendo_prenda_linea_search" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.search</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="suscripcion_id"/>
+                <field name="prenda_id"/>
+                <field name="numero_serie_id"/>
+                <field name="estado"/>
+                <separator/>
+                <filter name="filter_arrendada" string="En Posesión del Cliente" domain="[('estado', '=', 'arrendada')]"/>
+                <filter name="filter_devuelta" string="Devueltas" domain="[('estado', '=', 'devuelta')]"/>
+                <filter name="filter_active" string="Activas" domain="[('active', '=', True)]"/>
+                <separator/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="groupby_suscripcion" string="Suscripción" context="{'group_by': 'suscripcion_id'}"/>
+                    <filter name="groupby_prenda" string="Prenda" context="{'group_by': 'prenda_id'}"/>
+                    <filter name="groupby_estado" string="Estado" context="{'group_by': 'estado'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- List View (Odoo 18 uses <list>) -->
+    <record id="view_arriendo_prenda_linea_list" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.list</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <list decoration-info="estado=='arrendada'"
+                  decoration-success="estado=='devuelta'"
+                  decoration-warning="estado in ('en_limpieza', 'mantenimiento')"
+                  decoration-danger="estado=='perdida'">
+                <field name="suscripcion_id"/>
+                <field name="prenda_id"/>
+                <field name="numero_serie_id"/>
+                <field name="fecha_arriendo" widget="date" string="Fecha de Arriendo"/>
+                <field name="fecha_devolucion" widget="date" string="Fecha de Devolución"/>
+                <field name="estado"/>
+                <field name="active" widget="boolean_toggle"/>
+                <!-- Optional -->
+                <field name="dias_en_posesion" string="Días en Posesión" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_arriendo_prenda_linea_form" model="ir.ui.view">
+        <field name="name">arriendo.prenda.linea.form</field>
+        <field name="model">arriendo.prenda.linea</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group col="2">
+                            <field name="suscripcion_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="prenda_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="numero_serie_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="estado"/>
+                            <field name="fecha_arriendo" readonly="1"/>
+                            <field name="fecha_devolucion" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_arriendo_prenda_linea" model="ir.actions.act_window">
+        <field name="name">Historial de Arriendos</field>
+        <field name="res_model">arriendo.prenda.linea</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_arriendo_prenda_linea_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aún no hay registros de arriendos.
+            </p><p>
+                Los registros se crean automáticamente al validar albaranes de salida vinculados a una suscripción.
+            </p>
+        </field>
+    </record>
+
+</odoo>
