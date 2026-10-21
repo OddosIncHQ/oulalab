@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_bulk_publish_auctions" model="ir.actions.server">
+        <field name="name">Publicar seleccionadas</field>
+        <field name="model_id" ref="model_liquidation_auction"/>
+        <field name="binding_model_id" ref="model_liquidation_auction"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_publish()</field>
+    </record>
+    <record id="action_bulk_back_to_draft_auctions" model="ir.actions.server">
+        <field name="name">Volver a borrador (seleccionadas)</field>
+        <field name="model_id" ref="model_liquidation_auction"/>
+        <field name="binding_model_id" ref="model_liquidation_auction"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_back_to_draft()</field>
+    </record>
+    <record id="action_bulk_cancel_auctions" model="ir.actions.server">
+        <field name="name">Cancelar seleccionadas</field>
+        <field name="model_id" ref="model_liquidation_auction"/>
+        <field name="binding_model_id" ref="model_liquidation_auction"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_cancel()</field>
+    </record>
+</odoo>

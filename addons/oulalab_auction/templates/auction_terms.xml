@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Términos y condiciones de subastas OulaLab.
+         Si cambias el fondo del texto, sube AUCTION_TERMS_VERSION en
+         models/res_partner.py: así se vuelve a pedir la aceptación. -->
+    <template id="auction_terms_template" name="OulaLab: términos de subastas">
+        <t t-call="website.layout">
+            <t t-set="pageName" t-value="'auction_terms'"/>
+            <div class="container my-5 oulalab-auction-terms" style="max-width: 820px;">
+                <h1 class="mb-1">Términos y condiciones de subastas</h1>
+                <p class="text-muted small">Versión vigente desde el <t t-out="terms_version"/></p>
+
+                <div class="alert alert-light border small">
+                    <strong>En corto:</strong> vendemos prendas <strong>usadas</strong> que salen de
+                    nuestro servicio de arriendo. Tu oferta es vinculante: si ganas, tienes un plazo
+                    para pagar. Los precios incluyen IVA. Tienes <strong>derecho a retracto</strong>
+                    de 10 días desde que recibes la prenda.
+                </div>
+
+                <h4 class="mt-4">1. Quién vende y relación con los términos generales</h4>
+                <p>
+                    Las subastas son organizadas por <strong>Oulalab Chile SpA</strong>, RUT
+                    78.107.873-5, representada legalmente por Mauricio Loy Decebal-Cuza, con domicilio
+                    legal en Las Lavándulas 11245, Las Condes, Santiago, Región Metropolitana
+                    (en adelante, "OulaLab"). Contacto:
+                    <a href="mailto:contactotyc@oulalab.com">contactotyc@oulalab.com</a>.
+                </p>
+                <p>
+                    Las subastas son el canal por el que OulaLab ofrece en venta el inventario que sale
+                    de su servicio de arriendo, según anuncian los
+                    <a href="/terms" target="_blank">Términos y condiciones de uso de OulaLab</a>
+                    (numeral 2). Estos términos de subastas complementan esos términos generales y la
+                    Política de Privacidad y Protección de Datos Personales de OulaLab (la "PPDPOL").
+                    En lo que se refiere a las subastas, prevalece lo dispuesto aquí. Para ofertar no
+                    necesitas tener una suscripción activa.
+                </p>
+
+                <h4 class="mt-4">2. Qué se subasta: productos usados</h4>
+                <p>
+                    Las prendas subastadas fueron parte del servicio de arriendo de OulaLab y se
+                    retiran de él por uso, temporada o baja rotación. Son <strong>productos usados</strong>
+                    y se venden en el estado que muestran sus fotos y su descripción, que pueden incluir
+                    señales de uso propias de prendas arrendadas (desgaste, pilling, decoloración leve,
+                    pequeños arreglos). Esta información se entrega de forma expresa antes de ofertar,
+                    conforme al artículo 14 de la Ley N° 19.496.
+                </p>
+                <p>
+                    Revisa la talla, las medidas y las fotos antes de ofertar. Los colores pueden variar
+                    levemente según la pantalla.
+                </p>
+
+                <h4 class="mt-4">3. Quién puede participar</h4>
+                <p>
+                    Pueden ofertar personas mayores de 18 años que se identifiquen con su correo y RUT
+                    y que indiquen cómo recibirán la prenda. Los datos deben ser verdaderos; la boleta
+                    se emite a nombre de quien adjudica.
+                </p>
+                <p>
+                    Los <strong>socios OulaLab</strong> (suscripción de arriendo activa) tienen
+                    preferencia: una ventana de acceso exclusivo antes de la apertura pública y un
+                    incremento mínimo de oferta menor. Las condiciones de cada subasta se muestran en
+                    su página.
+                </p>
+
+                <h4 class="mt-4">4. Cómo funciona</h4>
+                <ul>
+                    <li>Cada subasta tiene fecha y hora de inicio y de cierre (hora de Chile continental)
+                        y puede tener un precio mínimo. Si ninguna oferta lo alcanza, se declara desierta.</li>
+                    <li>Todos los montos son en pesos chilenos e <strong>incluyen IVA</strong>.</li>
+                    <li>Cada nueva oferta debe superar la oferta más alta vigente en al menos el
+                        incremento mínimo que indica la página.</li>
+                    <li>Si entra una oferta en los minutos finales, el cierre se extiende por ese mismo
+                        lapso, para que todos tengan oportunidad de responder.</li>
+                    <li><strong>Las ofertas son vinculantes</strong> y no se pueden retirar una vez
+                        registradas. Vale el registro de hora del sistema de OulaLab.</li>
+                    <li>OulaLab puede descartar ofertas hechas con datos falsos, de forma fraudulenta o
+                        que alteren el funcionamiento normal de la subasta.</li>
+                </ul>
+
+                <h4 class="mt-4">5. Adjudicación y pago</h4>
+                <ul>
+                    <li>Gana la oferta más alta al cierre, siempre que alcance el precio mínimo.</li>
+                    <li>Quien gana recibe un correo con el monto y un enlace de pago. Debe pagar dentro
+                        del plazo que indica ese correo (por defecto, 24 horas desde la adjudicación),
+                        con tarjeta a través de Mercado Pago o por transferencia bancaria.</li>
+                    <li>Si el pago no se recibe dentro del plazo, la adjudicación queda sin efecto y
+                        la prenda se ofrece al siguiente postor, por el monto de su propia oferta.
+                        OulaLab puede restringir la participación futura de quien no pague.</li>
+                    <li>El pago se procesa en la pasarela segura del medio de pago. OulaLab no tiene
+                        acceso a los datos de tu tarjeta, solo al código de la transacción.</li>
+                    <li>Con el pago confirmado recibes por correo la confirmación de tu compra, con
+                        copia de estos términos, y la boleta electrónica dentro de los dos (2) días
+                        hábiles siguientes.</li>
+                </ul>
+
+                <h4 class="mt-4">6. Entrega</h4>
+                <p>
+                    Al ofertar eliges entre <strong>retiro en el showroom</strong> de OulaLab o
+                    <strong>despacho sin costo</strong> a las comunas con cobertura que se muestran en
+                    el sitio (hoy Lo Barnechea, Las Condes y Vitacura). La entrega se coordina contigo
+                    por correo o WhatsApp después del pago.
+                </p>
+
+                <h4 class="mt-4">7. Derecho a retracto</h4>
+                <p>
+                    Por tratarse de una compra a distancia, tienes <strong>derecho a retracto</strong>:
+                    puedes dejar sin efecto la compra dentro de los <strong>10 días</strong> siguientes
+                    a la recepción de la prenda, sin expresar causa (artículo 3 bis, letra b, Ley
+                    N° 19.496). Para ejercerlo, escríbenos a contactotyc@oulalab.com indicando tu número de
+                    pedido y devuelve la prenda en el mismo estado en que la recibiste, sin uso
+                    adicional y con sus etiquetas y embalaje si los tenía. Te devolveremos lo pagado
+                    por el mismo medio de pago, en los plazos que establece la ley.
+                </p>
+
+                <h4 class="mt-4">8. Garantía</h4>
+                <p>
+                    Como se trata de productos usados informados expresamente como tales, la garantía
+                    legal no cubre las señales de uso ni las deficiencias descritas o visibles en las
+                    fotos de la subasta (artículo 14, Ley N° 19.496). Si recibes una prenda distinta a
+                    la adjudicada, o con un defecto relevante que no fue informado, contáctanos: te
+                    ofreceremos el cambio, la reparación o la devolución del dinero, según corresponda
+                    conforme a la ley.
+                </p>
+
+                <h4 class="mt-4">9. Datos personales</h4>
+                <p>
+                    Para las subastas tratamos solo los datos necesarios: nombre, RUT, correo, teléfono,
+                    dirección de entrega y tu historial de ofertas. Los usamos para gestionar tu
+                    participación, el pago, la boleta y la entrega, y para avisarte el resultado de las
+                    subastas en que participas. Las subastas no usan datos biométricos ni de medidas
+                    corporales. Los compartimos solo con quienes nos ayudan a cumplir esos fines, como
+                    Mercado Pago y el servicio de despacho.
+                </p>
+                <p>
+                    El tratamiento se rige por la Ley N° 19.628, la Ley N° 21.719 (vigente desde el
+                    1 de diciembre de 2026) y la PPDPOL. Puedes ejercer gratuitamente tus derechos de
+                    acceso, rectificación, supresión, oposición, bloqueo y portabilidad, y revocar tu
+                    autorización, mediante el formulario de ejercicio de derechos del sitio o escribiendo a
+                    <a href="mailto:contactotyc@oulalab.com">contactotyc@oulalab.com</a>. Respondemos
+                    en un plazo máximo de 7 días hábiles. El responsable de protección de datos es
+                    Mauricio Loy Decebal-Cuza.
+                </p>
+
+                <h4 class="mt-4">10. Cambios y cancelaciones</h4>
+                <p>
+                    OulaLab puede cancelar una subasta que aún no tenga ofertas. Si una subasta con
+                    ofertas debe cancelarse por un error evidente en su publicación o por fuerza mayor,
+                    avisaremos a los participantes y, si ya hubo pago, lo devolveremos íntegramente.
+                    Si estos términos cambian, la nueva versión rige solo para las ofertas hechas después
+                    de que la aceptes: te la pediremos antes de tu siguiente oferta. Un cambio nunca
+                    altera las condiciones de una subasta en la que ya ofertaste.
+                </p>
+
+                <h4 class="mt-4">11. Consultas, reclamos y ley aplicable</h4>
+                <p>
+                    Para consultas, reclamos o para ejercer el derecho a retracto, escríbenos a
+                    <a href="mailto:contactotyc@oulalab.com">contactotyc@oulalab.com</a>.
+                </p>
+                <p>
+                    Estos términos se rigen por las leyes de Chile, en especial la Ley N° 19.496 sobre
+                    Protección de los Derechos de los Consumidores. Nada de lo aquí dispuesto limita los
+                    derechos irrenunciables que esa ley te otorga, incluido el de recurrir al SERNAC o
+                    al tribunal competente de tu domicilio.
+                </p>
+
+                <p class="mt-5">
+                    <a href="/auctions" class="btn btn-dark">Volver a las subastas</a>
+                </p>
+            </div>
+        </t>
+    </template>
+</odoo>

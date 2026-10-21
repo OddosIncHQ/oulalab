@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portada del sitio orientada a las subastas.
+         Reemplaza el contenido editable de la vista website.homepage. Mientras esta vista
+         esté activa, la portada deja de editarse desde el editor del sitio:
+         para volver al bloque anterior basta desactivarla en Ajustes > Vistas. -->
+    <template id="website_homepage_auctions" inherit_id="website.homepage"
+              name="OulaLab: portada de subastas">
+        <xpath expr="//div[@id='wrap']" position="replace">
+            <div id="wrap" class="oulalab-home">
+
+                <!-- HERO con video -->
+                <section class="olh-hero">
+                    <video class="olh-hero-video" autoplay="autoplay" muted="muted"
+                           loop="loop" playsinline="playsinline"
+                           poster="/oulalab_auction/static/src/img/hero-poster.jpg">
+                        <source src="/oulalab_auction/static/src/video/hero.mp4" type="video/mp4"/>
+                    </video>
+                    <div class="olh-hero-veil"/>
+                    <div class="olh-hero-body">
+                        <p class="olh-kicker">Liquidación OulaLab</p>
+                        <h1 class="olh-title">La prenda que arrendaste<br/>ahora puede ser tuya.</h1>
+                        <p class="olh-lead">
+                            Piezas que salen del clóset de arriendo y se subastan al mejor postor.
+                            Una sola unidad por prenda. Las socias ofertan primero.
+                        </p>
+                        <div class="olh-cta-row">
+                            <a class="olh-btn olh-btn--solid" href="/auctions">Ver subastas activas</a>
+                            <a class="olh-btn olh-btn--ghost" href="/auctions/mis-subastas">Mis subastas</a>
+                        </div>
+                    </div>
+                    <span class="olh-scroll">Desliza</span>
+                </section>
+
+                <!-- CIFRAS -->
+                <section class="olh-strip">
+                    <div class="container">
+                        <div class="olh-strip-grid">
+                            <div>
+                                <span class="olh-stat">1</span>
+                                <span class="olh-stat-label">unidad por prenda</span>
+                            </div>
+                            <div>
+                                <span class="olh-stat">24 h</span>
+                                <span class="olh-stat-label">para pagar si ganas</span>
+                            </div>
+                            <div>
+                                <span class="olh-stat">0</span>
+                                <span class="olh-stat-label">costo de despacho en Lo Barnechea, Las Condes y Vitacura</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CÓMO FUNCIONA, con video de apoyo -->
+                <section class="olh-split">
+                    <div class="container">
+                        <div class="olh-split-grid">
+                            <div class="olh-split-text">
+                                <h2 class="olh-h2">Tres pasos y la prenda es tuya</h2>
+                                <ol class="olh-steps">
+                                    <li>
+                                        <strong>Ingresa con tu RUT.</strong>
+                                        Sin crear cuenta: te llega un código de seis dígitos al correo que ya tenemos.
+                                    </li>
+                                    <li>
+                                        <strong>Haz tu oferta.</strong>
+                                        Cada prenda muestra su precio mínimo y el precio retail de referencia.
+                                    </li>
+                                    <li>
+                                        <strong>Paga y recíbela.</strong>
+                                        Con Mercado Pago, y la eliges con despacho o retiro en el showroom.
+                                    </li>
+                                </ol>
+                                <a class="olh-btn olh-btn--solid" href="/auctions">Quiero subastar</a>
+                            </div>
+                            <div class="olh-split-media">
+                                <video class="olh-video-card" autoplay="autoplay" muted="muted"
+                                       loop="loop" playsinline="playsinline">
+                                    <source src="/oulalab_auction/static/src/video/story.mp4" type="video/mp4"/>
+                                </video>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SUBASTAS QUE CIERRAN PRONTO -->
+                <t t-set="closing" t-value="website.auction_closing_soon()"/>
+                <t t-if="closing">
+                    <section class="olh-closing">
+                        <div class="container">
+                            <div class="olh-closing-head">
+                                <h2 class="olh-h2">Cierran pronto</h2>
+                                <a class="olh-link" href="/auctions">Ver todas</a>
+                            </div>
+                            <div class="olh-closing-grid">
+                                <t t-foreach="closing" t-as="auction">
+                                    <a class="olh-mini" t-attf-href="/auctions/#{auction.id}">
+                                        <img class="olh-mini-img" t-att-src="auction._get_primary_image_url()" alt="Prenda en subasta"/>
+                                        <span class="olh-mini-name" t-out="auction.web_title or 'Prenda en subasta'"/>
+                                        <span class="olh-mini-price">
+                                            Desde <t t-out="auction.currency_id.symbol"/><t t-out="'{:,.0f}'.format(auction.reserve_price)"/>
+                                        </span>
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+                    </section>
+                </t>
+
+                <!-- CIERRE -->
+                <section class="olh-outro">
+                    <div class="container">
+                        <h2 class="olh-h2 olh-h2--light">¿Todavía no eres socia?</h2>
+                        <p class="olh-outro-lead">
+                            La suscripción OulaLab te da el clóset infinito, y en las subastas ofertas antes que el resto.
+                        </p>
+                        <div class="olh-cta-row olh-cta-row--center">
+                            <a class="olh-btn olh-btn--solid" href="https://www.oulalab.com/suscribir">Conocer la suscripción</a>
+                            <a class="olh-btn olh-btn--ghost" href="/app">Descarga la app</a>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </xpath>
+    </template>
+</odoo>

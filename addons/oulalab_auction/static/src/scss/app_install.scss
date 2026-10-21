@@ -1,0 +1,282 @@
+// Página /app: guía para dejar OulaLab en la pantalla de inicio.
+.oulalab-app-install {
+    --oai-ink: #2b0e27;
+    --oai-plum: #6b2160;
+    --oai-accent: #d81b7a;
+    --oai-blush: #f8f1f6;
+    --oai-line: #e3d2dd;
+
+    color: var(--oai-ink);
+
+    .oai-head {
+        max-width: 34rem;
+        margin-bottom: 3rem;
+    }
+
+    .oai-title {
+        font-size: clamp(2rem, 5vw, 3.1rem);
+        line-height: 1.1;
+        margin-bottom: 1rem;
+    }
+
+    .oai-lead {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: var(--oai-plum);
+        margin-bottom: 0;
+    }
+
+    .oai-step-label {
+        font-size: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .oai-choices {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .oai-choice {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        text-align: left;
+        padding: 1.1rem 1.25rem;
+        background: #fff;
+        border: 1px solid var(--oai-line);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            border-color: var(--oai-accent);
+            background: var(--oai-blush);
+        }
+    }
+
+    .oai-choice--likely {
+        border-color: var(--oai-accent);
+    }
+
+    .oai-choice-name {
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .oai-choice-note {
+        font-size: 0.85rem;
+        color: var(--oai-plum);
+    }
+
+    .oai-back {
+        background: none;
+        border: 0;
+        padding: 0;
+        color: var(--oai-plum);
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .oai-guide {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 16rem);
+        gap: 3rem;
+        align-items: start;
+
+        @media (max-width: 767px) {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+
+    .oai-guide-title {
+        font-size: 1.6rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .oai-list {
+        counter-reset: oai;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.5rem;
+
+        li {
+            counter-increment: oai;
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.55;
+
+            &::before {
+                content: counter(oai);
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 1.7rem;
+                height: 1.7rem;
+                border-radius: 50%;
+                background: var(--oai-plum);
+                color: #fff;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+    .oai-note {
+        background: var(--oai-blush);
+        border-left: 3px solid var(--oai-accent);
+        padding: 0.85rem 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .oai-actions {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .oai-cta {
+        display: inline-block;
+        padding: 0.7rem 1.5rem;
+        background: var(--oai-plum);
+        color: #fff;
+        border-radius: 0.4rem;
+        text-decoration: none;
+
+        &:hover {
+            background: var(--oai-ink);
+            color: #fff;
+        }
+    }
+
+    // --- Teléfono dibujado ---
+    .oai-demo-caption {
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--oai-plum);
+        margin-top: 0.75rem;
+    }
+
+    .oai-phone {
+        position: relative;
+        margin: 0 auto;
+        width: 13rem;
+        height: 25rem;
+        border: 10px solid var(--oai-ink);
+        border-radius: 2rem;
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .oai-screen {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .oai-screen-bar {
+        flex: 0 0 auto;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.7rem;
+        color: var(--oai-plum);
+        background: var(--oai-blush);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .oai-screen-body {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .oai-screen-logo {
+        font-size: 1.2rem;
+        color: var(--oai-plum);
+    }
+
+    .oai-share,
+    .oai-dots {
+        font-size: 0.7rem;
+    }
+
+    .oai-sheet {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        border-top: 1px solid var(--oai-line);
+        padding: 0.5rem 0;
+        transform: translateY(100%);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .oai-sheet-row {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.75rem;
+        border-bottom: 1px solid var(--oai-blush);
+
+        &:last-child { border-bottom: 0; }
+
+        &--target {
+            color: var(--oai-accent);
+            font-weight: 600;
+        }
+    }
+
+    .oai-finger {
+        position: absolute;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        background: rgba(216, 27, 122, 0.35);
+        border: 2px solid var(--oai-accent);
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    // El recorrido cambia según dónde esté el control que hay que tocar.
+    .oai-phone[data-oai-demo="bottom"],
+    .oai-phone[data-oai-demo="top"] {
+        .oai-sheet { animation: oai-sheet 6s ease-in-out infinite; }
+        .oai-finger { animation: oai-finger 6s ease-in-out infinite; }
+    }
+
+    .oai-phone[data-oai-demo="bottom"] .oai-finger { left: 1rem; top: 21.5rem; }
+    .oai-phone[data-oai-demo="top"] .oai-finger { right: 1rem; top: 0.6rem; left: auto; }
+
+    @keyframes oai-sheet {
+        0%, 25% { transform: translateY(100%); }
+        40%, 85% { transform: translateY(0); }
+        100% { transform: translateY(100%); }
+    }
+
+    @keyframes oai-finger {
+        0%, 10% { opacity: 0; transform: scale(0.7); }
+        18%, 30% { opacity: 1; transform: scale(1); }
+        45%, 100% { opacity: 0; transform: scale(1.1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .oai-phone .oai-sheet,
+        .oai-phone .oai-finger {
+            animation: none !important;
+        }
+        .oai-phone .oai-sheet { transform: translateY(0); }
+    }
+}
