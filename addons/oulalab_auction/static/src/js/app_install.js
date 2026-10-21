@@ -60,6 +60,28 @@
             ],
             note: "Si tu navegador no tiene ninguna de esas opciones, instala Chrome y repite los pasos ahí.",
         },
+        "inapp:ios": {
+            title: "Estás dentro de Instagram",
+            demo: null,
+            steps: [
+                "Instagram abre las páginas en su propio navegador, y desde ahí el iPhone no puede guardar accesos directos.",
+                "Toca los <strong>tres puntos</strong> de la esquina superior derecha.",
+                "Elige <strong>Abrir en el navegador</strong>. La página se abrirá en Safari.",
+                "Ya en Safari, toca <strong>Compartir</strong> y luego <strong>Añadir a pantalla de inicio</strong>.",
+            ],
+            note: "Si no aparece esa opción, copia la dirección mobile.oulalab.com y pégala en Safari.",
+        },
+        "inapp:android": {
+            title: "Estás dentro de Instagram",
+            demo: null,
+            steps: [
+                "Instagram abre las páginas en su propio navegador, y desde ahí no se puede instalar la app.",
+                "Toca los <strong>tres puntos</strong> de la esquina superior derecha.",
+                "Elige <strong>Abrir en Chrome</strong> o <strong>Abrir en el navegador</strong>.",
+                "Ya en Chrome, abre el menú y elige <strong>Instalar aplicación</strong>.",
+            ],
+            note: null,
+        },
         "desktop:": {
             title: "En tu computador",
             demo: null,
@@ -81,6 +103,13 @@
             return "android";
         }
         return "desktop";
+    }
+
+    // Navegador embebido de Instagram, Facebook o Messenger: desde ahí no se
+    // puede guardar el acceso directo, hay que salir al navegador del teléfono.
+    function detectInApp() {
+        var ua = navigator.userAgent || "";
+        return /Instagram|FBAN|FBAV|FB_IAB|Messenger/i.test(ua);
     }
 
     function init(root) {
@@ -161,6 +190,11 @@
         // Deja preseleccionado el dispositivo probable, sin saltarse la elección:
         // la detección falla a menudo y la persona debe poder corregirla.
         var likely = detectDevice();
+        if (detectInApp() && likely !== "desktop") {
+            state.device = likely;
+            renderGuide("inapp:" + likely);
+            return;
+        }
         var hint = root.querySelector('[data-oai-device="' + likely + '"]');
         if (hint) {
             hint.classList.add("oai-choice--likely");
