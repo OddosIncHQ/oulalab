@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 
 # Comunas a las que OulaLab despacha. Para habilitar otra, agrégala aquí.
 # Súbela cada vez que cambie el texto de /auctions/terminos.
-AUCTION_TERMS_VERSION = "2026-10-21"
+AUCTION_TERMS_VERSION = "2026-10-22b"
 
 AUCTION_COMMUNES = [
     ("lo_barnechea", "Lo Barnechea"),
