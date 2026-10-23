@@ -140,7 +140,7 @@
                                 <t t-else="">
                                     Ventana exclusiva para socios OulaLab.
                                     La apertura pública es el
-                                    <strong t-out="auction.public_start"/>.
+                                    <strong t-out="public_start_local"/>.
                                 </t>
                             </div>
                         </t>
@@ -148,7 +148,7 @@
                         <t t-if="auction.public_start and server_now &lt; auction.public_start and not auction.member_preview_hours">
                             <div class="alert alert-info">
                                 La subasta abre para todo el público el
-                                <strong t-out="auction.public_start"/>.
+                                <strong t-out="public_start_local"/>.
                             </div>
                         </t>
 
@@ -167,7 +167,7 @@
                                 <p class="mb-1">
                                     El público general podrá subastar a partir de
                                 </p>
-                                <p class="fs-5 fw-bold mb-2" t-out="auction.public_start"/>
+                                <p class="fs-5 fw-bold mb-2" t-out="public_start_local"/>
                                 <p class="small text-muted mb-0">
                                     La página se actualizará sola cuando se abra.
                                 </p>
