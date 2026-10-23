@@ -2,6 +2,7 @@ import random
 import re
 import time
 
+import pytz
 from odoo import fields, http
 from odoo.http import request
 
@@ -139,6 +140,12 @@ class AuctionPortal(http.Controller):
             if preview_locked else 0
         )
 
+        def _cl(dt):
+            if not dt:
+                return ""
+            tz = pytz.timezone("America/Santiago")
+            return pytz.utc.localize(dt).astimezone(tz).strftime("%d-%m-%Y %H:%M") + " hrs"
+
         return request.render(
             "oulalab_auction.auction_detail_template",
             {
@@ -157,6 +164,7 @@ class AuctionPortal(http.Controller):
                 "guest_rut": partner.vat if partner else "",
                 "preview_locked": preview_locked,
                 "remaining_ms": remaining_ms,
+                "public_start_local": _cl(auction.public_start),
             },
         )
 
