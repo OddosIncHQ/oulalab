@@ -97,6 +97,8 @@
                             <field name="payment_deadline_hours"/>
                             <field name="payment_deadline" readonly="1"
                                    invisible="state != 'pending_payment'"/>
+                            <field name="payment_reminder_sent" readonly="1"
+                                   invisible="state != 'pending_payment'"/>
                             <field name="current_winner_bid_id" readonly="1"
                                    invisible="state not in ('pending_payment','sold')"/>
                             <field name="winner_id"/>

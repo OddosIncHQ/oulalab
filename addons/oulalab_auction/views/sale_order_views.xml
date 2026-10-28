@@ -6,7 +6,8 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
-                <group string="Subasta" invisible="not auction_ids">
+                <group string="Subasta" invisible="not auction_ids and not auction_origin_id">
+                    <field name="auction_origin_id" readonly="1"/>
                     <field name="auction_ids" widget="many2many_tags" readonly="1"/>
                     <field name="auction_photo_html" nolabel="1" colspan="2"/>
                 </group>
