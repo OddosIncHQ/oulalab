@@ -1,7 +1,9 @@
 import base64
 import logging
 import re
-from datetime import timedelta
+from datetime import datetime, time, timedelta
+
+import pytz
 
 from markupsafe import Markup
 
@@ -9,6 +11,14 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
 
 _logger = logging.getLogger(__name__)
+
+# Reglas de cobro (v57)
+MIN_PAYMENT_HOURS = 24        # plazo mínimo efectivo, aunque el registro diga menos
+PENDING_GRACE_HOURS = 24      # margen extra si hay un pago en línea "pendiente"
+REMINDER_HOURS_BEFORE = 6     # recordatorio antes de vencer
+QUIET_START, QUIET_END = 21, 9  # el plazo no vence entre 21:00 y 09:00 (hora Chile)
+QUIET_MOVE_TO = 12            # si cae en ese rango, se mueve a las 12:00
+AUCTION_TZ = "America/Santiago"
 
 
 class LiquidationAuction(models.Model):
@@ -148,9 +158,14 @@ class LiquidationAuction(models.Model):
     payment_deadline_hours = fields.Integer(
         string="Plazo de pago (horas)",
         default=24,
-        help="Horas que tiene el ganador para pagar antes de reasignar al siguiente postor.",
+        help="Horas que tiene el ganador para pagar antes de reasignar al siguiente postor. "
+        "Mínimo efectivo 24 h; si el vencimiento cae entre 21:00 y 09:00 (hora Chile) "
+        "se mueve a las 12:00.",
     )
     payment_deadline = fields.Datetime(string="Vence el pago", readonly=True)
+    payment_reminder_sent = fields.Boolean(
+        string="Recordatorio de pago enviado", readonly=True, copy=False
+    )
     payment_url = fields.Char(compute="_compute_payment_url")
 
     def _compute_payment_url(self):
@@ -468,7 +483,30 @@ class LiquidationAuction(models.Model):
             rec.state = "cancelled"
 
     def action_back_to_draft(self):
-        self.write({"state": "draft"})
+        """Vuelve a borrador SIN arrastrar un ciclo anterior.
+
+        Una subasta que ya tuvo ofertas o adjudicación no se recicla: quedarían
+        pujas rechazadas, ganador, pedido y plazo de otro ciclo. Para repetirla
+        se duplica (las ofertas no se copian).
+        """
+        for rec in self:
+            if rec.state in ("pending_payment", "sold"):
+                raise UserError(_(
+                    "La subasta %s está adjudicada o esperando pago; no puede volver a borrador."
+                ) % rec.display_name)
+            if rec.bid_ids:
+                raise UserError(_(
+                    "La subasta %s ya tiene ofertas. Para repetirla, duplícala "
+                    "(Acción → Duplicar): la copia nace sin ofertas ni adjudicación."
+                ) % rec.display_name)
+        self.write({
+            "state": "draft",
+            "winner_id": False,
+            "sale_order_id": False,
+            "current_winner_bid_id": False,
+            "payment_deadline": False,
+            "payment_reminder_sent": False,
+        })
 
     def action_open_product(self):
         """Abre la ficha del producto (plantilla) de la subasta."""
@@ -512,12 +550,31 @@ class LiquidationAuction(models.Model):
         for auction in pending:
             try:
                 with self.env.cr.savepoint():
-                    if auction._is_current_order_paid():
-                        auction._mark_paid()
-                    elif auction.payment_deadline and now > auction.payment_deadline:
-                        auction._handle_non_payment()
+                    auction._check_payment_status(now)
             except Exception:
                 _logger.exception("Subasta %s: error en control de pago", auction.id)
+
+    def _check_payment_status(self, now):
+        """Un paso del control de pago de una subasta 'Esperando pago'."""
+        self.ensure_one()
+        if self._is_current_order_paid():
+            self._mark_paid()
+            return
+        deadline = self.payment_deadline
+        if not deadline:
+            return
+        if now > deadline:
+            # Pago en línea en curso: se espera un margen antes de cancelar.
+            if self._has_pending_online_payment() and now <= deadline + timedelta(
+                hours=PENDING_GRACE_HOURS
+            ):
+                return
+            self._handle_non_payment()
+            return
+        if not self.payment_reminder_sent and now >= deadline - timedelta(
+            hours=REMINDER_HOURS_BEFORE
+        ):
+            self._send_payment_reminder()
 
     def _close_auction(self):
         """Al cerrar: avisa a los perdedores y adjudica al mejor postor."""
@@ -538,15 +595,47 @@ class LiquidationAuction(models.Model):
             return
 
         order = self._create_winner_order(next_bid)
+        deadline = self._compute_payment_deadline()
         self.write({
             "state": "pending_payment",
             "current_winner_bid_id": next_bid.id,
             "winner_id": next_bid.partner_id.id,
             "sale_order_id": order.id,
-            "payment_deadline": fields.Datetime.now()
-            + timedelta(hours=self.payment_deadline_hours or 24),
+            "payment_deadline": deadline,
+            "payment_reminder_sent": False,
+        })
+        self.message_post(body=_(
+            "Adjudicada a %(partner)s por $%(amount)s (pedido %(order)s). "
+            "Vence el pago: %(deadline)s."
+        ) % {
+            "partner": next_bid.partner_id.display_name,
+            "amount": "{:,.0f}".format(next_bid.amount).replace(",", "."),
+            "order": order.name,
+            "deadline": self._format_local(deadline),
         })
         self._send_winner_email()
+
+    def _compute_payment_deadline(self, start=None):
+        """Plazo de pago: mínimo 24 h y nunca vence de noche (hora Chile).
+
+        Devuelve un datetime UTC naive, como guarda Odoo.
+        """
+        self.ensure_one()
+        start = start or fields.Datetime.now()
+        hours = max(self.payment_deadline_hours or 0, MIN_PAYMENT_HOURS)
+        deadline_utc = start + timedelta(hours=hours)
+        tz = pytz.timezone(AUCTION_TZ)
+        local = pytz.utc.localize(deadline_utc).astimezone(tz)
+        if local.hour >= QUIET_START or local.hour < QUIET_END:
+            day = local.date() + timedelta(days=1) if local.hour >= QUIET_START else local.date()
+            local = tz.localize(datetime.combine(day, time(QUIET_MOVE_TO, 0)))
+        return local.astimezone(pytz.utc).replace(tzinfo=None)
+
+    def _format_local(self, dt):
+        if not dt:
+            return ""
+        local = pytz.utc.localize(dt).astimezone(pytz.timezone(AUCTION_TZ))
+        return local.strftime("%d-%m-%Y %H:%M")
 
     def _create_winner_order(self, bid):
         """Crea el presupuesto del ganador listo para pagar en el portal.
@@ -567,6 +656,8 @@ class LiquidationAuction(models.Model):
             "company_id": company.id,
             "partner_id": bid.partner_id.id,
             "origin": self.name,
+            # Vínculo permanente: sobrevive aunque la subasta suelte el pedido.
+            "auction_origin_id": self.id,
             "warehouse_id": warehouse.id if warehouse else False,
             # Pago en línea obligatorio por el total: habilita el botón de pago.
             "require_payment": True,
@@ -577,7 +668,8 @@ class LiquidationAuction(models.Model):
             # El presupuesto no puede vencer antes que el plazo de pago.
             "validity_date": (
                 fields.Datetime.now()
-                + timedelta(hours=(self.payment_deadline_hours or 24) + 24)
+                + timedelta(hours=max(self.payment_deadline_hours or 0, MIN_PAYMENT_HOURS)
+                            + PENDING_GRACE_HOURS + 24)
             ).date(),
             "order_line": [
                 (0, 0, {
@@ -627,12 +719,28 @@ class LiquidationAuction(models.Model):
     # Pago / reasignación
     # ------------------------------------------------------------------
     def _is_current_order_paid(self):
+        """Pagado = transacción aprobada, o pedido ya confirmado.
+
+        Un pedido confirmado a mano (p. ej. pago por transferencia) cuenta como
+        pagado: el cron nunca debe cancelar una venta ya confirmada.
+        """
         self.ensure_one()
         order = self.sale_order_id
         if not order:
             return False
+        if order.state == "sale":
+            return True
         return any(
             t.state in ("done", "authorized") for t in order.transaction_ids
+        )
+
+    def _has_pending_online_payment(self):
+        """Pago en línea iniciado y aún sin respuesta (no cuenta transferencias)."""
+        self.ensure_one()
+        order = self.sale_order_id
+        return bool(order) and any(
+            t.state == "pending" and t.provider_id.code != "custom"
+            for t in order.transaction_ids
         )
 
     def _mark_paid(self):
@@ -641,7 +749,7 @@ class LiquidationAuction(models.Model):
         # (p. ej. falló la confirmación automática), se confirma aquí.
         order = self.sale_order_id
         if order and order.state in ("draft", "sent"):
-            order.action_confirm()
+            order.with_context(auction_skip_sync=True).action_confirm()
         if self.current_winner_bid_id:
             self.current_winner_bid_id.rejected = False
         self.write({"state": "sold"})
@@ -650,19 +758,79 @@ class LiquidationAuction(models.Model):
     def _handle_non_payment(self):
         """El ganador no pagó a tiempo: descarta su oferta, cancela su pedido y reasigna."""
         self.ensure_one()
-        if self.current_winner_bid_id:
-            self.current_winner_bid_id.rejected = True
-        if self.sale_order_id:
-            self.sale_order_id._action_cancel()
+        # Última verificación: si el pedido ya está confirmado o pagado, es venta.
+        if self._is_current_order_paid():
+            self._mark_paid()
+            return
+        bid = self.current_winner_bid_id
+        order = self.sale_order_id
+        if bid:
+            bid.rejected = True
+        if order:
+            order._action_cancel()
             self.sale_order_id = False
-        self.message_post(
-            body=_("El ganador no pagó dentro del plazo. Reasignando al siguiente postor.")
-        )
+        self.message_post(body=_(
+            "%(partner)s no pagó dentro del plazo (oferta $%(amount)s, pedido %(order)s "
+            "cancelado). Reasignando al siguiente postor."
+        ) % {
+            "partner": bid.partner_id.display_name if bid else "-",
+            "amount": "{:,.0f}".format(bid.amount).replace(",", ".") if bid else "0",
+            "order": order.name if order else "-",
+        })
         self._award_to_next_bidder()
+
+    def _restore_award_from_order(self, order):
+        """Pedido confirmado DESPUÉS de que la subasta quedó desierta por no pago.
+
+        Restituye la adjudicación si la subasta sigue libre y la puja del cliente
+        existe. Si la prenda ya se reasignó a otro postor, no toca nada y avisa.
+        """
+        self.ensure_one()
+        if self.state == "sold" and self.sale_order_id == order:
+            return
+        bid = self.bid_ids.filtered(
+            lambda b: b.partner_id == order.partner_id
+        ).sorted(lambda b: (b.amount, b.id), reverse=True)[:1]
+        if self.state == "unsold" and not self.sale_order_id and bid:
+            bid.rejected = False
+            self.write({
+                "state": "sold",
+                "sale_order_id": order.id,
+                "winner_id": order.partner_id.id,
+                "current_winner_bid_id": bid.id,
+            })
+            self.message_post(body=_(
+                "Pedido %s confirmado después del vencimiento: se restituye la adjudicación."
+            ) % order.name)
+            return
+        warning = _(
+            "Atención: el pedido %(order)s se confirmó, pero la subasta %(auction)s está "
+            "en estado '%(state)s' con pedido %(current)s. Revisar a mano: posible doble venta."
+        ) % {
+            "order": order.name,
+            "auction": self.display_name,
+            "state": dict(self._fields["state"].selection).get(self.state),
+            "current": self.sale_order_id.name or "-",
+        }
+        self.message_post(body=warning)
+        order.message_post(body=warning)
+        _logger.warning(warning)
 
     # ------------------------------------------------------------------
     # Emails
     # ------------------------------------------------------------------
+    def _send_payment_reminder(self):
+        """Recordatorio único al ganador, unas horas antes del vencimiento."""
+        self.ensure_one()
+        template = self.env.ref(
+            "oulalab_auction.mail_template_auction_payment_reminder", raise_if_not_found=False
+        )
+        if template and self.sale_order_id:
+            template.send_mail(self.sale_order_id.id, force_send=True)
+            self.message_post(body=_("Recordatorio de pago enviado a %s.")
+                              % self.winner_id.display_name)
+        self.payment_reminder_sent = True
+
     def _send_winner_email(self):
         """Confirmación de la orden al ganador (plantilla sobre sale.order)."""
         self.ensure_one()

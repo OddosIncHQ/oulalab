@@ -9,6 +9,12 @@ class SaleOrder(models.Model):
     auction_ids = fields.One2many(
         "liquidation.auction", "sale_order_id", string="Subastas"
     )
+    # Vínculo permanente con la subasta que originó el pedido. A diferencia de
+    # auction_ids, no se pierde cuando la subasta suelta el pedido por no pago.
+    auction_origin_id = fields.Many2one(
+        "liquidation.auction", string="Subasta de origen",
+        readonly=True, copy=False, index=True,
+    )
     auction_photo_html = fields.Html(
         string="Foto de la prenda", compute="_compute_auction_photo", sanitize=False
     )
@@ -43,7 +49,7 @@ class SaleOrder(models.Model):
         la regla de la compañía del pedido y falla con 'No rule has been found',
         dejando la transacción pagada y el pedido sin confirmar.
         """
-        auction_orders = self.filtered("auction_ids")
+        auction_orders = self.filtered(lambda o: o.auction_ids or o.auction_origin_id)
         others = self - auction_orders
         res = True
         for company in auction_orders.company_id:
@@ -53,4 +59,18 @@ class SaleOrder(models.Model):
             )).action_confirm()
         if others:
             res = super(SaleOrder, others).action_confirm()
+        if not self.env.context.get("auction_skip_sync"):
+            auction_orders.filtered(lambda o: o.state == "sale")._sync_auction_after_confirm()
         return res
+
+    def _sync_auction_after_confirm(self):
+        """Lleva la subasta al estado correcto cuando su pedido se confirma,
+        venga del webhook de pago o de una confirmación manual."""
+        for order in self:
+            auction = order.auction_origin_id or order.auction_ids[:1]
+            if not auction:
+                continue
+            if auction.state == "pending_payment" and auction.sale_order_id == order:
+                auction._mark_paid()
+            elif auction.state != "sold" or auction.sale_order_id != order:
+                auction._restore_award_from_order(order)
