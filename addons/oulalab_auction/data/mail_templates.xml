@@ -91,5 +91,37 @@
                 </div>
             </field>
         </record>
+
+        <!-- Recordatorio de pago (v57): una vez, horas antes del vencimiento -->
+        <record id="mail_template_auction_payment_reminder" model="mail.template">
+            <field name="name">Subasta: recordatorio de pago al ganador</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Recuerda pagar tu prenda: {{ object.auction_origin_id.product_id.name or '' }} (Orden {{ object.name }})</field>
+            <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="body_html" type="html">
+                <div style="font-family:Arial,sans-serif;color:#31112C;max-width:600px;">
+                    <p>Hola <t t-out="object.partner_id.name or ''"/>,</p>
+                    <p>Tu prenda <strong t-out="object.auction_origin_id.product_id.name or ''"/>
+                        sigue reservada para ti, pero aún no recibimos el pago.</p>
+                    <p><img t-att-src="object._get_auction_photo_src()" style="max-height:220px;border-radius:6px;"/></p>
+                    <p>Orden: <strong t-out="object.name or ''"/><br/>
+                       Monto: <strong>$<t t-out="'{:,.0f}'.format(object.amount_total)"/></strong></p>
+                    <p t-if="object.auction_origin_id.payment_deadline">
+                        El plazo vence el
+                        <strong t-out="format_datetime(object.auction_origin_id.payment_deadline, tz=object.partner_id.tz or 'America/Santiago', dt_format='dd-MM-yyyy HH:mm')"/>.
+                        Después de esa hora, la prenda se ofrecerá al siguiente postor.
+                    </p>
+                    <p style="margin:24px 0;">
+                        <a t-att-href="object.get_base_url() + object.get_portal_url()"
+                           style="background:#BC6C4C;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;">
+                            Pagar ahora
+                        </a>
+                    </p>
+                    <p style="font-size:12px;color:#888;">Si ya pagaste, ignora este correo. OulaLab · Liquidación de prendas</p>
+                </div>
+            </field>
+        </record>
     </data>
 </odoo>
