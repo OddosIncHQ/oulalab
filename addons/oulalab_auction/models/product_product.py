@@ -18,3 +18,14 @@ class ProductProduct(models.Model):
     def action_open_auction_web(self):
         self.ensure_one()
         return self.product_tmpl_id.action_open_auction_web()
+
+    # La ficha de variante hereda los botones de la plantilla: el de ventas
+    # directas también necesita su campo y su acción aquí.
+    shop_item_count = fields.Integer(
+        related="product_tmpl_id.shop_item_count",
+        string="N.º ventas directas",
+    )
+
+    def action_open_shop_items(self):
+        self.ensure_one()
+        return self.product_tmpl_id.action_open_shop_items()
