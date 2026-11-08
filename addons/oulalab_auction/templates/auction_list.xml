@@ -3,6 +3,9 @@
     <template id="auction_list_template" name="OulaLab Auctions">
         <t t-call="website.layout">
             <div class="container my-5 oulalab-auctions">
+                <t t-set="section" t-value="'auction'"/>
+                <t t-set="cart_count" t-value="len(request.session.get('oulalab_shop_cart') or [])"/>
+                <t t-call="oulalab_auction.liquidation_section_tabs"/>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                     <h1 class="mb-0">Liquidación OulaLab</h1>
                     <a href="/auctions/mis-subastas" class="btn btn-outline-dark btn-sm">Mis subastas</a>

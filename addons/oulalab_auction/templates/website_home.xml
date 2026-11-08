@@ -21,11 +21,12 @@
                         <p class="olh-kicker">Liquidación OulaLab</p>
                         <h1 class="olh-title">La prenda que arrendaste<br/>ahora puede ser tuya.</h1>
                         <p class="olh-lead">
-                            Piezas que salen del clóset de arriendo y se subastan al mejor postor.
-                            Una sola unidad por prenda. Las socias ofertan primero.
+                            Piezas que salen del clóset de arriendo: unas se subastan al mejor postor
+                            y otras se venden a precio fijo. Una sola unidad por prenda.
                         </p>
                         <div class="olh-cta-row">
                             <a class="olh-btn olh-btn--solid" href="/auctions">Ver subastas activas</a>
+                            <a class="olh-btn olh-btn--ghost" href="/prendas">Comprar prendas</a>
                             <a class="olh-btn olh-btn--ghost" href="/auctions/mis-subastas">Mis subastas</a>
                         </div>
                     </div>

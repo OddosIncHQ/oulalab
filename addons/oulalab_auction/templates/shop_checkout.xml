@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Bloque del OulaBag en carrito y checkout.
+         Recibe `offer`, `fmt_clp` y opcionalmente `selectable` (checkbox) y `checked`. -->
+    <template id="shop_oulabag_block" name="OulaLab: oferta OulaBag">
+        <div t-attf-class="olx-bag #{'is-locked' if not offer['eligible'] else ''}" t-if="offer['available']">
+            <img src="/oulalab_auction/static/src/img/oulabag.jpg" alt="OulaBag, bolso portatrajes burdeo de OulaLab"
+                 class="olx-bag-img" loading="lazy"/>
+            <div class="olx-bag-body">
+                <h3 class="olx-bag-title">OulaBag</h3>
+                <p class="olx-bag-copy">
+                    Bolso portatrajes burdeo con colgadores y etiqueta de cuero. Tus prendas
+                    llegan colgadas y sin arrugas.
+                </p>
+                <p class="olx-bag-price">
+                    <strong t-out="fmt_clp(offer['price'])"/>
+                    <s t-if="offer['reference'] &gt; offer['price']" t-out="fmt_clp(offer['reference'])"/>
+                </p>
+                <t t-if="offer['eligible']">
+                    <label class="olx-check" t-if="selectable">
+                        <input type="checkbox" name="oulabag" value="1" class="olx-bag-toggle"
+                               t-att-data-price="offer['price']" t-att-checked="checked or None"/>
+                        <span>Agregar a mi compra (máximo 1 por compra)</span>
+                    </label>
+                    <p class="olx-bag-ok" t-else="">Disponible en tu compra: lo eliges al pagar.</p>
+                </t>
+                <t t-else="">
+                    <div class="olx-progress" role="progressbar" t-att-aria-valuenow="offer['progress']"
+                         aria-valuemin="0" aria-valuemax="100">
+                        <span t-attf-style="width: #{offer['progress']}%"/>
+                    </div>
+                    <p class="olx-bag-lock">
+                        Agrega <strong t-out="fmt_clp(offer['missing'])"/> más en prendas para sumarlo
+                        (disponible desde <t t-out="fmt_clp(offer['min_cart'])"/>).
+                    </p>
+                </t>
+            </div>
+        </div>
+    </template>
+
+    <!-- ===================== CARRITO ===================== -->
+    <template id="shop_cart_template" name="OulaLab: carrito">
+        <t t-call="website.layout">
+            <div class="olx-shop">
+                <div class="container">
+                    <t t-call="oulalab_auction.liquidation_section_tabs"/>
+                    <h1 class="olx-title">Tu carrito</h1>
+
+                    <div class="alert alert-warning" t-if="removed">
+                        Quitamos <t t-out="len(removed)"/> prenda(s) que alguien más compró o reservó
+                        mientras navegabas.
+                    </div>
+
+                    <div class="olx-empty" t-if="not items">
+                        <p>Tu carrito está vacío.</p>
+                        <a href="/prendas" class="btn olx-btn">Ver prendas en venta</a>
+                    </div>
+
+                    <div class="olx-cart" t-if="items">
+                        <ul class="olx-lines">
+                            <t t-foreach="items" t-as="item">
+                                <li class="olx-line">
+                                    <a t-attf-href="/prendas/#{item.id}" class="olx-line-img">
+                                        <img t-att-src="item._get_primary_image_url()" t-att-alt="item.web_title or 'Prenda'"/>
+                                    </a>
+                                    <div class="olx-line-info">
+                                        <p class="olx-card-brand" t-out="item.brand or ''"/>
+                                        <a t-attf-href="/prendas/#{item.id}" class="olx-line-title"
+                                           t-out="item.web_title or 'Prenda OulaLab'"/>
+                                        <p class="olx-line-meta">
+                                            <t t-if="item.size">Talla <t t-out="item.size"/>, </t>pieza única
+                                        </p>
+                                        <button type="button" class="olx-link olx-remove" t-att-data-item="item.id">
+                                            Quitar
+                                        </button>
+                                    </div>
+                                    <p class="olx-line-price" t-out="fmt_clp(item.price)"/>
+                                </li>
+                            </t>
+                        </ul>
+
+                        <aside class="olx-summary">
+                            <h2 class="olx-h2">Resumen</h2>
+                            <dl class="olx-totals">
+                                <dt>Prendas (<t t-out="len(items)"/>)</dt>
+                                <dd t-out="fmt_clp(total)"/>
+                                <dt>Despacho</dt>
+                                <dd>Se calcula al pagar</dd>
+                            </dl>
+                            <p class="olx-total"><span>Total</span><strong t-out="fmt_clp(total)"/></p>
+                            <a href="/prendas/checkout" class="btn olx-btn olx-btn--block">Continuar al pago</a>
+                            <a href="/prendas" class="olx-link d-block text-center mt-3">Seguir comprando</a>
+                            <p class="olx-hint">
+                                Las prendas no se reservan en el carrito: se reservan para ti al
+                                continuar al pago.
+                            </p>
+                            <t t-call="oulalab_auction.shop_oulabag_block">
+                                <t t-set="selectable" t-value="False"/>
+                            </t>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ===================== CHECKOUT ===================== -->
+    <template id="shop_checkout_template" name="OulaLab: checkout">
+        <t t-call="website.layout">
+            <div class="olx-shop">
+                <div class="container">
+                    <t t-call="oulalab_auction.liquidation_section_tabs"/>
+                    <h1 class="olx-title">Datos para tu compra</h1>
+
+                    <div class="alert alert-danger" role="alert" t-if="error" t-out="error"/>
+
+                    <form method="post" action="/prendas/checkout" class="olx-checkout" id="olxCheckout">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                        <div class="olx-checkout-form">
+                            <fieldset class="olx-fieldset">
+                                <legend>Tus datos</legend>
+                                <p class="olx-hint" t-if="partner">
+                                    Comprando como <strong t-out="partner.name"/>.
+                                </p>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label" for="olxName">Nombre completo</label>
+                                        <input id="olxName" name="name" class="form-control" required="required"
+                                               autocomplete="name" t-att-value="form.get('name')"/>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label" for="olxRut">RUT</label>
+                                        <input id="olxRut" name="rut" class="form-control" required="required"
+                                               placeholder="12.345.678-5" t-att-value="form.get('rut')"/>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label" for="olxPhone">Teléfono</label>
+                                        <input id="olxPhone" name="phone" type="tel" class="form-control"
+                                               required="required" autocomplete="tel" placeholder="+56 9 1234 5678"
+                                               t-att-value="form.get('phone')"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="olxEmail">Correo</label>
+                                        <input id="olxEmail" name="email" type="email" class="form-control"
+                                               required="required" autocomplete="email" t-att-value="form.get('email')"/>
+                                        <div class="form-text">Ahí te enviamos la confirmación y el comprobante.</div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="olx-fieldset">
+                                <legend>Entrega</legend>
+                                <t t-set="mode" t-value="form.get('mode') or 'pickup'"/>
+                                <div class="olx-choice">
+                                    <label class="olx-choice-opt">
+                                        <input type="radio" name="mode" value="delivery" class="olx-mode"
+                                               t-att-checked="mode == 'delivery' or None"/>
+                                        <span>
+                                            <strong>Despacho a domicilio</strong>
+                                            <small>
+                                                Lo Barnechea, Las Condes y Vitacura.
+                                                <t t-if="shipping_fee">Costo <t t-out="fmt_clp(shipping_fee)"/>.</t>
+                                                <t t-else="">Sin costo.</t>
+                                            </small>
+                                        </span>
+                                    </label>
+                                    <label class="olx-choice-opt">
+                                        <input type="radio" name="mode" value="pickup" class="olx-mode"
+                                               t-att-checked="mode == 'pickup' or None"/>
+                                        <span>
+                                            <strong>Retiro en showroom</strong>
+                                            <small t-out="showroom"/>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="olx-address row g-3" t-att-hidden="None if mode == 'delivery' else 'hidden'">
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label" for="olxCommune">Comuna</label>
+                                        <select id="olxCommune" name="commune" class="form-select">
+                                            <option value="">Elige tu comuna</option>
+                                            <t t-foreach="communes" t-as="c">
+                                                <option t-att-value="c[0]" t-att-selected="c[0] == form.get('commune') or None"
+                                                        t-out="c[1]"/>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-8">
+                                        <label class="form-label" for="olxStreet">Dirección</label>
+                                        <input id="olxStreet" name="street" class="form-control"
+                                               autocomplete="street-address" placeholder="Calle y número"
+                                               t-att-value="form.get('street')"/>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="olxStreet2">Depto, casa u oficina (opcional)</label>
+                                        <input id="olxStreet2" name="street2" class="form-control"
+                                               t-att-value="form.get('street2')"/>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <aside class="olx-summary">
+                            <h2 class="olx-h2">Tu compra</h2>
+                            <ul class="olx-mini">
+                                <t t-foreach="items" t-as="item">
+                                    <li>
+                                        <img t-att-src="item._get_primary_image_url()" alt=""/>
+                                        <span class="olx-mini-title">
+                                            <t t-out="item.web_title or 'Prenda OulaLab'"/>
+                                            <small t-if="item.size">Talla <t t-out="item.size"/></small>
+                                        </span>
+                                        <span class="olx-mini-price" t-out="fmt_clp(item.price)"/>
+                                    </li>
+                                </t>
+                            </ul>
+
+                            <t t-call="oulalab_auction.shop_oulabag_block">
+                                <t t-set="selectable" t-value="True"/>
+                                <t t-set="checked" t-value="form.get('oulabag')"/>
+                            </t>
+
+                            <dl class="olx-totals">
+                                <dt>Prendas</dt>
+                                <dd t-out="fmt_clp(total)"/>
+                                <dt class="olx-bag-row" hidden="hidden">OulaBag</dt>
+                                <dd class="olx-bag-row" hidden="hidden" t-out="fmt_clp(offer['price'])"/>
+                                <dt class="olx-ship-row" t-if="shipping_fee" hidden="hidden">Despacho</dt>
+                                <dd class="olx-ship-row" t-if="shipping_fee" hidden="hidden" t-out="fmt_clp(shipping_fee)"/>
+                            </dl>
+                            <p class="olx-total">
+                                <span>Total</span>
+                                <strong class="olx-grand" t-att-data-base="total"
+                                        t-att-data-ship="shipping_fee or 0" t-out="fmt_clp(total)"/>
+                            </p>
+
+                            <label class="olx-check">
+                                <input type="checkbox" name="accept_terms" value="1" required="required"/>
+                                <span>
+                                    Acepto los <a href="/terms" target="_blank">términos de compra</a>.
+                                    Entiendo que son prendas usadas, en el estado que muestran las fotos.
+                                </span>
+                            </label>
+                            <button type="submit" class="btn olx-btn olx-btn--block olx-pay">Ir a pagar</button>
+                            <p class="olx-hint">
+                                Al continuar, reservamos estas prendas para ti y te llevamos al pago
+                                seguro con Mercado Pago.
+                            </p>
+                        </aside>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

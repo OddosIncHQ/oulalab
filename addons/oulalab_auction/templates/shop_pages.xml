@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Selector de sección compartido por Subastas y Prendas en venta.
+         Recibe `section` ('auction' | 'shop') y `cart_count`. -->
+    <template id="liquidation_section_tabs" name="OulaLab: secciones de liquidación">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600&amp;display=swap"/>
+        <nav class="olx-sections" aria-label="Secciones de liquidación">
+            <div class="olx-sections-track">
+                <a href="/auctions" t-att-aria-current="'page' if section == 'auction' else None"
+                   t-attf-class="olx-section #{'is-active' if section == 'auction' else ''}">Subastas</a>
+                <a href="/prendas" t-att-aria-current="'page' if section == 'shop' else None"
+                   t-attf-class="olx-section #{'is-active' if section == 'shop' else ''}">Prendas en venta</a>
+            </div>
+            <a href="/prendas/carrito" class="olx-cart-link" aria-label="Ver carrito">
+                <i class="fa fa-shopping-bag" aria-hidden="true"/>
+                <span>Carrito</span>
+                <span class="olx-cart-count" t-att-data-count="cart_count or 0"
+                      t-out="cart_count or 0"/>
+            </a>
+        </nav>
+    </template>
+
+    <!-- Etiqueta de precio con forma de etiqueta colgante (como la del OulaBag). -->
+    <template id="shop_price_tag" name="OulaLab: etiqueta de precio">
+        <div class="olx-tag">
+            <span class="olx-tag-hole" aria-hidden="true"/>
+            <span class="olx-tag-price" t-out="fmt_clp(item.price)"/>
+            <span class="olx-tag-ref" t-if="item.retail_price and item.retail_price &gt; item.price">
+                <s t-out="fmt_clp(item.retail_price)"/>
+                <span class="olx-tag-off" t-if="item.discount_pct">-<t t-out="item.discount_pct"/>%</span>
+            </span>
+        </div>
+    </template>
+
+    <!-- ===================== CATÁLOGO ===================== -->
+    <template id="shop_list_template" name="OulaLab: prendas en venta">
+        <t t-call="website.layout">
+            <div class="olx-shop">
+                <div class="container">
+                    <t t-call="oulalab_auction.liquidation_section_tabs"/>
+
+                    <header class="olx-head">
+                        <h1 class="olx-title">Prendas en venta</h1>
+                        <p class="olx-lead">
+                            Piezas que dejan el clóset de arriendo, a precio fijo y listas para
+                            llevar. Cada una existe en una sola unidad: cuando alguien la compra,
+                            desaparece del catálogo.
+                        </p>
+                    </header>
+
+                    <section class="olx-bagstrip" t-if="offer['available']">
+                        <video class="olx-bagstrip-media" autoplay="autoplay" muted="muted" loop="loop"
+                               playsinline="playsinline" poster="/oulalab_auction/static/src/img/oulabag_poster.jpg">
+                            <source src="/oulalab_auction/static/src/video/oulabag.mp4" type="video/mp4"/>
+                        </video>
+                        <div class="olx-bagstrip-text">
+                            <h2>Llévalas en tu OulaBag</h2>
+                            <p>
+                                En compras desde <strong t-out="fmt_clp(offer['min_cart'])"/> en prendas,
+                                suma el bolso portatrajes OulaLab a
+                                <strong t-out="fmt_clp(offer['price'])"/>
+                                <s class="text-muted ms-1" t-if="offer['reference'] &gt; offer['price']"
+                                   t-out="fmt_clp(offer['reference'])"/>.
+                                Uno por compra.
+                            </p>
+                        </div>
+                    </section>
+
+                    <form method="get" action="/prendas" class="olx-filters">
+                        <select name="marca" class="form-select" aria-label="Marca">
+                            <option value="">Todas las marcas</option>
+                            <t t-foreach="marcas" t-as="m">
+                                <option t-att-value="m" t-att-selected="m == marca_sel" t-out="m"/>
+                            </t>
+                        </select>
+                        <select name="tipo" class="form-select" aria-label="Tipo de prenda">
+                            <option value="">Todos los tipos</option>
+                            <t t-foreach="tipos" t-as="tp">
+                                <option t-att-value="tp.id" t-att-selected="str(tp.id) == tipo_sel" t-out="tp.name"/>
+                            </t>
+                        </select>
+                        <select name="talla" class="form-select" aria-label="Talla">
+                            <option value="">Todas las tallas</option>
+                            <t t-foreach="tallas" t-as="tl">
+                                <option t-att-value="tl" t-att-selected="tl == talla_sel" t-out="tl"/>
+                            </t>
+                        </select>
+                        <select name="orden" class="form-select" aria-label="Ordenar">
+                            <option value="">Más recientes</option>
+                            <option value="precio_asc" t-att-selected="orden_sel == 'precio_asc'">Precio: menor a mayor</option>
+                            <option value="precio_desc" t-att-selected="orden_sel == 'precio_desc'">Precio: mayor a menor</option>
+                            <option value="descuento" t-att-selected="orden_sel == 'descuento'">Mayor descuento</option>
+                        </select>
+                        <button type="submit" class="btn olx-btn">Filtrar</button>
+                        <a href="/prendas" class="olx-link">Limpiar</a>
+                    </form>
+
+                    <p class="olx-count"><t t-out="len(items)"/> prendas disponibles</p>
+
+                    <div class="olx-empty" t-if="not items">
+                        <p>No hay prendas con esos filtros.</p>
+                        <a href="/prendas" class="btn olx-btn">Ver todas</a>
+                        <a href="/auctions" class="olx-link ms-3">Revisar las subastas activas</a>
+                    </div>
+
+                    <div class="olx-grid">
+                        <t t-foreach="items" t-as="item">
+                            <t t-set="imgs" t-value="item._get_image_urls()"/>
+                            <article class="olx-card">
+                                <a t-attf-href="/prendas/#{item.id}" class="olx-card-media">
+                                    <img t-att-src="imgs[0] if imgs else ''" loading="lazy"
+                                         t-att-alt="item.web_title or 'Prenda'"/>
+                                    <img t-if="len(imgs) &gt; 1" t-att-src="imgs[1]" loading="lazy"
+                                         class="olx-card-alt" alt=""/>
+                                </a>
+                                <div class="olx-card-body">
+                                    <p class="olx-card-brand" t-out="item.brand or ''"/>
+                                    <h3 class="olx-card-title">
+                                        <a t-attf-href="/prendas/#{item.id}" t-out="item.web_title or 'Prenda OulaLab'"/>
+                                    </h3>
+                                    <p class="olx-card-size" t-if="item.size">Talla <t t-out="item.size"/></p>
+                                    <t t-call="oulalab_auction.shop_price_tag"/>
+                                    <button type="button" class="btn olx-btn olx-btn--block olx-add"
+                                            t-att-data-item="item.id"
+                                            t-att-disabled="item.id in cart_ids or None">
+                                        <t t-if="item.id in cart_ids">En tu carrito</t>
+                                        <t t-else="">Agregar al carrito</t>
+                                    </button>
+                                </div>
+                            </article>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ===================== FICHA ===================== -->
+    <template id="shop_detail_template" name="OulaLab: ficha de prenda en venta">
+        <t t-call="website.layout">
+            <t t-set="imgs" t-value="item._get_image_urls()"/>
+            <div class="olx-shop">
+                <div class="container">
+                    <t t-call="oulalab_auction.liquidation_section_tabs"/>
+                    <a href="/prendas" class="olx-link olx-back">Volver al catálogo</a>
+
+                    <div class="olx-detail">
+                        <div class="olx-gallery">
+                            <div t-attf-id="olxGallery#{item.id}" class="carousel slide" data-bs-ride="false">
+                                <div class="carousel-inner">
+                                    <t t-foreach="imgs" t-as="img">
+                                        <div t-attf-class="carousel-item #{'active' if img_index == 0 else ''}">
+                                            <img t-att-src="img" class="d-block w-100"
+                                                 t-attf-alt="#{item.web_title or 'Prenda'} — foto #{img_index + 1}"/>
+                                        </div>
+                                    </t>
+                                </div>
+                                <t t-if="len(imgs) &gt; 1">
+                                    <button class="carousel-control-prev" type="button"
+                                            t-attf-data-bs-target="#olxGallery#{item.id}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"/>
+                                        <span class="visually-hidden">Foto anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button"
+                                            t-attf-data-bs-target="#olxGallery#{item.id}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"/>
+                                        <span class="visually-hidden">Foto siguiente</span>
+                                    </button>
+                                </t>
+                            </div>
+                            <div class="olx-thumbs" t-if="len(imgs) &gt; 1">
+                                <t t-foreach="imgs" t-as="img">
+                                    <button type="button" t-attf-data-bs-target="#olxGallery#{item.id}"
+                                            t-att-data-bs-slide-to="img_index"
+                                            t-attf-class="olx-thumb #{'active' if img_index == 0 else ''}"
+                                            t-attf-aria-label="Ver foto #{img_index + 1}">
+                                        <img t-att-src="img" alt="" loading="lazy"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+
+                        <div class="olx-info">
+                            <p class="olx-card-brand" t-out="item.brand or ''"/>
+                            <h1 class="olx-detail-title" t-out="item.web_title or 'Prenda OulaLab'"/>
+                            <p class="olx-detail-meta">
+                                <t t-if="item.size">Talla <strong t-out="item.size"/></t>
+                                <span class="olx-unique">Pieza única</span>
+                            </p>
+                            <t t-call="oulalab_auction.shop_price_tag"/>
+
+                            <t t-if="item.state == 'published'">
+                                <div class="olx-actions">
+                                    <button type="button" class="btn olx-btn olx-btn--block olx-add"
+                                            t-att-data-item="item.id" t-att-disabled="in_cart or None">
+                                        <t t-if="in_cart">En tu carrito</t>
+                                        <t t-else="">Agregar al carrito</t>
+                                    </button>
+                                    <button type="button" class="btn olx-btn olx-btn--ghost olx-btn--block olx-add"
+                                            t-att-data-item="item.id" data-go="/prendas/checkout">
+                                        Comprar ahora
+                                    </button>
+                                </div>
+                            </t>
+                            <p class="olx-gone" t-elif="item.state == 'reserved'">
+                                Alguien está pagando esta prenda. Si no completa el pago, vuelve a
+                                estar disponible en unos minutos.
+                            </p>
+                            <p class="olx-gone" t-else="">Esta prenda ya se vendió.</p>
+
+                            <p class="olx-bagnote" t-if="offer['available']">
+                                Desde <t t-out="fmt_clp(offer['min_cart'])"/> en prendas puedes sumar
+                                el OulaBag a <t t-out="fmt_clp(offer['price'])"/> al pagar.
+                            </p>
+
+                            <div class="olx-acc">
+                                <details open="open" t-if="item.web_description">
+                                    <summary>Descripción</summary>
+                                    <div t-out="item.web_description"/>
+                                </details>
+                                <details t-if="item.materials">
+                                    <summary>Materialidad</summary>
+                                    <p t-out="item.materials"/>
+                                </details>
+                                <details t-if="item.care_tips">
+                                    <summary>Cuidados</summary>
+                                    <p t-out="item.care_tips"/>
+                                </details>
+                                <details>
+                                    <summary>Entrega, estado y retracto</summary>
+                                    <p>
+                                        Despacho sin costo en Lo Barnechea, Las Condes y Vitacura, o retiro en
+                                        nuestro showroom (<t t-out="showroom"/>). Es una prenda usada que viene
+                                        del servicio de arriendo, revisada y sanitizada, y se vende en el estado
+                                        que muestran las fotos. Tienes 10 días desde que la recibes para
+                                        retractarte, devolviéndola en el mismo estado.
+                                    </p>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section class="olx-related" t-if="related">
+                        <h2 class="olx-h2">También te puede gustar</h2>
+                        <div class="olx-grid olx-grid--4">
+                            <t t-foreach="related" t-as="rel">
+                                <article class="olx-card">
+                                    <a t-attf-href="/prendas/#{rel.id}" class="olx-card-media">
+                                        <img t-att-src="rel._get_primary_image_url()" loading="lazy"
+                                             t-att-alt="rel.web_title or 'Prenda'"/>
+                                    </a>
+                                    <div class="olx-card-body">
+                                        <p class="olx-card-brand" t-out="rel.brand or ''"/>
+                                        <h3 class="olx-card-title">
+                                            <a t-attf-href="/prendas/#{rel.id}" t-out="rel.web_title or 'Prenda OulaLab'"/>
+                                        </h3>
+                                        <p class="olx-card-price" t-out="fmt_clp(rel.price)"/>
+                                    </div>
+                                </article>
+                            </t>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Barra fija en móvil con precio y botón -->
+                <div class="olx-mobilebar" t-if="item.state == 'published'">
+                    <span class="olx-mobilebar-price" t-out="fmt_clp(item.price)"/>
+                    <button type="button" class="btn olx-btn olx-add" t-att-data-item="item.id"
+                            data-go="/prendas/checkout">Comprar ahora</button>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
