@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- OulaBag: bolso portatrajes que se ofrece en el checkout (1 por compra).
+             Si el bolso ya existe como producto en la base (con su stock), elígelo en
+             Subastas > Configuración y archiva este. -->
+        <record id="product_oulabag" model="product.template">
+            <field name="name">OulaBag — bolso portatrajes OulaLab</field>
+            <field name="default_code">OULABAG</field>
+            <field name="type">consu</field>
+            <field name="is_storable" eval="True"/>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="list_price">33605</field>
+            <field name="description_sale">Bolso portatrajes burdeo OulaLab con colgadores, asas y etiqueta de cuero sintético. Máximo 1 por compra.</field>
+            <field name="image_1920" type="base64" file="oulalab_auction/static/src/img/oulabag_square.jpg"/>
+        </record>
+
+        <record id="product_shop_shipping" model="product.template">
+            <field name="name">Despacho prendas OulaLab</field>
+            <field name="default_code">OULA-DESPACHO</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+        </record>
+
+        <record id="seq_liquidation_shop_order" model="ir.sequence">
+            <field name="name">Pedidos de venta directa OulaLab</field>
+            <field name="code">liquidation.shop.order</field>
+            <field name="prefix">LIQVTA-%(year)s%(month)s-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="cron_release_shop_reservations" model="ir.cron">
+            <field name="name">OulaLab: liberar prendas reservadas sin pago</field>
+            <field name="model_id" ref="model_liquidation_shop_item"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_release_reservations()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+
+    <function model="website" name="_oulalab_ensure_liquidation_menus"/>
+</odoo>
