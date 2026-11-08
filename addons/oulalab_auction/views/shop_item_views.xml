@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="liquidation_shop_item_view_list" model="ir.ui.view">
+        <field name="name">liquidation.shop.item.list</field>
+        <field name="model">liquidation.shop.item</field>
+        <field name="arch" type="xml">
+            <list string="Ventas directas" editable="bottom" multi_edit="1"
+                  decoration-success="state == 'sold'"
+                  decoration-warning="state == 'reserved'"
+                  decoration-muted="state == 'withdrawn'">
+                <field name="name" readonly="1"/>
+                <field name="product_id" readonly="state != 'draft'"/>
+                <field name="brand" optional="show"/>
+                <field name="categ" optional="hide"/>
+                <field name="price"/>
+                <field name="retail_price" optional="show"/>
+                <field name="discount_pct" optional="hide"/>
+                <field name="published_date" optional="hide"/>
+                <field name="sale_order_id" optional="show" readonly="1"/>
+                <field name="buyer_id" optional="show" readonly="1"/>
+                <field name="state" widget="badge" readonly="1"
+                       decoration-info="state == 'published'"
+                       decoration-warning="state == 'reserved'"
+                       decoration-success="state == 'sold'"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="liquidation_shop_item_view_form" model="ir.ui.view">
+        <field name="name">liquidation.shop.item.form</field>
+        <field name="model">liquidation.shop.item</field>
+        <field name="arch" type="xml">
+            <form string="Venta directa">
+                <header>
+                    <button name="action_publish" type="object" string="Publicar" class="btn-primary"
+                            invisible="state not in ('draft','withdrawn')"/>
+                    <button name="action_withdraw" type="object" string="Retirar de la venta"
+                            invisible="state not in ('draft','published')"/>
+                    <button name="action_back_to_draft" type="object" string="Volver a borrador"
+                            invisible="state not in ('published','withdrawn')"/>
+                    <button name="action_move_to_auction" type="object" string="Pasar a subasta"
+                            invisible="state not in ('draft','published','withdrawn')"
+                            confirm="La prenda sale de la venta directa y se crea una subasta en borrador. ¿Continuar?"/>
+                    <button name="action_open_web" type="object" string="Ver en web" class="btn-secondary"
+                            invisible="state not in ('published','reserved','sold')"/>
+                    <button name="action_view_order" type="object" string="Ver pedido" class="btn-secondary"
+                            invisible="not sale_order_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,published,reserved,sold"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <field name="image_128" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Prenda">
+                            <field name="product_id" readonly="state not in ('draft','withdrawn')"/>
+                            <field name="default_code"/>
+                            <field name="barcode"/>
+                            <field name="reason"/>
+                            <field name="web_title"/>
+                        </group>
+                        <group string="Precio">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="price" readonly="state in ('reserved','sold')"/>
+                            <field name="retail_price"/>
+                            <field name="discount_pct"/>
+                        </group>
+                        <group string="Resultado">
+                            <field name="published_date"/>
+                            <field name="sale_order_id"/>
+                            <field name="buyer_id"/>
+                            <field name="reserved_until" invisible="state != 'reserved'"/>
+                            <field name="sold_date" invisible="state != 'sold'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Fotos" name="images">
+                            <group>
+                                <field name="image_url_1" widget="url"/>
+                                <field name="image_url_2" widget="url"/>
+                                <field name="image_url_3" widget="url"/>
+                                <field name="image_url_4" widget="url"/>
+                                <field name="image_url_5" widget="url"/>
+                                <field name="image_url_6" widget="url"/>
+                                <field name="image_url_7" widget="url"/>
+                                <field name="image_url_8" widget="url"/>
+                                <field name="image_url_9" widget="url"/>
+                                <field name="image_url_10" widget="url"/>
+                            </group>
+                        </page>
+                        <page string="Descripción pública" name="description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="liquidation_shop_item_view_search" model="ir.ui.view">
+        <field name="name">liquidation.shop.item.search</field>
+        <field name="model">liquidation.shop.item</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="default_code"/>
+                <field name="brand"/>
+                <field name="buyer_id"/>
+                <filter name="published" string="Publicadas" domain="[('state','=','published')]"/>
+                <filter name="reserved" string="Reservadas" domain="[('state','=','reserved')]"/>
+                <filter name="sold" string="Vendidas" domain="[('state','=','sold')]"/>
+                <filter name="draft" string="Borrador" domain="[('state','=','draft')]"/>
+                <group>
+                    <filter name="by_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="by_brand" string="Marca" context="{'group_by': 'brand'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="liquidation_shop_item_action" model="ir.actions.act_window">
+        <field name="name">Ventas directas</field>
+        <field name="res_model">liquidation.shop.item</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Publica una prenda a precio fijo</p>
+            <p>Crea una venta directa desde aquí, desde una subasta desierta («Pasar a venta
+               directa») o desde la lista de Productos (Acción → Crear venta directa).
+               Una prenda no puede estar en subasta y en venta a la vez.</p>
+        </field>
+    </record>
+
+    <!-- Acciones masivas -->
+    <record id="action_bulk_publish_shop" model="ir.actions.server">
+        <field name="name">Publicar seleccionadas</field>
+        <field name="model_id" ref="model_liquidation_shop_item"/>
+        <field name="binding_model_id" ref="model_liquidation_shop_item"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_publish()</field>
+    </record>
+    <record id="action_bulk_withdraw_shop" model="ir.actions.server">
+        <field name="name">Retirar de la venta (seleccionadas)</field>
+        <field name="model_id" ref="model_liquidation_shop_item"/>
+        <field name="binding_model_id" ref="model_liquidation_shop_item"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.action_withdraw()</field>
+    </record>
+    <record id="action_bulk_create_shop_from_products" model="ir.actions.server">
+        <field name="name">Crear venta directa</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = env["liquidation.shop.item"].action_create_from_products(records)</field>
+    </record>
+
+    <!-- Subasta desierta o cancelada: pasar a venta directa -->
+    <record id="liquidation_auction_form_shop_button" model="ir.ui.view">
+        <field name="name">liquidation.auction.form.shop.button</field>
+        <field name="model">liquidation.auction</field>
+        <field name="inherit_id" ref="oulalab_auction.liquidation_auction_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_move_to_shop" type="object" string="Pasar a venta directa"
+                        invisible="state not in ('unsold','cancelled')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Producto: botón de ventas directas y canal -->
+    <record id="product_template_form_shop" model="ir.ui.view">
+        <field name="name">product.template.form.shop</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="oulalab_auction.product_template_form_auction"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button type="object" name="action_open_shop_items" class="oe_stat_button"
+                        icon="fa-shopping-bag" invisible="shop_item_count == 0">
+                    <field name="shop_item_count" widget="statinfo" string="Venta directa"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+</odoo>

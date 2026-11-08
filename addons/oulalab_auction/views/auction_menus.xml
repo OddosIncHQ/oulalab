@@ -4,8 +4,13 @@
               web_icon="oulalab_auction,static/description/icon.png"/>
     <menuitem id="menu_auction_auctions" name="Subastas"
               parent="menu_auction_root" action="liquidation_auction_action" sequence="10"/>
+    <menuitem id="menu_shop_items" name="Ventas directas"
+              parent="menu_auction_root" action="liquidation_shop_item_action" sequence="15"/>
     <menuitem id="menu_auction_bids" name="Ofertas"
               parent="menu_auction_root" action="auction_bid_action" sequence="20"/>
     <menuitem id="menu_auction_contacts" name="Contactos"
               parent="menu_auction_root" action="action_auction_contacts" sequence="30"/>
+    <menuitem id="menu_liquidation_settings" name="Configuración"
+              parent="menu_auction_root" action="action_oulalab_liquidation_settings"
+              sequence="90" groups="sales_team.group_sale_manager"/>
 </odoo>

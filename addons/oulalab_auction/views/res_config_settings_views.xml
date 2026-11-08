@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_oulalab" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.oulalab.liquidation</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="95"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Subastas y ventas" string="Subastas y ventas" name="oulalab_auction">
+                    <block title="OulaBag en el checkout" name="oulabag_block">
+                        <setting string="Producto" help="Vacío = el OulaBag que crea el módulo.">
+                            <field name="oulabag_product_id"/>
+                        </setting>
+                        <setting string="Precio del OulaBag"
+                                 help="Precio con IVA en el checkout. No puede ser menor que el precio mínimo.">
+                            <div class="row"><label class="col-6" for="oulabag_price"/><field name="oulabag_price" class="col-6"/></div>
+                            <div class="row"><label class="col-6" for="oulabag_reference_price"/><field name="oulabag_reference_price" class="col-6"/></div>
+                            <div class="row"><label class="col-6" for="oulabag_floor_price"/><field name="oulabag_floor_price" class="col-6"/></div>
+                        </setting>
+                        <setting string="Compra mínima"
+                                 help="Total en prendas (IVA incl.) desde el cual se ofrece. Máximo 1 por compra.">
+                            <field name="oulabag_min_cart"/>
+                        </setting>
+                    </block>
+                    <block title="Venta directa" name="shop_block">
+                        <setting string="Reserva para pagar"
+                                 help="Minutos que una prenda queda reservada mientras la clienta paga.">
+                            <div class="row"><label class="col-6" for="shop_reservation_minutes"/><field name="shop_reservation_minutes" class="col-6"/></div>
+                            <div class="row"><label class="col-6" for="shop_pending_grace_minutes"/><field name="shop_pending_grace_minutes" class="col-6"/></div>
+                        </setting>
+                        <setting string="Despacho" help="Costo con IVA. 0 = gratis en las comunas habilitadas.">
+                            <field name="shop_shipping_fee"/>
+                        </setting>
+                        <setting string="Ubicación de clientes"
+                                 help="Destino de las entregas de subastas y ventas directas. Vacío = el de la regla de entrega del almacén.">
+                            <field name="liquidation_customer_location_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_oulalab_liquidation_settings" model="ir.actions.act_window">
+        <field name="name">Configuración</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module': 'oulalab_auction', 'bin_size': False}</field>
+    </record>
+</odoo>
