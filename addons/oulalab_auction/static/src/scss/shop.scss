@@ -1,0 +1,332 @@
+// OulaLab — Prendas en venta y selector de secciones.
+// Paleta tomada del logo (ciruela) y del OulaBag (burdeo). El elemento propio
+// es la etiqueta colgante del precio, igual a la etiqueta de cuero del bolso.
+// La fuente Bodoni Moda se carga con <link> en la plantilla del selector de secciones.
+
+$olx-plum: #31112c;
+$olx-wine: #7a1f3d;
+$olx-wine-dark: #5e1530;
+$olx-paper: #fbf9f8;
+$olx-blush: #f4e8ec;
+$olx-line: #e6dde1;
+$olx-muted: #6f6168;
+$olx-pink: #d6336c;
+$olx-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
+
+// ---------- Selector de secciones (también en /auctions) ----------
+.olx-sections {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+    border-bottom: 1px solid $olx-line;
+}
+.olx-sections-track { display: flex; gap: 1.75rem; }
+.olx-section {
+    padding: .75rem 0;
+    color: $olx-muted;
+    text-decoration: none;
+    font-size: 1.05rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    &:hover { color: $olx-plum; }
+    &.is-active { color: $olx-plum; border-bottom-color: $olx-wine; font-weight: 600; }
+}
+.olx-cart-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: $olx-plum;
+    text-decoration: none;
+    font-size: .95rem;
+}
+.olx-cart-count {
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 .4rem;
+    border-radius: .75rem;
+    background: $olx-wine;
+    color: #fff;
+    font-size: .8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    &[data-count="0"] { background: $olx-line; color: $olx-muted; }
+    &.is-bump { animation: olx-bump .35s ease; }
+}
+@keyframes olx-bump { 50% { transform: scale(1.25); } }
+
+// ---------- Base ----------
+.olx-shop {
+    background: $olx-paper;
+    color: $olx-plum;
+    padding-bottom: 4rem;
+    a { color: inherit; }
+}
+.olx-title {
+    font-family: $olx-display;
+    font-weight: 500;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.05;
+    margin: 0 0 .75rem;
+}
+.olx-h2 { font-family: $olx-display; font-weight: 500; font-size: 1.5rem; margin: 0 0 1rem; }
+.olx-lead { max-width: 38rem; color: $olx-muted; font-size: 1.05rem; line-height: 1.6; }
+.olx-head { margin-bottom: 2rem; }
+.olx-link {
+    background: none; border: 0; padding: 0;
+    color: $olx-wine; text-decoration: underline; text-underline-offset: 3px;
+    cursor: pointer;
+}
+.olx-back { display: inline-block; margin-bottom: 1.25rem; }
+.olx-hint { font-size: .85rem; color: $olx-muted; margin: .75rem 0 0; }
+.olx-count { color: $olx-muted; font-size: .9rem; margin: 0 0 1rem; }
+
+.olx-btn {
+    background: $olx-wine;
+    color: #fff;
+    border: 1px solid $olx-wine;
+    border-radius: 2rem;
+    padding: .65rem 1.4rem;
+    font-weight: 600;
+    &:hover, &:focus-visible { background: $olx-wine-dark; border-color: $olx-wine-dark; color: #fff; }
+    &:disabled { background: $olx-blush; border-color: $olx-blush; color: $olx-muted; opacity: 1; }
+    &:focus-visible { outline: 3px solid rgba($olx-wine, .35); outline-offset: 2px; }
+}
+.olx-btn--ghost {
+    background: transparent; color: $olx-wine;
+    &:hover { background: $olx-blush; color: $olx-wine-dark; }
+}
+.olx-btn--block { display: block; width: 100%; }
+
+// ---------- Banda del OulaBag ----------
+.olx-bagstrip {
+    display: grid;
+    grid-template-columns: minmax(0, 260px) 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    background: $olx-blush;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    h2 { font-family: $olx-display; font-weight: 500; font-size: 1.6rem; margin: 0 0 .4rem; }
+    p { margin: 0; max-width: 34rem; line-height: 1.55; }
+}
+.olx-bagstrip-media { width: 100%; height: 100%; max-height: 180px; object-fit: cover; display: block; }
+.olx-bagstrip-text { padding: 1.25rem 1.5rem 1.25rem 0; }
+@media (max-width: 575.98px) {
+    .olx-bagstrip { grid-template-columns: 1fr; }
+    .olx-bagstrip-text { padding: 0 1.25rem 1.25rem; }
+}
+
+// ---------- Filtros ----------
+.olx-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    .form-select { width: auto; min-width: 10rem; border-color: $olx-line; background-color: #fff; }
+}
+
+// ---------- Grilla y tarjetas ----------
+.olx-grid {
+    display: grid;
+    gap: 2rem 1.25rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media (min-width: 768px) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (min-width: 1200px) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.olx-card { display: flex; flex-direction: column; }
+.olx-card-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .olx-card-alt { opacity: 0; transition: opacity .25s ease; }
+    &:hover .olx-card-alt, &:focus-visible .olx-card-alt { opacity: 1; }
+}
+.olx-card-body { display: flex; flex-direction: column; flex: 1; padding-top: .8rem; }
+.olx-card-brand { color: $olx-muted; font-size: .85rem; margin: 0 0 .15rem; }
+.olx-card-title {
+    font-size: 1rem; font-weight: 600; line-height: 1.35; margin: 0 0 .25rem;
+    a { text-decoration: none; }
+}
+.olx-card-size { font-size: .85rem; color: $olx-muted; margin: 0 0 .6rem; }
+.olx-card-price { font-family: $olx-display; font-size: 1.2rem; margin: 0; }
+.olx-card .olx-add { margin-top: auto; }
+
+// ---------- Etiqueta colgante de precio ----------
+.olx-tag {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .2rem .6rem;
+    align-self: flex-start;
+    padding: .45rem .9rem .45rem 1.9rem;
+    margin: 0 0 .9rem;
+    border: 1px solid rgba($olx-wine, .45);
+    border-radius: 4px 12px 12px 4px;
+    background: #fff;
+}
+.olx-tag-hole {
+    position: absolute;
+    left: .65rem;
+    top: 50%;
+    width: .55rem;
+    height: .55rem;
+    margin-top: -.275rem;
+    border-radius: 50%;
+    border: 1px solid rgba($olx-wine, .55);
+    background: $olx-paper;
+}
+.olx-tag-price { font-family: $olx-display; font-weight: 600; font-size: 1.3rem; color: $olx-wine-dark; }
+.olx-tag-ref { font-size: .85rem; color: $olx-muted; }
+.olx-tag-off { color: $olx-pink; font-weight: 600; margin-left: .3rem; }
+
+// ---------- Ficha ----------
+.olx-detail {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1fr;
+    @media (min-width: 992px) { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
+}
+.olx-gallery {
+    .carousel-item img { aspect-ratio: 3 / 4; object-fit: cover; border-radius: 12px; background: #fff; }
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+        background-color: rgba($olx-plum, .45); border-radius: 50%; padding: 1rem; background-size: 50%;
+    }
+}
+.olx-thumbs { display: flex; gap: .5rem; margin-top: .75rem; overflow-x: auto; }
+.olx-thumb {
+    flex: 0 0 64px; padding: 0; border: 2px solid transparent; border-radius: 6px; background: none;
+    img { width: 60px; height: 80px; object-fit: cover; border-radius: 4px; display: block; }
+    &.active { border-color: $olx-wine; }
+}
+.olx-info { align-self: start; @media (min-width: 992px) { position: sticky; top: 6rem; } }
+.olx-detail-title {
+    font-family: $olx-display; font-weight: 500;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem); line-height: 1.1; margin: 0 0 .6rem;
+}
+.olx-detail-meta { display: flex; gap: 1rem; align-items: center; color: $olx-muted; margin-bottom: 1rem; }
+.olx-unique {
+    font-size: .8rem; color: $olx-wine; border: 1px solid rgba($olx-wine, .35);
+    border-radius: 1rem; padding: .1rem .6rem;
+}
+.olx-actions { display: grid; gap: .6rem; margin: .5rem 0 1rem; }
+.olx-gone { background: $olx-blush; border-radius: 10px; padding: .9rem 1rem; }
+.olx-bagnote { font-size: .9rem; color: $olx-muted; }
+.olx-acc {
+    border-top: 1px solid $olx-line; margin-top: 1.5rem;
+    details { border-bottom: 1px solid $olx-line; padding: .9rem 0; }
+    summary { cursor: pointer; font-weight: 600; }
+    details p, details div { margin: .6rem 0 0; color: $olx-muted; line-height: 1.6; }
+}
+.olx-related { margin-top: 4rem; }
+
+.olx-mobilebar {
+    display: none;
+    @media (max-width: 767.98px) {
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+        position: sticky; bottom: 0; z-index: 10;
+        padding: .75rem 1rem; background: #fff; border-top: 1px solid $olx-line;
+    }
+}
+.olx-mobilebar-price { font-family: $olx-display; font-size: 1.3rem; }
+
+// ---------- Carrito y checkout ----------
+.olx-empty {
+    background: #fff; border: 1px dashed $olx-line; border-radius: 12px;
+    padding: 2.5rem; text-align: center; margin-bottom: 2rem;
+}
+.olx-cart, .olx-checkout {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: 1fr;
+    @media (min-width: 992px) { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+}
+.olx-lines { list-style: none; padding: 0; margin: 0; }
+.olx-line {
+    display: grid; grid-template-columns: 96px 1fr auto; gap: 1rem; align-items: start;
+    padding: 1.25rem 0; border-bottom: 1px solid $olx-line;
+}
+.olx-line-img img { width: 96px; height: 128px; object-fit: cover; border-radius: 8px; }
+.olx-line-title { font-weight: 600; text-decoration: none; }
+.olx-line-meta { color: $olx-muted; font-size: .85rem; margin: .2rem 0 .5rem; }
+.olx-line-price { font-family: $olx-display; font-size: 1.2rem; margin: 0; }
+
+.olx-summary {
+    align-self: start;
+    background: #fff;
+    border: 1px solid $olx-line;
+    border-radius: 14px;
+    padding: 1.5rem;
+    @media (min-width: 992px) { position: sticky; top: 6rem; }
+}
+.olx-totals {
+    display: grid; grid-template-columns: 1fr auto; gap: .45rem 1rem; margin: 0 0 1rem;
+    dt { font-weight: 400; color: $olx-muted; }
+    dd { margin: 0; text-align: right; }
+    [hidden] { display: none; }
+}
+.olx-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 1px solid $olx-line; padding-top: 1rem; margin-bottom: 1.25rem;
+    strong { font-family: $olx-display; font-size: 1.6rem; color: $olx-wine-dark; }
+}
+.olx-mini {
+    list-style: none; padding: 0; margin: 0 0 1.25rem;
+    li { display: grid; grid-template-columns: 48px 1fr auto; gap: .75rem; align-items: center; padding: .4rem 0; }
+    img { width: 48px; height: 64px; object-fit: cover; border-radius: 6px; }
+    small { display: block; color: $olx-muted; }
+}
+.olx-mini-price { font-weight: 600; }
+
+.olx-fieldset {
+    background: #fff; border: 1px solid $olx-line; border-radius: 14px;
+    padding: 1.5rem; margin-bottom: 1.5rem;
+    legend { float: none; width: auto; font-family: $olx-display; font-size: 1.4rem; margin-bottom: .75rem; }
+}
+.olx-choice { display: grid; gap: .75rem; margin-bottom: 1rem; @media (min-width: 768px) { grid-template-columns: 1fr 1fr; } }
+.olx-choice-opt {
+    display: flex; gap: .75rem; align-items: flex-start;
+    border: 1px solid $olx-line; border-radius: 10px; padding: .9rem 1rem; cursor: pointer;
+    small { display: block; color: $olx-muted; margin-top: .15rem; }
+    input { margin-top: .3rem; accent-color: $olx-wine; }
+    &:has(input:checked) { border-color: $olx-wine; background: $olx-blush; }
+}
+.olx-check {
+    display: flex; gap: .6rem; align-items: flex-start; margin: 0 0 1rem; cursor: pointer;
+    input { margin-top: .25rem; accent-color: $olx-wine; }
+}
+
+// ---------- Bloque OulaBag ----------
+.olx-bag {
+    display: grid; grid-template-columns: 96px 1fr; gap: 1rem;
+    background: $olx-blush; border-radius: 12px; padding: 1rem; margin: 1.25rem 0;
+    &.is-locked .olx-bag-img { filter: saturate(.6); }
+}
+.olx-bag-img { width: 96px; height: 128px; object-fit: cover; border-radius: 8px; }
+.olx-bag-title { font-family: $olx-display; font-size: 1.25rem; margin: 0 0 .25rem; }
+.olx-bag-copy { font-size: .85rem; color: $olx-muted; margin: 0 0 .4rem; }
+.olx-bag-price {
+    margin: 0 0 .5rem;
+    strong { font-family: $olx-display; font-size: 1.2rem; color: $olx-wine-dark; }
+    s { color: $olx-muted; margin-left: .4rem; font-size: .85rem; }
+}
+.olx-bag .olx-check { margin: 0; font-size: .9rem; }
+.olx-bag-ok, .olx-bag-lock { font-size: .85rem; margin: .4rem 0 0; }
+.olx-progress {
+    height: 6px; border-radius: 3px; background: rgba($olx-wine, .15); overflow: hidden;
+    span { display: block; height: 100%; background: $olx-wine; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .olx-cart-count.is-bump { animation: none; }
+    .olx-card-media .olx-card-alt { transition: none; }
+}
