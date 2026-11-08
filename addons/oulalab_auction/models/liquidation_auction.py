@@ -211,10 +211,54 @@ class LiquidationAuction(models.Model):
 
     # Computes
     # ==================================================================
-    @api.depends("product_id")
+    @api.depends("product_id", "product_id.name", "product_id.default_code")
     def _compute_name(self):
+        # El código de la prenda va en el nombre: hay prendas que solo se diferencian
+        # por la talla al final del nombre (SML / MDM) y se confundían en las listas.
         for rec in self:
-            rec.name = _("Subasta: %s") % (rec.product_id.name or _("(sin prenda)"))
+            prod = rec.product_id
+            if not prod:
+                rec.name = _("Subasta: (sin prenda)")
+            elif prod.default_code:
+                rec.name = _("Subasta [%s]: %s") % (prod.default_code, prod.name)
+            else:
+                rec.name = _("Subasta: %s") % prod.name
+
+    @api.constrains("product_id", "state", "active")
+    def _check_not_in_shop(self):
+        """Subasta XOR venta directa: una prenda es una sola unidad."""
+        from .shop_item import AUCTION_ACTIVE_STATES, SHOP_ACTIVE_STATES
+        Shop = self.env["liquidation.shop.item"].sudo()
+        for rec in self.filtered(lambda r: r.active and r.state in AUCTION_ACTIVE_STATES):
+            item = Shop.search([("product_id", "=", rec.product_id.id),
+                                ("state", "in", SHOP_ACTIVE_STATES)], limit=1)
+            if item:
+                raise ValidationError(_(
+                    "La prenda %(code)s está en venta directa («%(item)s», %(state)s). "
+                    "Una prenda no puede estar en subasta y en venta directa a la vez: "
+                    "retira primero la venta directa."
+                ) % {"code": rec.product_id.display_name, "item": item.name,
+                     "state": dict(item._fields["state"].selection).get(item.state)})
+
+    def action_move_to_shop(self):
+        """Subasta desierta o cancelada → venta directa en borrador con los mismos datos."""
+        self.ensure_one()
+        if self.state not in ("unsold", "cancelled"):
+            raise UserError(_("Solo las subastas desiertas o canceladas pasan a venta directa."))
+        vals = {
+            "product_id": self.product_id.id,
+            "price": self.reserve_price,
+            "retail_price": self.retail_price,
+            "description": self.description,
+            "reason": self.reason,
+        }
+        vals.update({f: self[f] for f in self._image_url_fields()})
+        item = self.env["liquidation.shop.item"].create(vals)
+        self.message_post(body=_("Enviada a venta directa: %s (borrador).") % item.name)
+        return {
+            "type": "ir.actions.act_window", "res_model": "liquidation.shop.item",
+            "res_id": item.id, "view_mode": "form", "target": "current",
+        }
 
     winning_amount_untaxed = fields.Monetary(
         string="Oferta sin impuesto",
@@ -658,6 +702,7 @@ class LiquidationAuction(models.Model):
             "origin": self.name,
             # Vínculo permanente: sobrevive aunque la subasta suelte el pedido.
             "auction_origin_id": self.id,
+            "liquidation_channel": "auction",
             "warehouse_id": warehouse.id if warehouse else False,
             # Pago en línea obligatorio por el total: habilita el botón de pago.
             "require_payment": True,

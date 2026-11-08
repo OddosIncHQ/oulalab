@@ -2,8 +2,11 @@ from . import res_partner
 from . import product_template
 from . import product_product
 from . import sale_order
+from . import sale_order_line
 from . import liquidation_auction
+from . import shop_item
 from . import auction_bid
 from . import auction_guest_otp
 from . import website
 from . import website_home_hook
+from . import res_config_settings
