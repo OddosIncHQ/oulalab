@@ -1,6 +1,6 @@
 {
     "name": "OulaLab Auction (Liquidación de prendas)",
-    "version": "19.0.1.0.59",
+    "version": "19.0.1.0.60",
     "category": "Website/Website",
     "summary": "Liquidación de prendas retiradas del alquiler: subastas (socios primero) y venta directa con carrito y checkout.",
     "author": "OulaLab",
