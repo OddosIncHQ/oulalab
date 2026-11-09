@@ -111,10 +111,14 @@ class SaleOrder(models.Model):
             items = order.sudo().shop_item_ids
             items.filtered(lambda i: i.state == "reserved")._release(
                 _("Pedido %s cancelado: la prenda vuelve a estar a la venta.") % order.name)
+            # Venta anulada después de confirmada: la prenda vuelve a BORRADOR (no se
+            # republica sola: primero hay que recibirla de vuelta y revisarla).
             for item in items.filtered(lambda i: i.state == "sold"):
+                item.write({"state": "draft", "sale_order_id": False, "buyer_id": False,
+                            "reserved_until": False, "sold_date": False})
                 item.message_post(body=_(
-                    "Se canceló el pedido %s de esta prenda vendida. Si vuelve a stock, "
-                    "retírala y publícala de nuevo.") % order.name)
+                    "Venta anulada: se canceló el pedido %s. La prenda vuelve a borrador; "
+                    "publícala de nuevo cuando esté de vuelta y revisada.") % order.name)
         return res
 
     def _liquidation_customer_location(self):

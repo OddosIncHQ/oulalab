@@ -97,6 +97,7 @@ class LiquidationShopItem(models.Model):
     )
     published_date = fields.Datetime(string="Publicada el", readonly=True, copy=False)
     sale_order_id = fields.Many2one("sale.order", string="Pedido", readonly=True, copy=False)
+    order_state = fields.Selection(related="sale_order_id.state", string="Estado del pedido")
     buyer_id = fields.Many2one("res.partner", string="Compradora", readonly=True, copy=False)
     reserved_until = fields.Datetime(string="Reservada hasta", readonly=True, copy=False)
     sold_date = fields.Datetime(string="Vendida el", readonly=True, copy=False)
@@ -230,8 +231,15 @@ class LiquidationShopItem(models.Model):
                 ) % rec.product_id.display_name)
         self.write({"state": "published", "published_date": fields.Datetime.now()})
 
+    def _order_is_void(self):
+        """El pedido de la prenda ya no cuenta: no existe o está cancelado."""
+        self.ensure_one()
+        return not self.sale_order_id or self.sale_order_id.state == "cancel"
+
     def action_withdraw(self):
         for rec in self:
+            if rec.state in ("reserved", "sold") and rec._order_is_void():
+                continue  # pedido anulado: se puede retirar
             if rec.state == "reserved":
                 raise UserError(_(
                     "%s está reservada con el pedido %s. Cancela ese pedido primero."
@@ -241,11 +249,22 @@ class LiquidationShopItem(models.Model):
         self.write({"state": "withdrawn"})
 
     def action_back_to_draft(self):
+        """Vuelve a borrador. Una prenda reservada o vendida solo puede volver si su
+        pedido está cancelado (venta anulada); si el pedido sigue vigente, no."""
         for rec in self:
-            if rec.state not in ("published", "withdrawn"):
-                raise UserError(_("Solo vuelven a borrador prendas publicadas o retiradas."))
-        self.write({"state": "draft", "sale_order_id": False, "buyer_id": False,
-                    "reserved_until": False})
+            if rec.state == "draft":
+                continue
+            if rec.state in ("reserved", "sold") and not rec._order_is_void():
+                raise UserError(_(
+                    "%(item)s tiene el pedido %(order)s vigente. Cancela primero ese pedido "
+                    "(Ventas → pedido → Cancelar) y luego vuelve la prenda a borrador."
+                ) % {"item": rec.name, "order": rec.sale_order_id.name})
+        for rec in self.filtered(lambda r: r.state != "draft"):
+            old = rec.sale_order_id.name
+            rec.write({"state": "draft", "sale_order_id": False, "buyer_id": False,
+                       "reserved_until": False, "sold_date": False})
+            if old:
+                rec.message_post(body=_("Vuelve a borrador (pedido %s anulado).") % old)
 
     def action_move_to_auction(self):
         """Saca la prenda de la venta directa y crea una subasta en borrador con sus datos."""
