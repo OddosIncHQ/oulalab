@@ -35,10 +35,11 @@
                 <header>
                     <button name="action_publish" type="object" string="Publicar" class="btn-primary"
                             invisible="state not in ('draft','withdrawn')"/>
+                    <field name="order_state" invisible="1"/>
                     <button name="action_withdraw" type="object" string="Retirar de la venta"
-                            invisible="state not in ('draft','published')"/>
+                            invisible="state not in ('draft','published') and not (state in ('reserved','sold') and order_state in (False, 'cancel'))"/>
                     <button name="action_back_to_draft" type="object" string="Volver a borrador"
-                            invisible="state not in ('published','withdrawn')"/>
+                            invisible="state == 'draft' or (state in ('reserved','sold') and order_state not in (False, 'cancel'))"/>
                     <button name="action_move_to_auction" type="object" string="Pasar a subasta"
                             invisible="state not in ('draft','published','withdrawn')"
                             confirm="La prenda sale de la venta directa y se crea una subasta en borrador. ¿Continuar?"/>
@@ -71,6 +72,7 @@
                         <group string="Resultado">
                             <field name="published_date"/>
                             <field name="sale_order_id"/>
+                            <field name="order_state" invisible="not sale_order_id"/>
                             <field name="buyer_id"/>
                             <field name="reserved_until" invisible="state != 'reserved'"/>
                             <field name="sold_date" invisible="state != 'sold'"/>
