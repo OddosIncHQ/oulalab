@@ -39,6 +39,17 @@ def fmt_clp(amount):
     return "$" + "{:,.0f}".format(amount or 0).replace(",", ".")
 
 
+def garment_type_of(product):
+    """Tipo de prenda para los filtros web: la clasificación de Studio
+    (Abrigo, Falda, Blazer…). La categoría de producto no sirve: las prendas en
+    liquidación están todas en la categoría de subastas y ventas."""
+    if product and "x_studio_clasificacion_de_la_prenda" in product._fields:
+        value = product.x_studio_clasificacion_de_la_prenda
+        if value:
+            return value.display_name if hasattr(value, "display_name") else str(value)
+    return False
+
+
 class LiquidationShopItem(models.Model):
     _name = "liquidation.shop.item"
     _description = "Prenda en venta directa"
