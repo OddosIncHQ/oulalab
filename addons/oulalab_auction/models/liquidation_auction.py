@@ -241,23 +241,60 @@ class LiquidationAuction(models.Model):
                      "state": dict(item._fields["state"].selection).get(item.state)})
 
     def action_move_to_shop(self):
-        """Subasta desierta o cancelada → venta directa en borrador con los mismos datos."""
-        self.ensure_one()
-        if self.state not in ("unsold", "cancelled"):
-            raise UserError(_("Solo las subastas desiertas o canceladas pasan a venta directa."))
-        vals = {
-            "product_id": self.product_id.id,
-            "price": self.reserve_price,
-            "retail_price": self.retail_price,
-            "description": self.description,
-            "reason": self.reason,
-        }
-        vals.update({f: self[f] for f in self._image_url_fields()})
-        item = self.env["liquidation.shop.item"].create(vals)
-        self.message_post(body=_("Enviada a venta directa: %s (borrador).") % item.name)
+        """Subastas desiertas o canceladas → ventas directas en borrador.
+
+        Acepta una o varias subastas (acción masiva). Las que no se pueden pasar
+        se omiten y se informan; las demás se crean igual.
+        """
+        Shop = self.env["liquidation.shop.item"]
+        states = dict(self._fields["state"].selection)
+        created = Shop.browse()
+        skipped = []
+        for auction in self:
+            if auction.state not in ("unsold", "cancelled"):
+                skipped.append(_("%(name)s: está «%(state)s»") % {
+                    "name": auction.name, "state": states.get(auction.state)})
+                continue
+            vals = {
+                "product_id": auction.product_id.id,
+                "price": auction.reserve_price,
+                "retail_price": auction.retail_price,
+                "description": auction.description,
+                "reason": auction.reason,
+            }
+            vals.update({f: auction[f] for f in auction._image_url_fields()})
+            try:
+                with self.env.cr.savepoint():
+                    item = Shop.create(vals)
+            except (UserError, ValidationError) as e:
+                skipped.append("%s: %s" % (auction.name, e.args[0] if e.args else e))
+                continue
+            auction.message_post(body=_("Enviada a venta directa: %s (borrador).") % item.name)
+            created |= item
+
+        if len(self) == 1:
+            if not created:
+                raise UserError(skipped[0])
+            return {
+                "type": "ir.actions.act_window", "res_model": "liquidation.shop.item",
+                "res_id": created.id, "view_mode": "form", "target": "current",
+            }
+
+        message = _("%d ventas directas creadas en borrador.") % len(created)
+        if skipped:
+            message += "\n" + _("Omitidas (%d):") % len(skipped) + "\n" + "\n".join(skipped)
+        next_action = {
+            "type": "ir.actions.act_window", "name": _("Ventas directas creadas"),
+            "res_model": "liquidation.shop.item", "view_mode": "list,form",
+            "domain": [("id", "in", created.ids)],
+        } if created else {"type": "ir.actions.act_window_close"}
         return {
-            "type": "ir.actions.act_window", "res_model": "liquidation.shop.item",
-            "res_id": item.id, "view_mode": "form", "target": "current",
+            "type": "ir.actions.client", "tag": "display_notification",
+            "params": {
+                "title": _("Pasar a venta directa"), "message": message,
+                "type": "warning" if skipped else "success", "sticky": bool(skipped),
+                "next": next_action,
+            },
         }
 
     winning_amount_untaxed = fields.Monetary(
