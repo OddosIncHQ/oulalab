@@ -6,7 +6,12 @@ import pytz
 from odoo import fields, http
 from odoo.http import request
 
+from collections import namedtuple
+
 from ..models.res_partner import validate_rut
+from ..models.shop_item import garment_type_of
+
+Tipo = namedtuple("Tipo", "id name")  # la plantilla lee tp.id y tp.name
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SESSION_KEY = "auction_guest_partner_id"
@@ -77,19 +82,19 @@ class AuctionPortal(http.Controller):
         )
         # Opciones de los filtros: solo valores que existen en subastas activas
         marcas = sorted({a.brand for a in base if a.brand})
-        tipos = {a.categ.id: a.categ for a in base if a.categ}
+        tipos = sorted({garment_type_of(a.product_id) for a in base} - {False})
         ocasiones = {}
         for a in base:
             for o in a.occasion_ids:
                 ocasiones[o.id] = o
-        tipos = sorted(tipos.values(), key=lambda r: r.complete_name or r.name)
+        tipos = [Tipo(t, t) for t in tipos]
         ocasiones = sorted(ocasiones.values(), key=lambda r: r.display_name or "")
 
         auctions = base
         if marca:
             auctions = auctions.filtered(lambda a: a.brand == marca)
-        if tipo and tipo.isdigit():
-            auctions = auctions.filtered(lambda a: a.categ.id == int(tipo))
+        if tipo:
+            auctions = auctions.filtered(lambda a: garment_type_of(a.product_id) == tipo)
         if ocasion and ocasion.isdigit():
             auctions = auctions.filtered(lambda a: int(ocasion) in a.occasion_ids.ids)
 
