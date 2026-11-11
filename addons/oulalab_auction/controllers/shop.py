@@ -5,11 +5,14 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 from ..models.res_partner import validate_rut
-from ..models.shop_item import fmt_clp, shop_param
+from collections import namedtuple
+
+from ..models.shop_item import fmt_clp, garment_type_of, shop_param
 from .auction_portal import EMAIL_RE, AuctionPortal
 
 CART_KEY = "oulalab_shop_cart"
 SHOWROOM = "Av. La Dehesa 222 of. 817, Lo Barnechea"
+Tipo = namedtuple("Tipo", "id name")  # la plantilla lee tp.id y tp.name
 
 
 class OulaLabShop(http.Controller):
@@ -47,14 +50,14 @@ class OulaLabShop(http.Controller):
         Item = request.env["liquidation.shop.item"].sudo()
         base = Item.search([("state", "=", "published")])
         marcas = sorted({i.brand for i in base if i.brand})
-        tipos = sorted({i.categ for i in base if i.categ}, key=lambda c: c.name or "")
+        tipos = [Tipo(t, t) for t in sorted({garment_type_of(i.product_id) for i in base} - {False})]
         tallas = sorted({i.size for i in base if i.size})
 
         items = base
         if marca:
             items = items.filtered(lambda i: i.brand == marca)
-        if tipo and tipo.isdigit():
-            items = items.filtered(lambda i: i.categ.id == int(tipo))
+        if tipo:
+            items = items.filtered(lambda i: garment_type_of(i.product_id) == tipo)
         if talla:
             items = items.filtered(lambda i: i.size == talla)
         if orden == "precio_asc":
@@ -77,10 +80,12 @@ class OulaLabShop(http.Controller):
         item = request.env["liquidation.shop.item"].sudo().browse(item_id)
         if not item.exists() or item.state not in ("published", "reserved", "sold"):
             return request.not_found()
+        own_type = garment_type_of(item.product_id)
         related = request.env["liquidation.shop.item"].sudo().search([
-            ("state", "=", "published"), ("id", "!=", item.id),
-            "|", ("brand", "=", item.brand or "-"), ("categ", "=", item.categ.id),
-        ], limit=4)
+            ("state", "=", "published"), ("id", "!=", item.id)])
+        related = related.filtered(
+            lambda r: (item.brand and r.brand == item.brand)
+            or (own_type and garment_type_of(r.product_id) == own_type))[:4]
         return request.render("oulalab_auction.shop_detail_template", self._common(
             item=item, in_cart=item.id in request.session.get(CART_KEY, []),
             related=related, showroom=SHOWROOM,
