@@ -542,9 +542,12 @@ class LiquidationAuction(models.Model):
         if remaining < (self.anti_sniping_minutes or 0) * 60:
             self.end_date = now + timedelta(minutes=self.anti_sniping_minutes)
 
+        # Autor explícito: en el portal público (Public user) el chatter quedaría
+        # a nombre del visitante anónimo. Se registra a nombre del postor.
         self.message_post(
             body=_("Nueva oferta: %(amt)s por %(name)s")
-            % {"amt": amount, "name": partner.name}
+            % {"amt": amount, "name": partner.name},
+            author_id=partner.id,
         )
         return bid
 
