@@ -330,7 +330,14 @@ class AuctionPortal(http.Controller):
         return {"ok": True}
 
     def _send_code(self, email, name, code):
-        company = request.env.company
+        # Entorno como OdooBot (SUPERUSER_ID), no solo .sudo(): un visitante sin
+        # cuenta (Public user, uid 2) quedaba como autor del mail.message y el ORM
+        # rechazaba la escritura posterior -> "Error en la entrega". Con el entorno
+        # de OdooBot y un autor explícito de la compañía, el envío no depende de los
+        # permisos del visitante.
+        from odoo import SUPERUSER_ID
+        env = request.env(user=SUPERUSER_ID)
+        company = env.company
         sender = company.email or "hola@oulalab.com"
         body = (
             "<p>Hola %s,</p>"
@@ -338,12 +345,14 @@ class AuctionPortal(http.Controller):
             "<p style='font-size:24px;font-weight:bold;letter-spacing:4px'>%s</p>"
             "<p>Vence en 10 minutos. Si no lo pediste, ignora este correo.</p>"
         ) % (name, code)
-        request.env["mail.mail"].sudo().create({
+        env["mail.mail"].create({
             "subject": "Tu código de verificación – OulaLab",
             "body_html": body,
             "email_to": email,
             "email_from": sender,
+            "author_id": company.partner_id.id,
         }).send()
+
 
     # ------------------------------------------------------------------
     # Resumen del postor: estado de cada subasta en la que ha ofertado
