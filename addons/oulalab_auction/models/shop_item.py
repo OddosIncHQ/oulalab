@@ -501,10 +501,13 @@ class LiquidationShopItem(models.Model):
             "reserved_until": fields.Datetime.now() + timedelta(minutes=minutes),
         })
         for item in items:
-            item.message_post(body=_("Reservada para %(partner)s con el pedido %(order)s "
-                                     "por %(price)s.") % {
-                "partner": partner.display_name, "order": order.name,
-                "price": fmt_clp(item.price)})
+            item.message_post(
+                body=_("Reservada para %(partner)s con el pedido %(order)s "
+                       "por %(price)s.") % {
+                    "partner": partner.display_name, "order": order.name,
+                    "price": fmt_clp(item.price)},
+                author_id=partner.id,
+            )
         return order
 
     def _shop_order_note(self, delivery_mode):
