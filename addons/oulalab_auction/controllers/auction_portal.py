@@ -336,7 +336,7 @@ class AuctionPortal(http.Controller):
         # de OdooBot y un autor explícito de la compañía, el envío no depende de los
         # permisos del visitante.
         env = request.env(user=SUPERUSER_ID)
-        company = env.company
+        company = self.env.company or env.company
         sender = company.email or "hola@oulalab.com"
         body = (
             "<p>Hola %s,</p>"
