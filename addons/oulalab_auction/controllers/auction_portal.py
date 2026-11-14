@@ -3,7 +3,7 @@ import re
 import time
 
 import pytz
-from odoo import fields, http
+from odoo import fields, http, SUPERUSER_ID
 from odoo.http import request
 
 from collections import namedtuple
@@ -335,7 +335,6 @@ class AuctionPortal(http.Controller):
         # rechazaba la escritura posterior -> "Error en la entrega". Con el entorno
         # de OdooBot y un autor explícito de la compañía, el envío no depende de los
         # permisos del visitante.
-        from odoo import SUPERUSER_ID
         env = request.env(user=SUPERUSER_ID)
         company = env.company
         sender = company.email or "hola@oulalab.com"
@@ -352,7 +351,6 @@ class AuctionPortal(http.Controller):
             "email_from": sender,
             "author_id": company.partner_id.id,
         }).send()
-
 
     # ------------------------------------------------------------------
     # Resumen del postor: estado de cada subasta en la que ha ofertado
