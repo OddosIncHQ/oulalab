@@ -16,8 +16,8 @@
                 <field name="retail_price" optional="show"/>
                 <field name="discount_pct" optional="hide"/>
                 <field name="published_date" optional="hide"/>
-                <field name="sale_order_id" optional="show" readonly="1"/>
-                <field name="buyer_id" optional="show" readonly="1"/>
+                <field name="sale_order_id" optional="show"/>
+                <field name="buyer_id" optional="show"/>
                 <field name="state" widget="badge" readonly="1"
                        decoration-info="state == 'published'"
                        decoration-warning="state == 'reserved'"
@@ -36,6 +36,8 @@
                     <button name="action_publish" type="object" string="Publicar" class="btn-primary"
                             invisible="state not in ('draft','withdrawn')"/>
                     <field name="order_state" invisible="1"/>
+                    <button name="action_link_order" type="object" string="Vincular con pedido" class="btn-secondary"
+                            invisible="state == 'sold'"/>
                     <button name="action_withdraw" type="object" string="Retirar de la venta"
                             invisible="state not in ('draft','published') and not (state in ('reserved','sold') and order_state in (False, 'cancel'))"/>
                     <button name="action_back_to_draft" type="object" string="Volver a borrador"
@@ -113,6 +115,7 @@
                 <field name="default_code"/>
                 <field name="brand"/>
                 <field name="buyer_id"/>
+                <field name="sale_order_id"/>
                 <filter name="published" string="Publicadas" domain="[('state','=','published')]"/>
                 <filter name="reserved" string="Reservadas" domain="[('state','=','reserved')]"/>
                 <filter name="sold" string="Vendidas" domain="[('state','=','sold')]"/>
@@ -120,6 +123,7 @@
                 <group>
                     <filter name="by_state" string="Estado" context="{'group_by': 'state'}"/>
                     <filter name="by_brand" string="Marca" context="{'group_by': 'brand'}"/>
+                    <filter name="by_order" string="Pedido" context="{'group_by': 'sale_order_id'}"/>
                 </group>
             </search>
         </field>
@@ -154,6 +158,14 @@
         <field name="state">code</field>
         <field name="code">records.action_withdraw()</field>
     </record>
+    <record id="action_bulk_link_order_shop" model="ir.actions.server">
+        <field name="name">Vincular con su pedido automáticamente</field>
+        <field name="model_id" ref="model_liquidation_shop_item"/>
+        <field name="binding_model_id" ref="model_liquidation_shop_item"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">records.action_link_order()</field>
+    </record>
     <record id="action_bulk_create_shop_from_products" model="ir.actions.server">
         <field name="name">Crear venta directa</field>
         <field name="model_id" ref="product.model_product_template"/>
@@ -161,6 +173,111 @@
         <field name="binding_view_types">list,form</field>
         <field name="state">code</field>
         <field name="code">action = env["liquidation.shop.item"].action_create_from_products(records)</field>
+    </record>
+
+    <!-- Acción en sale.order para enlazar sus prendas de venta directa -->
+    <record id="action_sale_order_bind_shop_items" model="ir.actions.server">
+        <field name="name">OulaLab: Asociar prendas de Venta Directa a esta orden</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">
+ShopItem = env["liquidation.shop.item"].sudo()
+for order in records:
+    tmpl_ids = order.order_line.mapped("product_id.product_tmpl_id").ids
+    items = ShopItem.search([("product_id", "in", tmpl_ids)])
+    for item in items:
+        item.write({"sale_order_id": order.id, "buyer_id": order.partner_id.id})
+        item.action_link_order()
+        </field>
+    </record>
+
+    <!-- ============================================================== -->
+    <!-- ACCIONES OPERACIONALES: PEDIDOS, DESPACHOS Y STOCK / OULABAGS  -->
+    <!-- ============================================================== -->
+    <record id="action_liquidation_shop_orders" model="ir.actions.act_window">
+        <field name="name">Pedidos de Venta Directa</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">['|', ('liquidation_channel', '=', 'shop'), ('name', '=like', 'LIQVTA-%')]</field>
+        <field name="context">{'default_liquidation_channel': 'shop'}</field>
+    </record>
+
+    <record id="action_liquidation_auction_orders" model="ir.actions.act_window">
+        <field name="name">Pedidos de Subastas</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">['|', ('liquidation_channel', '=', 'auction'), ('name', '=like', 'LIQSUB-%')]</field>
+        <field name="context">{'default_liquidation_channel': 'auction'}</field>
+    </record>
+
+    <record id="view_liquidation_pickings_search" model="ir.ui.view">
+        <field name="name">oulalab.liquidation.picking.search</field>
+        <field name="model">stock.picking</field>
+        <field name="arch" type="xml">
+            <search string="Despachos Liquidación">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <filter name="ready" string="Listos para despachar" domain="[('state', '=', 'assigned')]"/>
+                <filter name="waiting" string="En espera / Preparación" domain="[('state', 'in', ('confirmed', 'waiting'))]"/>
+                <filter name="done" string="Despachados (Realizados)" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="shop" string="Venta Directa" domain="['|', ('sale_id.liquidation_channel', '=', 'shop'), ('origin', '=like', 'LIQVTA-%')]"/>
+                <filter name="auction" string="Subastas" domain="['|', ('sale_id.liquidation_channel', '=', 'auction'), ('origin', '=like', 'LIQSUB-%')]"/>
+                <group>
+                    <filter string="Estado operacional" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Tipo de operación" name="group_type" context="{'group_by': 'picking_type_id'}"/>
+                    <filter string="Documento origen" name="group_origin" context="{'group_by': 'origin'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_liquidation_dispatch_status" model="ir.actions.act_window">
+        <field name="name">Estado Operacional de Despachos</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_liquidation_pickings_search"/>
+        <field name="domain">['|', '|', ('sale_id.liquidation_channel', 'in', ('shop', 'auction')), ('origin', '=like', 'LIQVTA-%'), ('origin', '=like', 'LIQSUB-%')]</field>
+        <field name="context">{'search_default_group_state': 1}</field>
+    </record>
+
+    <record id="view_liquidation_stock_quant_search" model="ir.ui.view">
+        <field name="name">oulalab.liquidation.quant.search</field>
+        <field name="model">stock.quant</field>
+        <field name="arch" type="xml">
+            <search string="Stock Liquidación y OulaBags">
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <filter name="only_oulabags" string="Solo OulaBags"
+                        domain="['|', ('product_id.default_code', 'ilike', 'OULABAG'), ('product_id.name', 'ilike', 'OulaBag')]"/>
+                <filter name="only_garments" string="Prendas en Liquidación (STKSALEDH)"
+                        domain="[('location_id.barcode', '=', 'STKSALEDH'), ('quantity', '&gt;', 0)]"/>
+                <filter name="available_positive" string="Con stock (&gt; 0)"
+                        domain="[('quantity', '&gt;', 0)]"/>
+                <group>
+                    <filter string="Ubicación" name="group_location" context="{'group_by': 'location_id'}"/>
+                    <filter string="Producto" name="group_product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_liquidation_stock_oulabags" model="ir.actions.act_window">
+        <field name="name">Stock Prendas en Liquidación y OulaBags</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_liquidation_stock_quant_search"/>
+        <field name="domain">[
+            ('location_id.usage', '=', 'internal'),
+            '|', '|',
+            ('location_id.barcode', '=', 'STKSALEDH'),
+            ('product_id.default_code', 'ilike', 'OULABAG'),
+            ('product_id.name', 'ilike', 'OulaBag')
+        ]</field>
+        <field name="context">{'search_default_available_positive': 1, 'search_default_group_location': 1}</field>
     </record>
 
     <!-- Subasta desierta o cancelada: pasar a venta directa -->
