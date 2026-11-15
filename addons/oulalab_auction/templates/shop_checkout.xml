@@ -149,6 +149,26 @@
                                 </div>
                             </fieldset>
 
+                            <fieldset class="olx-fieldset" t-if="otp_required">
+                                <legend>Confirma que eres tú</legend>
+                                <p class="olx-hint">
+                                    Enviamos un código de 6 dígitos a <strong t-out="otp_email"/>.
+                                    Revisa tu correo (mira también en spam) y escríbelo aquí.
+                                </p>
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-5">
+                                        <label class="form-label" for="olxOtp">Código de 6 dígitos</label>
+                                        <input id="olxOtp" name="otp" class="form-control" required="required"
+                                               inputmode="numeric" autocomplete="one-time-code"
+                                               pattern="[0-9]{6}" maxlength="6" placeholder="123456"/>
+                                    </div>
+                                </div>
+                                <p class="olx-hint">
+                                    El código vence en 10 minutos. Si no te llega, vuelve a enviar el
+                                    formulario y te mandamos uno nuevo.
+                                </p>
+                            </fieldset>
+
                             <fieldset class="olx-fieldset">
                                 <legend>Entrega</legend>
                                 <t t-set="mode" t-value="form.get('mode') or 'pickup'"/>
