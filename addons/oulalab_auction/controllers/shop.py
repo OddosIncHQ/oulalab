@@ -231,7 +231,8 @@ class OulaLabShop(http.Controller):
                          otp_required=False, otp_email=""):
         partner = self._portal()._current_partner()
         total = sum(items.mapped("price"))
-        offer = request.env["liquidation.shop.item"].sudo()._oulabag_offer(total)
+        Item = request.env["liquidation.shop.item"].sudo()
+        offer = Item._oulabag_offer(total)
         form = form or {}
         if partner and not form:
             form = {
@@ -240,11 +241,25 @@ class OulaLabShop(http.Controller):
                 "mode": partner.auction_delivery_mode or "pickup",
                 "commune": partner.auction_commune or "", "street": partner.street or "",
             }
+        quote_partner = partner
+        if not quote_partner and (form.get("rut") or form.get("email")):
+            clean_rut = validate_rut(form.get("rut") or "")
+            quote_partner = self._find_existing_partner(
+                clean_rut, (form.get("email") or "").strip().lower()
+            )
+        ship_quote = Item._compute_shipping_quote(
+            items_count=len(items),
+            garments_total=total,
+            partner=quote_partner,
+            commune=form.get("commune"),
+        )
         return self._common(
             items=items, removed=removed or request.env["liquidation.shop.item"],
             total=total, offer=offer, form=form, error=error, partner=partner,
             communes=request.env["res.partner"]._fields["auction_commune"].selection,
-            showroom=SHOWROOM, shipping_fee=shop_param(request.env, "shipping_fee"),
+            showroom=SHOWROOM,
+            shipping_fee=ship_quote["final_fee"],
+            shipping_quote=ship_quote,
             otp_required=otp_required, otp_email=otp_email,
         )
 
