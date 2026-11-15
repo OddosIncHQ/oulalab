@@ -8,6 +8,20 @@
               parent="menu_auction_root" action="liquidation_shop_item_action" sequence="15"/>
     <menuitem id="menu_auction_bids" name="Ofertas"
               parent="menu_auction_root" action="auction_bid_action" sequence="20"/>
+
+    <!-- Nuevos menús operacionales: Pedidos, Despachos y Stock / OulaBags -->
+    <menuitem id="menu_liquidation_orders_root" name="Pedidos"
+              parent="menu_auction_root" sequence="22"/>
+    <menuitem id="menu_liquidation_shop_orders" name="Pedidos Venta Directa"
+              parent="menu_liquidation_orders_root" action="action_liquidation_shop_orders" sequence="10"/>
+    <menuitem id="menu_liquidation_auction_orders" name="Pedidos Subastas"
+              parent="menu_liquidation_orders_root" action="action_liquidation_auction_orders" sequence="20"/>
+
+    <menuitem id="menu_liquidation_dispatch" name="Despachos"
+              parent="menu_auction_root" action="action_liquidation_dispatch_status" sequence="25"/>
+    <menuitem id="menu_liquidation_stock_oulabags" name="Stock y OulaBags"
+              parent="menu_auction_root" action="action_liquidation_stock_oulabags" sequence="28"/>
+
     <menuitem id="menu_auction_contacts" name="Contactos"
               parent="menu_auction_root" action="action_auction_contacts" sequence="30"/>
     <menuitem id="menu_liquidation_settings" name="Configuración"
