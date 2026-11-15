@@ -16,13 +16,16 @@ SHOP_ACTIVE_STATES = ("draft", "published", "reserved", "sold")
 PARAM_PREFIX = "oulalab_shop."
 # Valores por defecto (CLP, IVA incluido). Se cambian en Subastas > Configuración.
 SHOP_DEFAULTS = {
-    "oulabag_price": 39990,            # precio del OulaBag en el checkout
-    "oulabag_reference_price": 49990,  # precio "normal" que se muestra tachado
-    "oulabag_min_cart": 100000,        # compra mínima en prendas para ofrecerlo
-    "oulabag_floor_price": 32990,      # piso: costo puesto en Chile + IVA (lote aéreo)
-    "reservation_minutes": 60,         # minutos que una prenda queda reservada para pagar
-    "pending_grace_minutes": 120,      # margen extra si hay un pago en línea pendiente
-    "shipping_fee": 0,                 # despacho (0 = gratis en comunas habilitadas)
+    "oulabag_price": 39990,                # precio del OulaBag en el checkout
+    "oulabag_reference_price": 49990,      # precio "normal" que se muestra tachado
+    "oulabag_min_cart": 100000,            # compra mínima en prendas para ofrecerlo
+    "oulabag_floor_price": 32990,          # piso: costo puesto en Chile + IVA (lote aéreo)
+    "reservation_minutes": 60,             # minutos que una prenda queda reservada para pagar
+    "pending_grace_minutes": 120,          # margen extra si hay un pago en línea pendiente
+    "shipping_fee": 3990,                  # tarifa base eCommerce RM (1ª prenda, IVA incl.)
+    "shipping_extra_item_fee": 500,        # recargo por cada prenda adicional en el carrito
+    "shipping_free_threshold": 150000,     # despacho gratis desde este monto en prendas (0 = desactivado)
+    "shipping_member_discount_pct": 100,   # % de descuento en despacho para suscriptoras OulaLab
 }
 
 
@@ -458,6 +461,43 @@ class LiquidationShopItem(models.Model):
         }
 
     # ------------------------------------------------------------------
+    # Despacho eCommerce y Descuento Suscriptoras OulaLab
+    # ------------------------------------------------------------------
+    @api.model
+    def _compute_shipping_quote(self, items_count=1, garments_total=0, partner=None, commune=None):
+        """Calcula el costo de despacho típico de eCommerce y aplica el % de dcto a suscriptoras."""
+        base_fee = max(0, shop_param(self.env, "shipping_fee"))
+        extra_fee = max(0, shop_param(self.env, "shipping_extra_item_fee"))
+        free_threshold = max(0, shop_param(self.env, "shipping_free_threshold"))
+        member_disc_pct = min(100, max(0, shop_param(self.env, "shipping_member_discount_pct")))
+
+        count = max(1, int(items_count or 1))
+        standard_fee = base_fee + (count - 1) * extra_fee if base_fee > 0 else 0
+
+        is_member = bool(partner and getattr(partner.sudo(), "is_oulalab_member", False))
+        free_by_threshold = bool(free_threshold > 0 and garments_total >= free_threshold)
+
+        if free_by_threshold:
+            final_fee = 0
+            discount_amount = standard_fee
+        elif is_member and member_disc_pct > 0:
+            discount_amount = int(round(standard_fee * (member_disc_pct / 100.0), -1))
+            final_fee = max(0, standard_fee - discount_amount)
+        else:
+            discount_amount = 0
+            final_fee = standard_fee
+
+        return {
+            "standard_fee": standard_fee,
+            "final_fee": final_fee,
+            "discount_amount": discount_amount,
+            "member_discount_pct": member_disc_pct,
+            "is_member": is_member,
+            "free_by_threshold": free_by_threshold,
+            "free_threshold": free_threshold,
+        }
+
+    # ------------------------------------------------------------------
     # Checkout: crea el pedido y reserva las prendas
     # ------------------------------------------------------------------
     def _lock_for_checkout(self):
@@ -525,16 +565,25 @@ class LiquidationShopItem(models.Model):
                 "name": _("OulaBag — bolso portatrajes OulaLab (1 por compra)"),
             }))
 
-        fee = shop_param(self.env, "shipping_fee")
+        ship_quote = self._compute_shipping_quote(
+            items_count=len(items),
+            garments_total=garments_total,
+            partner=partner,
+            commune=getattr(shipping_partner or partner, "auction_commune", None),
+        )
+        fee = ship_quote["final_fee"]
         shipping = self.env.ref("oulalab_auction.product_shop_shipping", raise_if_not_found=False)
         if delivery_mode == "delivery" and fee > 0 and shipping:
             ship_variant = shipping.sudo().product_variant_id
             taxes = self._taxes_for(ship_variant, company)
+            ship_label = _("Despacho a domicilio")
+            if ship_quote["is_member"] and ship_quote["member_discount_pct"] > 0:
+                ship_label = _("Despacho a domicilio (%d%% dcto. Suscriptora OulaLab)") % ship_quote["member_discount_pct"]
             lines.append((0, 0, {
                 "product_id": ship_variant.id, "product_uom_qty": 1,
                 "price_unit": self._net_from_gross(fee, taxes, currency),
                 "tax_ids": [(6, 0, taxes.ids)],
-                "name": _("Despacho a domicilio"),
+                "name": ship_label,
             }))
 
         minutes = shop_param(self.env, "reservation_minutes")
