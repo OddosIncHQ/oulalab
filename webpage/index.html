@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oulalab | Welcome to the Future of Fashion</title>
+    
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* 1. CARGA DE LA FUENTE CLAVEN LOCAL */
+        @font-face {
+          font-family: 'Claven';
+          src: url('/fonts/Claven.otf') format('opentype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* 2. CARGA DE LA FUENTE NEUETHING VARIABLE LOCAL */
+        @font-face {
+          font-family: 'Neuething';
+          src: url('/fonts/NeuethingVariable-variable.woff2') format('woff2-variations'),
+               url('/fonts/NeuethingVariable-variable.woff') format('woff-variations'),
+               url('/fonts/NeuethingVariable-variable.ttf') format('truetype');
+          font-weight: 100 900; /* Cubre todos los grosores de Thin a Black */
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* 3. APLICAMOS LA FUENTE A TODO EL SITIO */
+        body {
+            font-family: 'Neuething', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        /* CLASES PERSONALIZADAS */
+        .font-claven {
+            font-family: 'Claven', serif;
+            font-weight: 400;
+        }
+        
+        :root {
+            --brand-dark-plum: #2D132B;
+            --brand-plum: #662F5F;
+            --brand-neon-pink: #DF3265;
+            --brand-pastel-pink: #F7E8F7;
+        }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes icon-pop {
+            0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .animate-reveal {
+            opacity: 0;
+            animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-icon {
+            animation: icon-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+
+        .reveal-hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes slow-zoom {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.1); }
+        }
+    </style>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    /* INYECTAR LAS FUENTES EN TAILWIND */
+                    fontFamily: {
+                        sans: ['Neuething', 'sans-serif'], 
+                        claven: ['Claven', 'serif'],       
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#2D132B',
+                            plum: '#662F5F',
+                            pink: '#DF3265',
+                            pastel: '#F7E8F7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body class="bg-brand-pastel text-brand-dark overflow-x-hidden font-sans">
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+</body>
+</html>
