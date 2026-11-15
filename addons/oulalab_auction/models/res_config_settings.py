@@ -42,9 +42,27 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="oulalab_shop.pending_grace_minutes",
     )
     shop_shipping_fee = fields.Integer(
-        string="Costo de despacho (IVA incl.)", default=SHOP_DEFAULTS["shipping_fee"],
+        string="Tarifa base despacho (1ª prenda, IVA incl.)", default=SHOP_DEFAULTS["shipping_fee"],
         config_parameter="oulalab_shop.shipping_fee",
-        help="0 = despacho gratis en las comunas habilitadas.",
+        help="Tarifa base de eCommerce para la primera prenda (ej. $3.990 CLP). 0 = despacho gratis.",
+    )
+    shop_shipping_extra_item_fee = fields.Integer(
+        string="Recargo por prenda adicional (IVA incl.)",
+        default=SHOP_DEFAULTS["shipping_extra_item_fee"],
+        config_parameter="oulalab_shop.shipping_extra_item_fee",
+        help="Monto que se suma por cada prenda extra en el pedido (ej. $500 CLP). 0 = tarifa plana.",
+    )
+    shop_shipping_free_threshold = fields.Integer(
+        string="Despacho gratis en compras desde (CLP)",
+        default=SHOP_DEFAULTS["shipping_free_threshold"],
+        config_parameter="oulalab_shop.shipping_free_threshold",
+        help="Total en prendas (IVA incl.) desde el cual el despacho es gratis. 0 = sin umbral.",
+    )
+    shop_shipping_member_discount_pct = fields.Integer(
+        string="% Descuento en despacho para Suscriptoras OulaLab",
+        default=SHOP_DEFAULTS["shipping_member_discount_pct"],
+        config_parameter="oulalab_shop.shipping_member_discount_pct",
+        help="Porcentaje de descuento (0 a 100%) en el despacho para clientas con suscripción activa (is_oulalab_member).",
     )
     liquidation_customer_location_id = fields.Many2one(
         "stock.location", string="Ubicación de clientes (liquidación)",
@@ -66,4 +84,10 @@ class ResConfigSettings(models.TransientModel):
                 raise ValidationError(_(
                     "Revisa la configuración: la compra mínima no puede ser negativa y la "
                     "reserva para pagar debe ser de al menos 15 minutos."))
+            if not (0 <= rec.shop_shipping_member_discount_pct <= 100):
+                raise ValidationError(_(
+                    "El porcentaje de descuento en despacho para suscriptoras debe estar entre 0% y 100%."))
+            if rec.shop_shipping_fee < 0 or rec.shop_shipping_extra_item_fee < 0 or rec.shop_shipping_free_threshold < 0:
+                raise ValidationError(_(
+                    "Las tarifas y umbrales de despacho no pueden ser negativos."))
         return super().set_values()
