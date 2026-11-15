@@ -1,6 +1,9 @@
+import hmac
 import re
+import secrets
+import time
 
-from odoo import http
+from odoo import SUPERUSER_ID, http
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
@@ -13,6 +16,12 @@ from .auction_portal import EMAIL_RE, AuctionPortal
 CART_KEY = "oulalab_shop_cart"
 SHOWROOM = "Av. La Dehesa 222 of. 817, Lo Barnechea"
 Tipo = namedtuple("Tipo", "id name")  # la plantilla lee tp.id y tp.name
+
+# --- Verificación por código (OTP) del checkout -----------------------------
+OTP_KEY = "oulalab_shop_otp"              # código pendiente en la sesión
+VERIFIED_KEY = "oulalab_shop_verified"    # ids de contactos ya verificados
+OTP_TTL = 10 * 60                         # 10 minutos de vigencia
+OTP_MAX_ATTEMPTS = 5                      # intentos por código
 
 
 class OulaLabShop(http.Controller):
@@ -122,9 +131,104 @@ class OulaLabShop(http.Controller):
         ))
 
     # ------------------------------------------------------------------
+    # Verificación del comprador (OTP)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _mask_email(email):
+        """v***a@gmail.com — para nombrar el correo sin revelarlo entero."""
+        email = (email or "").strip()
+        if "@" not in email:
+            return ""
+        user, domain = email.split("@", 1)
+        if len(user) <= 2:
+            visible = user[:1]
+        else:
+            visible = user[0] + "***" + user[-1]
+        return "%s@%s" % (visible, domain)
+
+    def _find_existing_partner(self, clean_rut, email):
+        """Contacto ya registrado que coincide por RUT o por correo.
+
+        Se busca también por correo para no crear duplicados y para que el
+        correo ajeno quede igual de protegido que el RUT ajeno.
+        """
+        Partner = request.env["res.partner"].sudo()
+        found = self._portal()._find_partner_by_rut(clean_rut)
+        if found:
+            return found[:1]
+        if email:
+            return Partner.search([
+                ("email", "=ilike", email),
+                ("type", "!=", "delivery"),
+            ], limit=1)
+        return Partner.browse()
+
+    def _is_verified(self, partner):
+        """True si esta sesión ya demostró ser dueña de ese contacto."""
+        if not partner:
+            return False
+        current = self._portal()._current_partner()
+        if current and current.id == partner.id:
+            return True
+        return partner.id in (request.session.get(VERIFIED_KEY) or [])
+
+    def _mark_verified(self, partner):
+        ids = list(request.session.get(VERIFIED_KEY) or [])
+        if partner.id not in ids:
+            ids.append(partner.id)
+        request.session[VERIFIED_KEY] = ids
+
+    def _otp_send(self, partner):
+        """Envía un código al correo REGISTRADO del contacto, nunca al tecleado."""
+        code = "%06d" % secrets.randbelow(1000000)
+        request.session[OTP_KEY] = {
+            "partner_id": partner.id,
+            "code": code,
+            "expires": time.time() + OTP_TTL,
+            "attempts": 0,
+        }
+        env = request.env(user=SUPERUSER_ID)
+        company = env.company
+        body = (
+            "<p>Hola,</p>"
+            "<p>Tu código para confirmar la compra en OulaLab es:</p>"
+            "<p style='font-size:28px;letter-spacing:4px;'><strong>%s</strong></p>"
+            "<p>Vence en 10 minutos. Si no fuiste tú quien lo pidió, "
+            "ignora este correo: nadie puede comprar a tu nombre sin él.</p>"
+        ) % code
+        mail = env["mail.mail"].create({
+            "subject": "Tu código de compra OulaLab",
+            "body_html": body,
+            "email_to": partner.email,
+            "email_from": company.email or company.partner_id.email,
+            "author_id": company.partner_id.id,
+        })
+        mail.send()
+
+    def _otp_check(self, partner, code):
+        """(ok, mensaje_de_error). Consume el código al acertar."""
+        data = request.session.get(OTP_KEY) or {}
+        if not data or data.get("partner_id") != partner.id:
+            return False, "Necesitamos verificar tu correo. Te enviamos un código nuevo."
+        if time.time() > data.get("expires", 0):
+            request.session.pop(OTP_KEY, None)
+            return False, "El código venció. Vuelve a enviar el formulario para recibir otro."
+        if data.get("attempts", 0) >= OTP_MAX_ATTEMPTS:
+            request.session.pop(OTP_KEY, None)
+            return False, ("Demasiados intentos. Vuelve a enviar el formulario para "
+                           "recibir un código nuevo.")
+        data["attempts"] = data.get("attempts", 0) + 1
+        request.session[OTP_KEY] = data
+        if not hmac.compare_digest(str(data.get("code") or ""), str(code or "").strip()):
+            return False, "El código no coincide. Revísalo e inténtalo de nuevo."
+        request.session.pop(OTP_KEY, None)
+        return True, None
+
+    # ------------------------------------------------------------------
     # Checkout
     # ------------------------------------------------------------------
-    def _checkout_values(self, items, form=None, error=None, removed=None):
+    def _checkout_values(self, items, form=None, error=None, removed=None,
+                         otp_required=False, otp_email=""):
         partner = self._portal()._current_partner()
         total = sum(items.mapped("price"))
         offer = request.env["liquidation.shop.item"].sudo()._oulabag_offer(total)
@@ -141,6 +245,7 @@ class OulaLabShop(http.Controller):
             total=total, offer=offer, form=form, error=error, partner=partner,
             communes=request.env["res.partner"]._fields["auction_commune"].selection,
             showroom=SHOWROOM, shipping_fee=shop_param(request.env, "shipping_fee"),
+            otp_required=otp_required, otp_email=otp_email,
         )
 
     @http.route("/prendas/checkout", type="http", auth="public", website=True,
@@ -162,10 +267,12 @@ class OulaLabShop(http.Controller):
                 ("name", "email", "phone", "rut", "mode", "commune", "street", "street2")}
         form["oulabag"] = bool(post.get("oulabag"))
 
-        def fail(msg):
+        def fail(msg, otp_required=False, otp_email=""):
             return request.render("oulalab_auction.shop_checkout_template",
                                   self._checkout_values(items, form=form, error=msg,
-                                                        removed=removed))
+                                                        removed=removed,
+                                                        otp_required=otp_required,
+                                                        otp_email=otp_email))
 
         if removed:
             return fail("Algunas prendas de tu carrito ya no están disponibles y las quitamos. "
@@ -190,7 +297,32 @@ class OulaLabShop(http.Controller):
         if error:
             return fail(error)
 
-        partner, shipping = self._resolve_partner(form, clean_rut, email, mode, delivery_vals)
+        # --- Puerta de verificación -----------------------------------
+        # Un RUT o un correo no son secretos: antes de usar un contacto ya
+        # registrado hay que probar que la sesión es su dueña.
+        existing = self._portal()._current_partner() or \
+            self._find_existing_partner(clean_rut, email)
+        if existing and not self._is_verified(existing):
+            if not existing.email:
+                return fail("Ese RUT ya está registrado y no tiene correo asociado. "
+                            "Escríbenos a hola@oulalab.com para completar tu compra.")
+            masked = self._mask_email(existing.email)
+            code = (post.get("otp") or "").strip()
+            if not code:
+                self._otp_send(existing)
+                return fail(
+                    "Ese RUT o correo ya está registrado con nosotros. Te enviamos un "
+                    "código de 6 dígitos a %s para confirmar que eres tú." % masked,
+                    otp_required=True, otp_email=masked)
+            ok, msg = self._otp_check(existing, code)
+            if not ok:
+                if "código nuevo" in msg or "venció" in msg:
+                    self._otp_send(existing)
+                return fail(msg, otp_required=True, otp_email=masked)
+            self._mark_verified(existing)
+
+        partner, shipping = self._resolve_partner(
+            form, clean_rut, email, mode, delivery_vals, existing=existing)
         Item = request.env["liquidation.shop.item"].sudo()
         try:
             order = Item._shop_create_order(items, partner, shipping,
@@ -203,16 +335,17 @@ class OulaLabShop(http.Controller):
         request.session["oulalab_shop_last_order"] = order.id
         return request.redirect(order.get_portal_url())
 
-    def _resolve_partner(self, form, clean_rut, email, mode, delivery_vals):
+    def _resolve_partner(self, form, clean_rut, email, mode, delivery_vals, existing=None):
         """Cliente del pedido y dirección de despacho.
 
-        Nunca se sobrescriben los datos de un contacto existente a partir de un
-        formulario público: solo se completan campos vacíos. Una dirección nueva
-        se guarda como contacto de entrega hijo.
+        `existing` llega ya verificado desde shop_checkout_submit: este método
+        nunca busca un contacto por su cuenta. Nunca se sobrescriben los datos
+        de un contacto existente a partir de un formulario público: solo se
+        completan campos vacíos. Una dirección nueva se guarda como contacto de
+        entrega hijo.
         """
         Partner = request.env["res.partner"].sudo()
-        portal = self._portal()
-        partner = portal._current_partner() or portal._find_partner_by_rut(clean_rut)
+        partner = existing
         if partner:
             partner = partner.sudo()
             fill = {}
