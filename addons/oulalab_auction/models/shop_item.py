@@ -107,10 +107,16 @@ class LiquidationShopItem(models.Model):
         default="draft", tracking=True, required=True, copy=False,
     )
     published_date = fields.Datetime(string="Publicada el", readonly=True, copy=False)
-    sale_order_id = fields.Many2one("sale.order", string="Pedido", readonly=True, copy=False)
+    sale_order_id = fields.Many2one(
+        "sale.order", string="Pedido", readonly=False, copy=False, tracking=True,
+        help="Pedido de venta asociado. Puedes asignarlo manualmente para enlazar "
+             "una orden en borrador o confirmada con esta prenda.",
+    )
     order_state = fields.Selection(related="sale_order_id.state", string="Estado del pedido")
-    buyer_id = fields.Many2one("res.partner", string="Compradora", readonly=True, copy=False)
-    reserved_until = fields.Datetime(string="Reservada hasta", readonly=True, copy=False)
+    buyer_id = fields.Many2one(
+        "res.partner", string="Compradora", readonly=False, copy=False, tracking=True,
+    )
+    reserved_until = fields.Datetime(string="Reservada hasta", readonly=False, copy=False)
     sold_date = fields.Datetime(string="Vendida el", readonly=True, copy=False)
 
     # Catálogo: mismos atributos de Studio que usa la subasta.
@@ -125,8 +131,73 @@ class LiquidationShopItem(models.Model):
     discount_pct = fields.Integer(compute="_compute_discount", string="% bajo retail")
 
     # ------------------------------------------------------------------
-    # Computes
+    # Computes & Sincronización manual de pedidos
     # ------------------------------------------------------------------
+    @api.onchange("sale_order_id")
+    def _onchange_sale_order_id(self):
+        """Al elegir un pedido manualmente en la prenda, actualiza compradora y estado."""
+        for rec in self:
+            order = rec.sale_order_id
+            if not order:
+                continue
+            rec.buyer_id = order.partner_id
+            if order.state == "sale":
+                rec.state = "sold"
+                rec.sold_date = rec.sold_date or fields.Datetime.now()
+                rec.reserved_until = False
+            elif order.state in ("draft", "sent"):
+                rec.state = "reserved"
+                minutes = shop_param(self.env, "reservation_minutes")
+                rec.reserved_until = fields.Datetime.now() + timedelta(minutes=minutes)
+
+    def action_link_order(self):
+        """Busca o sincroniza el pedido de venta de las prendas seleccionadas."""
+        minutes = shop_param(self.env, "reservation_minutes")
+        linked = 0
+        for rec in self:
+            order = rec.sale_order_id
+            if not order and rec.product_id:
+                variant = rec.product_id.product_variant_id
+                line = self.env["sale.order.line"].sudo().search([
+                    ("product_id", "=", variant.id),
+                    ("order_id.state", "!=", "cancel"),
+                ], order="id desc", limit=1)
+                order = line.order_id
+            if not order:
+                continue
+            if not order.liquidation_channel:
+                order.sudo().write({"liquidation_channel": "shop"})
+            vals = {
+                "sale_order_id": order.id,
+                "buyer_id": order.partner_id.id,
+            }
+            if order.state == "sale":
+                vals.update({
+                    "state": "sold",
+                    "sold_date": rec.sold_date or fields.Datetime.now(),
+                    "reserved_until": False,
+                })
+            elif order.state in ("draft", "sent"):
+                vals.update({
+                    "state": "reserved",
+                    "reserved_until": fields.Datetime.now() + timedelta(minutes=minutes),
+                })
+            rec.write(vals)
+            rec.message_post(body=_(
+                "Prenda vinculada al pedido %(order)s (compradora: %(buyer)s, estado: %(state)s)."
+            ) % {
+                "order": order.name,
+                "buyer": order.partner_id.display_name,
+                "state": dict(self._fields["state"].selection).get(rec.state),
+            })
+            linked += 1
+        if len(self) == 1 and not linked:
+            raise UserError(_(
+                "No se encontró ningún pedido activo con la prenda %s. "
+                "Selecciona primero el pedido en el campo «Pedido» y guarda."
+            ) % self.display_name)
+        return True
+
     @api.depends("product_id", "product_id.name", "product_id.default_code")
     def _compute_name(self):
         for rec in self:
