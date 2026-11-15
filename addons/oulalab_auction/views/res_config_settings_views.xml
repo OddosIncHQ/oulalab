@@ -29,8 +29,18 @@
                             <div class="row"><label class="col-6" for="shop_reservation_minutes"/><field name="shop_reservation_minutes" class="col-6"/></div>
                             <div class="row"><label class="col-6" for="shop_pending_grace_minutes"/><field name="shop_pending_grace_minutes" class="col-6"/></div>
                         </setting>
-                        <setting string="Despacho" help="Costo con IVA. 0 = gratis en las comunas habilitadas.">
-                            <field name="shop_shipping_fee"/>
+                        <setting string="Despacho eCommerce y Descuento Suscriptoras"
+                                 help="Cálculo automático del despacho (base + prenda extra) y % de descuento para clientas suscriptoras (Socio OulaLab).">
+                            <div class="row"><label class="col-7" for="shop_shipping_fee"/><field name="shop_shipping_fee" class="col-5"/></div>
+                            <div class="row mt-1"><label class="col-7" for="shop_shipping_extra_item_fee"/><field name="shop_shipping_extra_item_fee" class="col-5"/></div>
+                            <div class="row mt-1"><label class="col-7" for="shop_shipping_free_threshold"/><field name="shop_shipping_free_threshold" class="col-5"/></div>
+                            <div class="row mt-1">
+                                <label class="col-7" for="shop_shipping_member_discount_pct"/>
+                                <div class="col-5 d-flex align-items-center">
+                                    <field name="shop_shipping_member_discount_pct" class="oe_inline"/>
+                                    <span class="ms-1">%</span>
+                                </div>
+                            </div>
                         </setting>
                         <setting string="Ubicación de clientes"
                                  help="Destino de las entregas de subastas y ventas directas. Vacío = el de la regla de entrega del almacén.">
