@@ -114,6 +114,8 @@
 
                     <div class="alert alert-danger" role="alert" t-if="error" t-out="error"/>
 
+                    <t t-set="sq" t-value="shipping_quote or {}"/>
+
                     <form method="post" action="/prendas/checkout" class="olx-checkout" id="olxCheckout">
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
@@ -178,10 +180,28 @@
                                                t-att-checked="mode == 'delivery' or None"/>
                                         <span>
                                             <strong>Despacho a domicilio</strong>
-                                            <small>
+                                            <small id="olxShipOptLabel">
                                                 Lo Barnechea, Las Condes y Vitacura.
-                                                <t t-if="shipping_fee">Costo <t t-out="fmt_clp(shipping_fee)"/>.</t>
-                                                <t t-else="">Sin costo.</t>
+                                                <t t-if="sq.get('free_by_threshold')">
+                                                    <s t-if="sq.get('standard_fee')" t-out="fmt_clp(sq['standard_fee'])"/>
+                                                    <strong>Sin costo</strong> (compra sobre <t t-out="fmt_clp(sq['free_threshold'])"/>).
+                                                </t>
+                                                <t t-elif="sq.get('is_member') and sq.get('member_discount_pct', 0) &gt; 0 and sq.get('standard_fee', 0) &gt; 0">
+                                                    <s t-out="fmt_clp(sq['standard_fee'])"/>
+                                                    <t t-if="shipping_fee">
+                                                        <strong>Costo <t t-out="fmt_clp(shipping_fee)"/></strong>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <strong>Sin costo</strong>
+                                                    </t>
+                                                    (<t t-out="sq['member_discount_pct']"/>% dcto. Suscriptora OulaLab).
+                                                </t>
+                                                <t t-elif="shipping_fee">
+                                                    Costo <t t-out="fmt_clp(shipping_fee)"/>.
+                                                </t>
+                                                <t t-else="">
+                                                    Sin costo.
+                                                </t>
                                             </small>
                                         </span>
                                     </label>
@@ -208,7 +228,7 @@
                                     <div class="col-12 col-md-8">
                                         <label class="form-label" for="olxStreet">Dirección</label>
                                         <input id="olxStreet" name="street" class="form-control"
-                                               autocomplete="street-address" placeholder="Calle y número"
+                                               autocomplete="off" placeholder="Calle y número"
                                                t-att-value="form.get('street')"/>
                                     </div>
                                     <div class="col-12">
@@ -245,13 +265,29 @@
                                 <dd t-out="fmt_clp(total)"/>
                                 <dt class="olx-bag-row" hidden="hidden">OulaBag</dt>
                                 <dd class="olx-bag-row" hidden="hidden" t-out="fmt_clp(offer['price'])"/>
-                                <dt class="olx-ship-row" t-if="shipping_fee" hidden="hidden">Despacho</dt>
-                                <dd class="olx-ship-row" t-if="shipping_fee" hidden="hidden" t-out="fmt_clp(shipping_fee)"/>
+                                <dt class="olx-ship-row" id="olxShipDt"
+                                    t-att-hidden="None if mode == 'delivery' and (shipping_fee or sq.get('standard_fee')) else 'hidden'">
+                                    Despacho
+                                    <small id="olxShipBadge" class="d-block text-success"
+                                           t-if="sq.get('is_member') and sq.get('member_discount_pct', 0) &gt; 0">
+                                        <t t-out="sq['member_discount_pct']"/>% dcto. Suscriptora
+                                    </small>
+                                </dt>
+                                <dd class="olx-ship-row" id="olxShipDd"
+                                    t-att-hidden="None if mode == 'delivery' and (shipping_fee or sq.get('standard_fee')) else 'hidden'">
+                                    <t t-if="sq.get('discount_amount', 0) &gt; 0 and sq.get('standard_fee', 0) &gt; 0">
+                                        <s class="text-muted me-1" t-out="fmt_clp(sq['standard_fee'])"/>
+                                    </t>
+                                    <span id="olxShipAmount"
+                                          t-out="fmt_clp(shipping_fee) if shipping_fee else 'Gratis'"/>
+                                </dd>
                             </dl>
                             <p class="olx-total">
                                 <span>Total</span>
-                                <strong class="olx-grand" t-att-data-base="total"
-                                        t-att-data-ship="shipping_fee or 0" t-out="fmt_clp(total)"/>
+                                <strong class="olx-grand" id="olxGrandTotal"
+                                        t-att-data-base="total"
+                                        t-att-data-ship="shipping_fee or 0"
+                                        t-out="fmt_clp(total + (shipping_fee if mode == 'delivery' else 0))"/>
                             </p>
 
                             <label class="olx-check">
@@ -270,6 +306,140 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Google Places Autocomplete y Recálculo de Despacho Suscriptoras en vivo -->
+            <t t-set="gmaps_places_key"
+               t-value="request.env['ir.config_parameter'].sudo().get_param('google_address_autocomplete.google_places_api_key')"/>
+            <t t-if="gmaps_places_key">
+                <script t-attf-src="https://maps.googleapis.com/maps/api/js?key=#{gmaps_places_key}&amp;libraries=places&amp;language=es"
+                        async="async" defer="defer"/>
+            </t>
+            <script type="text/javascript">
+                window.addEventListener('load', function () {
+                    // 1) Google Places Autocomplete en #olxStreet
+                    var input = document.getElementById('olxStreet');
+                    if (input &amp;&amp; window.google &amp;&amp; google.maps &amp;&amp; google.maps.places) {
+                        var ac = new google.maps.places.Autocomplete(input, {
+                            types: ['address'],
+                            componentRestrictions: { country: 'cl' },
+                            fields: ['address_components', 'formatted_address']
+                        });
+                        ac.addListener('place_changed', function () {
+                            var place = ac.getPlace();
+                            if (!place || !place.address_components) return;
+                            var route = '', streetNum = '', locality = '';
+                            place.address_components.forEach(function (c) {
+                                if (c.types.indexOf('route') !== -1) route = c.long_name;
+                                if (c.types.indexOf('street_number') !== -1) streetNum = c.long_name;
+                                if (c.types.indexOf('administrative_area_level_3') !== -1 ||
+                                    c.types.indexOf('locality') !== -1) {
+                                    locality = c.long_name.toLowerCase();
+                                }
+                            });
+                            if (route) {
+                                input.value = (route + (streetNum ? ' ' + streetNum : '')).trim();
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                            var sel = document.getElementById('olxCommune');
+                            if (sel &amp;&amp; locality) {
+                                if (locality.indexOf('barnechea') !== -1) sel.value = 'lo_barnechea';
+                                else if (locality.indexOf('condes') !== -1) sel.value = 'las_condes';
+                                else if (locality.indexOf('vitacura') !== -1) sel.value = 'vitacura';
+                                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        });
+                    }
+
+                    // 2) Recálculo en vivo de tarifa de despacho al ingresar RUT o correo
+                    var rutEl = document.getElementById('olxRut');
+                    var emailEl = document.getElementById('olxEmail');
+                    var grandEl = document.getElementById('olxGrandTotal');
+                    var bagToggle = document.querySelector('.olx-bag-toggle');
+                    var modeRadios = document.querySelectorAll('input.olx-mode');
+
+                    function fmtClp(n) {
+                        return '$' + Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    }
+
+                    function refreshGrandTotal() {
+                        if (!grandEl) return;
+                        var base = parseInt(grandEl.getAttribute('data-base') || '0', 10);
+                        var ship = parseInt(grandEl.getAttribute('data-ship') || '0', 10);
+                        var bag = (bagToggle &amp;&amp; bagToggle.checked)
+                            ? parseInt(bagToggle.getAttribute('data-price') || '0', 10) : 0;
+                        var isDeliv = false;
+                        modeRadios.forEach(function (r) {
+                            if (r.checked &amp;&amp; r.value === 'delivery') isDeliv = true;
+                        });
+                        var shipRows = document.querySelectorAll('.olx-ship-row');
+                        shipRows.forEach(function (row) {
+                            if (isDeliv) row.removeAttribute('hidden');
+                            else row.setAttribute('hidden', 'hidden');
+                        });
+                        grandEl.textContent = fmtClp(base + bag + (isDeliv ? ship : 0));
+                    }
+
+                    function fetchShippingQuote() {
+                        var rutVal = rutEl ? rutEl.value.trim() : '';
+                        var emailVal = emailEl ? emailEl.value.trim() : '';
+                        if (!rutVal &amp;&amp; !emailVal) return;
+                        fetch('/prendas/checkout/shipping-quote', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                jsonrpc: '2.0', method: 'call',
+                                params: { rut: rutVal, email: emailVal }
+                            })
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            var q = res &amp;&amp; res.result;
+                            if (!q || !grandEl) return;
+                            grandEl.setAttribute('data-ship', q.final_fee || 0);
+                            var optLabel = document.getElementById('olxShipOptLabel');
+                            var ddEl = document.getElementById('olxShipDd');
+                            var dtEl = document.getElementById('olxShipDt');
+                            if (optLabel) {
+                                var html = 'Lo Barnechea, Las Condes y Vitacura. ';
+                                if (q.free_by_threshold) {
+                                    if (q.standard_fee) html += '<s>' + fmtClp(q.standard_fee) + '</s> ';
+                                    html += '<strong>Sin costo</strong>.';
+                                } else if (q.is_member &amp;&amp; q.member_discount_pct > 0 &amp;&amp; q.standard_fee > 0) {
+                                    html += '<s>' + fmtClp(q.standard_fee) + '</s> ';
+                                    html += q.final_fee ? ('<strong>Costo ' + fmtClp(q.final_fee) + '</strong> ') : '<strong>Sin costo</strong> ';
+                                    html += '(' + q.member_discount_pct + '% dcto. Suscriptora OulaLab).';
+                                } else if (q.final_fee) {
+                                    html += 'Costo ' + fmtClp(q.final_fee) + '.';
+                                } else {
+                                    html += 'Sin costo.';
+                                }
+                                optLabel.innerHTML = html;
+                            }
+                            if (dtEl) {
+                                dtEl.innerHTML = 'Despacho' + (q.is_member &amp;&amp; q.member_discount_pct > 0
+                                    ? '<small class="d-block text-success">' + q.member_discount_pct + '% dcto. Suscriptora</small>'
+                                    : '');
+                            }
+                            if (ddEl) {
+                                var ddHtml = '';
+                                if (q.discount_amount > 0 &amp;&amp; q.standard_fee > 0) {
+                                    ddHtml += '<s class="text-muted me-1">' + fmtClp(q.standard_fee) + '</s>';
+                                }
+                                ddHtml += '<span>' + (q.final_fee ? fmtClp(q.final_fee) : 'Gratis') + '</span>';
+                                ddEl.innerHTML = ddHtml;
+                            }
+                            refreshGrandTotal();
+                        })
+                        .catch(function () {});
+                    }
+
+                    if (rutEl) rutEl.addEventListener('blur', fetchShippingQuote);
+                    if (emailEl) emailEl.addEventListener('blur', fetchShippingQuote);
+                    if (bagToggle) bagToggle.addEventListener('change', refreshGrandTotal);
+                    modeRadios.forEach(function (r) { r.addEventListener('change', refreshGrandTotal); });
+                });
+            </script>
         </t>
     </template>
 </odoo>
