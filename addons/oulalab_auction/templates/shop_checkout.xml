@@ -225,11 +225,13 @@
                                             </t>
                                         </select>
                                     </div>
-                                    <div class="col-12 col-md-8">
+                                    <div class="col-12 col-md-8 position-relative">
                                         <label class="form-label" for="olxStreet">Dirección</label>
                                         <input id="olxStreet" name="street" class="form-control"
                                                autocomplete="off" placeholder="Calle y número"
                                                t-att-value="form.get('street')"/>
+                                        <ul id="olxPlacesList" class="list-group position-absolute w-100 shadow-sm"
+                                            style="z-index:1050; display:none; max-height:220px; overflow-y:auto;"/>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label" for="olxStreet2">Depto, casa u oficina (opcional)</label>
@@ -307,47 +309,109 @@
                 </div>
             </div>
 
-            <!-- Google Places Autocomplete y Recálculo de Despacho Suscriptoras en vivo -->
+            <!-- Google Places Autocomplete (Places API New) y Recálculo de Despacho Suscriptoras en vivo -->
             <t t-set="gmaps_places_key"
                t-value="request.env['ir.config_parameter'].sudo().get_param('google_address_autocomplete.google_places_api_key')"/>
-            <t t-if="gmaps_places_key">
-                <script t-attf-src="https://maps.googleapis.com/maps/api/js?key=#{gmaps_places_key}&amp;libraries=places&amp;language=es"
-                        async="async" defer="defer"/>
-            </t>
             <script type="text/javascript">
                 window.addEventListener('load', function () {
-                    // 1) Google Places Autocomplete en #olxStreet
+                    var placesKey = "<t t-out="gmaps_places_key or ''"/>";
                     var input = document.getElementById('olxStreet');
-                    if (input &amp;&amp; window.google &amp;&amp; google.maps &amp;&amp; google.maps.places) {
-                        var ac = new google.maps.places.Autocomplete(input, {
-                            types: ['address'],
-                            componentRestrictions: { country: 'cl' },
-                            fields: ['address_components', 'formatted_address']
+                    var listEl = document.getElementById('olxPlacesList');
+                    var selCommune = document.getElementById('olxCommune');
+                    var debounceTimer = null;
+
+                    // Blindaje extra: si algún otro script intenta deshabilitar #olxStreet, lo mantiene editable
+                    if (input) {
+                        var keepEditable = function () {
+                            if (input.disabled || input.readOnly) {
+                                input.disabled = false;
+                                input.readOnly = false;
+                            }
+                            if (input.classList.contains('gm-err-autocomplete')) {
+                                input.classList.remove('gm-err-autocomplete');
+                                input.style.backgroundImage = 'none';
+                            }
+                        };
+                        window.gm_authFailure = keepEditable;
+                        new MutationObserver(keepEditable).observe(input, {
+                            attributes: true,
+                            attributeFilter: ['disabled', 'readonly', 'class', 'style']
                         });
-                        ac.addListener('place_changed', function () {
-                            var place = ac.getPlace();
-                            if (!place || !place.address_components) return;
-                            var route = '', streetNum = '', locality = '';
-                            place.address_components.forEach(function (c) {
-                                if (c.types.indexOf('route') !== -1) route = c.long_name;
-                                if (c.types.indexOf('street_number') !== -1) streetNum = c.long_name;
-                                if (c.types.indexOf('administrative_area_level_3') !== -1 ||
-                                    c.types.indexOf('locality') !== -1) {
-                                    locality = c.long_name.toLowerCase();
-                                }
-                            });
-                            if (route) {
-                                input.value = (route + (streetNum ? ' ' + streetNum : '')).trim();
-                                input.dispatchEvent(new Event('input', { bubbles: true }));
-                                input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    // 1) Autocompletado directo con Places API (New) en #olxStreet (sin cargar maps/api/js legacy)
+                    if (input &amp;&amp; listEl &amp;&amp; placesKey &amp;&amp; placesKey.length &gt; 10) {
+                        input.addEventListener('input', function () {
+                            var q = input.value.trim();
+                            clearTimeout(debounceTimer);
+                            if (q.length &lt; 3) {
+                                listEl.style.display = 'none';
+                                listEl.innerHTML = '';
+                                return;
                             }
-                            var sel = document.getElementById('olxCommune');
-                            if (sel &amp;&amp; locality) {
-                                if (locality.indexOf('barnechea') !== -1) sel.value = 'lo_barnechea';
-                                else if (locality.indexOf('condes') !== -1) sel.value = 'las_condes';
-                                else if (locality.indexOf('vitacura') !== -1) sel.value = 'vitacura';
-                                sel.dispatchEvent(new Event('change', { bubbles: true }));
-                            }
+                            debounceTimer = setTimeout(function () {
+                                fetch('https://places.googleapis.com/v1/places:autocomplete', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Goog-Api-Key': placesKey
+                                    },
+                                    body: JSON.stringify({
+                                        input: q,
+                                        includedRegionCodes: ['cl'],
+                                        languageCode: 'es',
+                                        locationBias: {
+                                            circle: {
+                                                center: { latitude: -33.385, longitude: -70.545 },
+                                                radius: 15000.0
+                                            }
+                                        }
+                                    })
+                                })
+                                .then(function (r) { return r.json(); })
+                                .then(function (data) {
+                                    listEl.innerHTML = '';
+                                    var suggestions = (data &amp;&amp; data.suggestions) || [];
+                                    if (!suggestions.length) {
+                                        listEl.style.display = 'none';
+                                        return;
+                                    }
+                                    suggestions.forEach(function (s) {
+                                        var pred = s.placePrediction;
+                                        if (!pred || !pred.text) return;
+                                        var fullText = pred.text.text || '';
+                                        var mainText = (pred.structuredFormat &amp;&amp; pred.structuredFormat.mainText &amp;&amp; pred.structuredFormat.mainText.text) || fullText.split(',')[0];
+                                        var secText = (pred.structuredFormat &amp;&amp; pred.structuredFormat.secondaryText &amp;&amp; pred.structuredFormat.secondaryText.text) || '';
+                                        var li = document.createElement('li');
+                                        li.className = 'list-group-item list-group-item-action py-2 small';
+                                        li.style.cursor = 'pointer';
+                                        li.innerHTML = '<strong>' + mainText + '</strong>' + (secText ? ' <span class="text-muted">' + secText + '</span>' : '');
+                                        li.addEventListener('mousedown', function (ev) {
+                                            ev.preventDefault();
+                                            input.value = mainText;
+                                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                                            var low = fullText.toLowerCase();
+                                            if (selCommune) {
+                                                if (low.indexOf('barnechea') !== -1) selCommune.value = 'lo_barnechea';
+                                                else if (low.indexOf('condes') !== -1) selCommune.value = 'las_condes';
+                                                else if (low.indexOf('vitacura') !== -1) selCommune.value = 'vitacura';
+                                                selCommune.dispatchEvent(new Event('change', { bubbles: true }));
+                                            }
+                                            listEl.style.display = 'none';
+                                        });
+                                        listEl.appendChild(li);
+                                    });
+                                    listEl.style.display = 'block';
+                                })
+                                .catch(function () {
+                                    listEl.style.display = 'none';
+                                });
+                            }, 250);
+                        });
+
+                        input.addEventListener('blur', function () {
+                            setTimeout(function () { listEl.style.display = 'none'; }, 200);
                         });
                     }
 
