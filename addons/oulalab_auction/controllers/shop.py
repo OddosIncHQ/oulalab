@@ -263,6 +263,22 @@ class OulaLabShop(http.Controller):
             otp_required=otp_required, otp_email=otp_email,
         )
 
+    @http.route("/prendas/checkout/shipping-quote", type="jsonrpc", auth="public")
+    def shop_shipping_quote(self, rut=None, email=None, commune=None, **kw):
+        """Devuelve la cotización de despacho en vivo según el carrito y si el RUT/email es suscriptora."""
+        items, _ = self._cart_items()
+        total = sum(items.mapped("price"))
+        partner = self._portal()._current_partner()
+        if not partner and (rut or email):
+            clean_rut = validate_rut(rut or "")
+            partner = self._find_existing_partner(clean_rut, (email or "").strip().lower())
+        return request.env["liquidation.shop.item"].sudo()._compute_shipping_quote(
+            items_count=len(items),
+            garments_total=total,
+            partner=partner,
+            commune=commune,
+        )
+
     @http.route("/prendas/checkout", type="http", auth="public", website=True,
                 methods=["GET"], sitemap=False)
     def shop_checkout(self, **kw):
