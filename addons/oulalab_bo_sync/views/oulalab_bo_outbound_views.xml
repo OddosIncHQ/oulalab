@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_oulalab_bo_outbound_config_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.outbound.config.form</field>
+        <field name="model">oulalab.bo.outbound.config</field>
+        <field name="arch" type="xml">
+            <form string="Webhook Saliente (Odoo -> BO) y Credenciales Mercado Pago">
+                <header>
+                    <button name="action_test_webhook" string="Probar Conexión Webhook Saliente" type="object" class="btn-primary"/>
+                    <button name="action_push_all_inventory_snapshot" string="Encolar Snapshot Completo de Stock hacia BO" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Webhook Saliente (Odoo → BackOffice)">
+                            <field name="active"/>
+                            <field name="target_url" placeholder="https://integration-service-production-1b6b.up.railway.app/webhooks/odoo"/>
+                            <field name="auth_header_name"/>
+                            <field name="auth_token" password="True"/>
+                            <field name="timeout_seconds"/>
+                            <field name="send_immediately"/>
+                        </group>
+                        <group string="Eventos Salientes Habilitados">
+                            <field name="notify_stock_changes"/>
+                            <field name="notify_product_changes"/>
+                            <field name="notify_rental_changes"/>
+                        </group>
+                    </group>
+                    <group string="Integración Tiempo Real con Mercado Pago (Webhook / API)">
+                        <group>
+                            <field name="mp_access_token" password="True" placeholder="APP_USR-..."/>
+                            <field name="mp_webhook_secret" password="True"/>
+                        </group>
+                        <group>
+                            <div class="alert alert-info" role="status" colspan="2">
+                                <strong>URLs Webhook de Entrada en Odoo:</strong>
+                                <ul class="mb-0">
+                                    <li><strong>Desde BackOffice:</strong> <code>https://odoo.oulalab.com/api/oulalab/bo/webhook</code></li>
+                                    <li><strong>Desde Mercado Pago:</strong> <code>https://odoo.oulalab.com/api/oulalab/mp/webhook</code></li>
+                                </ul>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_oulalab_bo_outbound_config_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.outbound.config.list</field>
+        <field name="model">oulalab.bo.outbound.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="target_url"/>
+                <field name="active"/>
+                <field name="send_immediately"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_outbound_config" model="ir.actions.act_window">
+        <field name="name">Webhook Saliente &amp; Mercado Pago</field>
+        <field name="res_model">oulalab.bo.outbound.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_oulalab_bo_outbound_queue_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.outbound.queue.list</field>
+        <field name="model">oulalab.bo.outbound.queue</field>
+        <field name="arch" type="xml">
+            <list string="Cola de Envíos hacia BackOffice">
+                <field name="name"/>
+                <field name="create_date"/>
+                <field name="event_type"/>
+                <field name="bo_sku"/>
+                <field name="attempts"/>
+                <field name="response_code"/>
+                <field name="sent_at"/>
+                <field name="state" widget="badge" decoration-success="state == 'sent'" decoration-warning="state == 'pending'" decoration-danger="state == 'failed'"/>
+                <button name="action_send_now" string="Reenviar" type="object" icon="fa-paper-plane" invisible="state == 'sent'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_oulalab_bo_outbound_queue_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.outbound.queue.form</field>
+        <field name="model">oulalab.bo.outbound.queue</field>
+        <field name="arch" type="xml">
+            <form string="Detalle de Evento Saliente">
+                <header>
+                    <button name="action_send_now" string="Enviar Ahora" type="object" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="event_type"/>
+                            <field name="bo_sku"/>
+                        </group>
+                        <group>
+                            <field name="attempts"/>
+                            <field name="response_code"/>
+                            <field name="sent_at"/>
+                            <field name="error_message"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Payload JSON Enviado">
+                            <field name="payload_json" widget="ace" options="{'mode': 'json'}"/>
+                        </page>
+                        <page string="Respuesta del BackOffice">
+                            <field name="response_body"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_outbound_queue" model="ir.actions.act_window">
+        <field name="name">Cola Webhook Saliente (Odoo → BO)</field>
+        <field name="res_model">oulalab.bo.outbound.queue</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="appointment_type_view_form_inherit_bo" model="ir.ui.view">
+        <field name="name">appointment.type.form.inherit.oulalab.bo</field>
+        <field name="model">appointment.type</field>
+        <field name="inherit_id" ref="appointment.appointment_type_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='location_id']" position="after">
+                <field name="x_bo_showroom_uuid"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

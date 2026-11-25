@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_oulalab_bo_sync_log_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.sync.log.list</field>
+        <field name="model">oulalab.bo.sync.log</field>
+        <field name="arch" type="xml">
+            <list string="Historial de Sincronizaciones BO">
+                <field name="name"/>
+                <field name="create_date"/>
+                <field name="file_name"/>
+                <field name="entity_type"/>
+                <field name="is_dry_run"/>
+                <field name="total_rows"/>
+                <field name="created_count"/>
+                <field name="updated_count"/>
+                <field name="skipped_count"/>
+                <field name="error_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'partial'" decoration-danger="state == 'failed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_oulalab_bo_sync_log_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.sync.log.form</field>
+        <field name="model">oulalab.bo.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Detalle de Sincronización BO">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="file_name"/>
+                            <field name="entity_type"/>
+                            <field name="is_dry_run"/>
+                        </group>
+                        <group>
+                            <field name="total_rows"/>
+                            <field name="created_count"/>
+                            <field name="updated_count"/>
+                            <field name="skipped_count"/>
+                            <field name="error_count"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="Notas técnicas..."/>
+                    <notebook>
+                        <page string="Detalle por Fila">
+                            <field name="line_ids">
+                                <list>
+                                    <field name="row_number"/>
+                                    <field name="external_key"/>
+                                    <field name="action" widget="badge" decoration-success="action in ('created', 'updated')" decoration-info="action == 'skipped'" decoration-danger="action == 'error'"/>
+                                    <field name="res_model"/>
+                                    <field name="res_id"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_sync_log" model="ir.actions.act_window">
+        <field name="name">Historial de Sincronizaciones</field>
+        <field name="res_model">oulalab.bo.sync.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

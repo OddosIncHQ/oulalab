@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_oulalab_bo_export_wizard_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.export.wizard.form</field>
+        <field name="model">oulalab.bo.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Exportar Planilla CSV para BackOffice OulaLab">
+                <group>
+                    <group string="Formato de Planilla BO">
+                        <field name="export_type"/>
+                        <field name="updated_since"/>
+                        <field name="include_zero_stock" invisible="export_type != 'inventory_import'"/>
+                    </group>
+                    <group string="Archivo Listo para Subir al BO" invisible="not csv_data">
+                        <field name="csv_data" filename="file_name"/>
+                        <field name="file_name" invisible="1"/>
+                        <field name="summary_text" nolabel="1" colspan="2"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" role="status">
+                    <strong>Consolidación automática:</strong> Agrupa las prendas físicas serializadas de alquiler de Odoo por su SKU BO
+                    y calcula <code>stocked</code>, <code>reserved</code> e <code>in_stock</code> según las ubicaciones configuradas.
+                </div>
+                <footer>
+                    <button name="action_generate_export" string="Generar y Descargar CSV" type="object" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_export_wizard" model="ir.actions.act_window">
+        <field name="name">Exportar Planillas hacia BO</field>
+        <field name="res_model">oulalab.bo.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

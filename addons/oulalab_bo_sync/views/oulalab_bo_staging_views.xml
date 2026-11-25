@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_oulalab_bo_staging_batch_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.staging.batch.list</field>
+        <field name="model">oulalab.bo.staging.batch</field>
+        <field name="arch" type="xml">
+            <list string="Bandeja de Revisión Previa BO">
+                <field name="name"/>
+                <field name="create_date"/>
+                <field name="source_type"/>
+                <field name="file_name"/>
+                <field name="entity_type"/>
+                <field name="total_lines"/>
+                <field name="ok_lines_count"/>
+                <field name="warning_lines_count"/>
+                <field name="error_lines_count"/>
+                <field name="approved_pending_count"/>
+                <field name="applied_lines_count"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'pending_review'"
+                       decoration-warning="state == 'partially_applied'"
+                       decoration-success="state == 'applied'"
+                       decoration-muted="state == 'discarded'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_oulalab_bo_staging_batch_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.staging.batch.form</field>
+        <field name="model">oulalab.bo.staging.batch</field>
+        <field name="arch" type="xml">
+            <form string="Revisión Previa de Cambios e Incongruencias BO">
+                <header>
+                    <button name="action_apply_approved_lines"
+                            string="Registrar Aprobados en Odoo"
+                            type="object"
+                            class="btn-primary"
+                            invisible="approved_pending_count == 0"/>
+                    <button name="action_approve_all_valid"
+                            string="Aprobar Todos (Válidos + Alertas)"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ('applied', 'discarded')"/>
+                    <button name="action_approve_only_clean_ok"
+                            string="Aprobar Solo Sin Alertas (OK)"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ('applied', 'discarded')"/>
+                    <button name="action_discard_warnings"
+                            string="Descartar con Incongruencias"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ('applied', 'discarded')"/>
+                    <button name="action_revalidate_batch"
+                            string="Re-validar contra Odoo"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ('applied', 'discarded')"/>
+                    <button name="action_discard_batch"
+                            string="Descartar Lote Completo"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state in ('applied', 'discarded')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Origen de Datos BO">
+                            <field name="source_type"/>
+                            <field name="file_name"/>
+                            <field name="entity_type"/>
+                            <field name="sync_log_id" invisible="not sync_log_id"/>
+                        </group>
+                        <group string="Diagnóstico de Validación">
+                            <field name="total_lines"/>
+                            <field name="ok_lines_count"/>
+                            <field name="warning_lines_count"/>
+                            <field name="error_lines_count"/>
+                            <field name="approved_pending_count"/>
+                            <field name="applied_lines_count"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="Notas del análisis..."/>
+                    <notebook>
+                        <page string="Registros Analizados (Cambios e Incongruencias)">
+                            <field name="line_ids">
+                                <list decoration-danger="validation_status == 'error'"
+                                      decoration-warning="validation_status == 'warning'"
+                                      decoration-success="review_decision == 'applied'"
+                                      decoration-muted="review_decision == 'discarded'">
+                                    <field name="row_number"/>
+                                    <field name="external_key"/>
+                                    <field name="existing_record_ref"/>
+                                    <field name="projected_action" widget="badge"
+                                           decoration-success="projected_action == 'created'"
+                                           decoration-info="projected_action == 'updated'"
+                                           decoration-muted="projected_action == 'skipped'"
+                                           decoration-danger="projected_action == 'error'"/>
+                                    <field name="validation_status" widget="badge"
+                                           decoration-success="validation_status == 'ok'"
+                                           decoration-warning="validation_status == 'warning'"
+                                           decoration-danger="validation_status == 'error'"/>
+                                    <field name="changes_summary"/>
+                                    <field name="inconsistencies_text"/>
+                                    <field name="review_decision" widget="badge"
+                                           decoration-info="review_decision == 'pending'"
+                                           decoration-primary="review_decision == 'approved'"
+                                           decoration-success="review_decision == 'applied'"
+                                           decoration-muted="review_decision == 'discarded'"/>
+                                    <button name="action_approve_line"
+                                            string="Aprobar"
+                                            type="object"
+                                            icon="fa-check"
+                                            invisible="review_decision in ('approved', 'applied')"/>
+                                    <button name="action_discard_line"
+                                            string="Descartar"
+                                            type="object"
+                                            icon="fa-times"
+                                            invisible="review_decision in ('discarded', 'applied')"/>
+                                </list>
+                                <form string="Detalle de Registro BO a Revisar">
+                                    <header>
+                                        <button name="action_approve_line" string="Aprobar Registro" type="object" class="btn-primary" invisible="review_decision == 'applied'"/>
+                                        <button name="action_discard_line" string="Descartar Registro" type="object" class="btn-secondary" invisible="review_decision == 'applied'"/>
+                                        <field name="review_decision" widget="statusbar"/>
+                                    </header>
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="row_number"/>
+                                                <field name="external_key"/>
+                                                <field name="target_res_model"/>
+                                                <field name="existing_record_ref"/>
+                                            </group>
+                                            <group>
+                                                <field name="projected_action"/>
+                                                <field name="validation_status"/>
+                                                <field name="applied_res_id"/>
+                                                <field name="apply_result_message"/>
+                                            </group>
+                                        </group>
+                                        <group string="Diagnóstico de Incongruencias y Cambios">
+                                            <field name="inconsistencies_text"/>
+                                            <field name="changes_summary"/>
+                                        </group>
+                                        <group string="Payload Recibido desde BO">
+                                            <field name="raw_payload_json" widget="ace" options="{'mode': 'json'}"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_staging_batch" model="ir.actions.act_window">
+        <field name="name">Revisión Previa (Cambios e Incongruencias)</field>
+        <field name="res_model">oulalab.bo.staging.batch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

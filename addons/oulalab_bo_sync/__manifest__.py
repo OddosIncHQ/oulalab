@@ -1,0 +1,40 @@
+{
+    'name': 'OulaLab BackOffice CSV & Webhook Sync',
+    'version': '19.0.15.0.0',
+    'category': 'Sales/CRM',
+    'summary': 'Sincronización BO OulaLab -> Odoo 19 con Bandeja de Revisión Previa (Staging), Validación de Incongruencias y Aprobación antes de escribir en Odoo',
+    'description': '''
+Módulo de integración para Odoo 19 Enterprise donde el BackOffice (BO) de OulaLab envía datos (vía CSV/XLSX o Webhook)
+a una Bandeja de Revisión Previa (Staging) con motor de validaciones e incongruencias antes de registrar cambios en Odoo.
+    ''',
+    'author': 'OulaLab Tech',
+    'website': 'https://oulalab.cl',
+    'license': 'LGPL-3',
+    'depends': [
+        'base',
+        'crm',
+        'calendar',
+        'appointment',
+        'product',
+        'stock',
+        'sale_management',
+        'sale_subscription',
+        'sale_renting',
+        'sale_renting_crm',
+    ],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/oulalab_bo_mapping_data.xml',
+        'data/ir_cron_data.xml',
+        'views/oulalab_bo_mapping_views.xml',
+        'views/oulalab_bo_outbound_views.xml',
+        'views/oulalab_bo_staging_views.xml',
+        'views/oulalab_bo_sync_log_views.xml',
+        'views/appointment_calendar_views.xml',
+        'wizard/oulalab_bo_import_wizard_views.xml',
+        'wizard/oulalab_bo_export_wizard_views.xml',
+        'views/menu_views.xml',
+    ],
+    'installable': True,
+    'application': True,
+}

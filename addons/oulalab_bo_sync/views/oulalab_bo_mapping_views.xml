@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Secuencias de Órdenes de Alquiler -->
+    <record id="view_oulalab_bo_rental_sequence_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.rental.sequence.list</field>
+        <field name="model">oulalab.bo.rental.sequence</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="prefix"/>
+                <field name="ir_sequence_id"/>
+                <field name="channel_scope"/>
+                <field name="is_default_creation"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_rental_sequence" model="ir.actions.act_window">
+        <field name="name">Secuencias de Órdenes de Alquiler</field>
+        <field name="res_model">oulalab.bo.rental.sequence</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Ubicaciones Stock -->
+    <record id="view_oulalab_bo_stock_config_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.stock.config.form</field>
+        <field name="model">oulalab.bo.stock.config</field>
+        <field name="arch" type="xml">
+            <form string="Ubicaciones de Stock Disponible y Flota Activa">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <field name="available_location_ids" widget="many2many_tags"/>
+                        <field name="available_location_barcodes"/>
+                    </group>
+                    <group>
+                        <field name="active_fleet_location_ids" widget="many2many_tags"/>
+                        <field name="active_fleet_location_barcodes"/>
+                    </group>
+                    <group string="Políticas de Arriendo Suscripción (rental-service BO)">
+                        <group>
+                            <field name="sub_default_duration_days"/>
+                            <field name="sub_post_expiry_grace_days"/>
+                            <field name="sub_max_duration_days"/>
+                        </group>
+                        <group>
+                            <div class="alert alert-info" role="status" colspan="2">
+                                Duración estándar por ciclo (<strong>15 días</strong>), gracia post-vencimiento (<strong>7 días</strong>) y tope máximo (<strong>90 días</strong>) aplicados cuando el arriendo no trae fecha de devolución explícita.
+                            </div>
+                        </group>
+                    </group>
+                    <group string="Composición del Ciclo (Topes por Familia de Prenda)">
+                        <field name="cycle_family_rule_ids" nolabel="1" colspan="2">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="keywords"/>
+                                <field name="max_per_cycle"/>
+                                <field name="active"/>
+                            </list>
+                        </field>
+                    </group>
+                                        <group string="Ajustes Book The Look (BTL) desde BO">
+                        <group>
+                            <field name="btl_reservation_days"/>
+                            <field name="btl_prep_days"/>
+                            <field name="btl_buffer_days"/>
+                            <field name="btl_checkout_hold_sec"/>
+                            <field name="btl_min_advance_days"/>
+                            <field name="btl_max_advance_days"/>
+                        </group>
+                        <group>
+                            <field name="btl_late_fee_daily"/>
+                            <field name="btl_extension_fee_daily"/>
+                            <field name="btl_delivery_window"/>
+                            <field name="btl_return_cutoff_time"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_oulalab_bo_stock_config_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.stock.config.list</field>
+        <field name="model">oulalab.bo.stock.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="available_location_ids" widget="many2many_tags"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_stock_config" model="ir.actions.act_window">
+        <field name="name">Ubicaciones de Stock BO</field>
+        <field name="res_model">oulalab.bo.stock.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Comunas -->
+    <record id="view_oulalab_bo_commune_map_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.commune.map.list</field>
+        <field name="model">oulalab.bo.commune.map</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="bo_code"/>
+                <field name="city_name"/>
+                <field name="state_id"/>
+                <field name="in_coverage"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_commune_map" model="ir.actions.act_window">
+        <field name="name">Mapeo de Comunas BO</field>
+        <field name="res_model">oulalab.bo.commune.map</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Etapas Lead -->
+    <record id="view_oulalab_bo_stage_map_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.stage.map.list</field>
+        <field name="model">oulalab.bo.stage.map</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="bo_status"/>
+                <field name="odoo_stage_id"/>
+                <field name="odoo_stage_name"/>
+                <field name="out_of_zone_stage_id"/>
+                <field name="out_of_zone_stage_name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_stage_map" model="ir.actions.act_window">
+        <field name="name">Mapeo de Etapas CRM</field>
+        <field name="res_model">oulalab.bo.stage.map</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Showrooms -->
+    <record id="view_oulalab_bo_showroom_map_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.showroom.map.list</field>
+        <field name="model">oulalab.bo.showroom.map</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="bo_showroom_uuid"/>
+                <field name="appointment_type_id"/>
+                <field name="responsible_user_id"/>
+                <field name="default_duration"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_showroom_map" model="ir.actions.act_window">
+        <field name="name">Mapeo de Showrooms (Citas)</field>
+        <field name="res_model">oulalab.bo.showroom.map</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Planes -->
+    <record id="view_oulalab_bo_plan_map_list" model="ir.ui.view">
+        <field name="name">oulalab.bo.plan.map.list</field>
+        <field name="model">oulalab.bo.plan.map</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="bo_plan_code"/>
+                <field name="profile_key"/>
+                <field name="plan_type"/>
+                <field name="product_id"/>
+                <field name="rental_sequence_id"/>
+                <field name="items_per_rental"/>
+                <field name="garment_limit"/>
+                <field name="swaps_allowed"/>
+                <field name="max_premium_per_rental"/>
+                <field name="max_premium"/>
+                <field name="monthly_price"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_oulalab_bo_plan_map_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.plan.map.form</field>
+        <field name="model">oulalab.bo.plan.map</field>
+        <field name="arch" type="xml">
+            <form string="Plan de Suscripción y Política JSON v1 BO">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="bo_plan_code"/></h1>
+                    </div>
+                    <group>
+                        <group string="Identificación y Mapeo Odoo">
+                            <field name="bo_plan_uuid"/>
+                            <field name="profile_key"/>
+                            <field name="plan_type"/>
+                            <field name="product_id"/>
+                            <field name="subscription_plan_id"/>
+                            <field name="rental_sequence_id"/>
+                            <field name="monthly_price"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Cuotas y Ventanas Extraídas del JSON BO">
+                            <field name="duration_days"/>
+                            <field name="items_per_rental"/>
+                            <field name="garment_limit"/>
+                            <field name="swaps_allowed"/>
+                            <field name="swap_window_start_day"/>
+                            <field name="swap_window_end_day"/>
+                            <field name="max_premium_per_rental"/>
+                            <field name="max_premium"/>
+                        </group>
+                    </group>
+                    <group string="Add-Ons del Plan (Prenda Extra entre Swaps)">
+                        <group>
+                            <field name="addon_extra_garment_enabled"/>
+                            <field name="addon_extra_garment_price"/>
+                            <field name="addon_extra_allow_premium"/>
+                        </group>
+                    </group>
+                    <group string="Política del Plan (JSON v1 desde BackOffice)">
+                        <field name="policy_json" widget="ace" options="{'mode': 'json'}" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_plan_map" model="ir.actions.act_window">
+        <field name="name">Mapeo de Planes y Productos BO</field>
+        <field name="res_model">oulalab.bo.plan.map</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

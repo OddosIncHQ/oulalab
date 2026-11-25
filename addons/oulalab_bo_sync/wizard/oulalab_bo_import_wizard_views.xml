@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_oulalab_bo_import_wizard_form" model="ir.ui.view">
+        <field name="name">oulalab.bo.import.wizard.form</field>
+        <field name="model">oulalab.bo.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar CSV BO / Excel Mercado Pago">
+                <group>
+                    <group string="Archivo Exportado">
+                        <field name="csv_file" filename="file_name"/>
+                        <field name="file_name" invisible="1"/>
+                        <field name="entity_type"/>
+                    </group>
+                    <group string="Control y Revisión Previa">
+                        <field name="execution_mode" widget="radio"/>
+                        <field name="auto_create_partner_from_lead"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" role="status">
+                    <strong>Bandeja de Revisión Previa (Recomendado):</strong> Analiza cada fila contra los datos actuales de Odoo,
+                    detecta incongruencias (diferencias de stock físico, cambios de plan, topes de prendas, SKUs sin existencias)
+                    y te permite aprobar o descartar cada cambio antes de registrarlo definitivamente en Odoo.
+                </div>
+                <footer>
+                    <button name="action_import_csv" string="Analizar / Procesar Archivo" type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_oulalab_bo_import_wizard" model="ir.actions.act_window">
+        <field name="name">Importar CSV BO / Mercado Pago</field>
+        <field name="res_model">oulalab.bo.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

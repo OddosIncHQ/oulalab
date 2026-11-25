@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_oulalab_bo_root"
+              name="OulaLab BO Sync"
+              sequence="45"/>
+
+    <menuitem id="menu_oulalab_bo_import"
+              name="Importar CSV BO / Mercado Pago"
+              parent="menu_oulalab_bo_root"
+              action="action_oulalab_bo_import_wizard"
+              sequence="10"/>
+
+    <menuitem id="menu_oulalab_bo_staging"
+              name="Revisión Previa (Incongruencias)"
+              parent="menu_oulalab_bo_root"
+              action="action_oulalab_bo_staging_batch"
+              sequence="12"/>
+
+    <menuitem id="menu_oulalab_bo_export"
+              name="Exportar Planillas hacia BO"
+              parent="menu_oulalab_bo_root"
+              action="action_oulalab_bo_export_wizard"
+              sequence="15"/>
+
+    <menuitem id="menu_oulalab_bo_logs"
+              name="Historial de Sincronizaciones"
+              parent="menu_oulalab_bo_root"
+              action="action_oulalab_bo_sync_log"
+              sequence="20"/>
+
+    <menuitem id="menu_oulalab_bo_outbound_queue"
+              name="Cola Saliente (Odoo → BO)"
+              parent="menu_oulalab_bo_root"
+              action="action_oulalab_bo_outbound_queue"
+              sequence="25"/>
+
+    <menuitem id="menu_oulalab_bo_config"
+              name="Configuración y Mapeos"
+              parent="menu_oulalab_bo_root"
+              sequence="90"/>
+
+    <menuitem id="menu_oulalab_bo_outbound_config"
+              name="Webhook Saliente &amp; Mercado Pago"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_outbound_config"
+              sequence="1"/>
+
+    <menuitem id="menu_oulalab_bo_rental_sequence"
+              name="Secuencias de Alquiler (RO / STKOUT)"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_rental_sequence"
+              sequence="3"/>
+
+    <menuitem id="menu_oulalab_bo_stock_config"
+              name="Ubicaciones de Stock"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_stock_config"
+              sequence="5"/>
+
+    <menuitem id="menu_oulalab_bo_plan_map"
+              name="Planes y Productos"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_plan_map"
+              sequence="10"/>
+
+    <menuitem id="menu_oulalab_bo_commune_map"
+              name="Comunas BO"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_commune_map"
+              sequence="20"/>
+
+    <menuitem id="menu_oulalab_bo_stage_map"
+              name="Etapas de Leads"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_stage_map"
+              sequence="30"/>
+
+    <menuitem id="menu_oulalab_bo_showroom_map"
+              name="Showrooms (Citas)"
+              parent="menu_oulalab_bo_config"
+              action="action_oulalab_bo_showroom_map"
+              sequence="40"/>
+</odoo>

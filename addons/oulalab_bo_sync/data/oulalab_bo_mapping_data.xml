@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Comunas habilitadas en BO (platform.geo.communes) -->
+        <record id="commune_map_vitacura" model="oulalab.bo.commune.map">
+            <field name="bo_code">com-vitacura</field>
+            <field name="city_name">Vitacura</field>
+            <field name="in_coverage">True</field>
+        </record>
+        <record id="commune_map_las_condes" model="oulalab.bo.commune.map">
+            <field name="bo_code">com-las-condes</field>
+            <field name="city_name">Las Condes</field>
+            <field name="in_coverage">True</field>
+        </record>
+        <record id="commune_map_lo_barnechea" model="oulalab.bo.commune.map">
+            <field name="bo_code">com-lo-barnechea</field>
+            <field name="city_name">Lo Barnechea</field>
+            <field name="in_coverage">True</field>
+        </record>
+        <record id="commune_map_chicureo" model="oulalab.bo.commune.map">
+            <field name="bo_code">com-chicureo</field>
+            <field name="city_name">Chicureo</field>
+            <field name="in_coverage">True</field>
+        </record>
+        <record id="commune_map_providencia" model="oulalab.bo.commune.map">
+            <field name="bo_code">com-providencia</field>
+            <field name="city_name">Providencia</field>
+            <field name="in_coverage">True</field>
+        </record>
+
+        <!-- Estados de Lead BO -> Etapas CRM -->
+        <record id="stage_map_new" model="oulalab.bo.stage.map">
+            <field name="bo_status">new</field>
+            <field name="odoo_stage_name">Prospectos</field>
+            <field name="out_of_zone_stage_name">Fuera de Zona</field>
+        </record>
+        <record id="stage_map_app_downloaded" model="oulalab.bo.stage.map">
+            <field name="bo_status">app_downloaded</field>
+            <field name="odoo_stage_name">App Descargada</field>
+        </record>
+        <record id="stage_map_unpaid" model="oulalab.bo.stage.map">
+            <field name="bo_status">unpaid</field>
+            <field name="odoo_stage_name">Suscritos Sin Pago</field>
+        </record>
+        <record id="stage_map_won" model="oulalab.bo.stage.map">
+            <field name="bo_status">subscribed</field>
+            <field name="odoo_stage_name">Ganado</field>
+        </record>
+        <record id="stage_map_churned" model="oulalab.bo.stage.map">
+            <field name="bo_status">churned</field>
+            <field name="odoo_stage_name">Churned</field>
+        </record>
+
+        <!-- Showroom principal detectado en CSV de Citas BO -->
+        <record id="showroom_map_main" model="oulalab.bo.showroom.map">
+            <field name="bo_showroom_uuid">22222222-2222-2222-2222-222222222201</field>
+            <field name="name">Showroom Principal OulaLab</field>
+            <field name="default_duration">0.5</field>
+        </record>
+
+        <!-- Secuencias parametrizables de órdenes de alquiler asociadas a suscripción -->
+        <record id="rental_seq_ro" model="oulalab.bo.rental.sequence">
+            <field name="sequence">10</field>
+            <field name="name">Órdenes de Alquiler Suscripción (RO)</field>
+            <field name="prefix">RO-</field>
+            <field name="channel_scope">subscription</field>
+            <field name="is_default_creation">True</field>
+            <field name="active">True</field>
+        </record>
+        <record id="rental_seq_stkout" model="oulalab.bo.rental.sequence">
+            <field name="sequence">20</field>
+            <field name="name">Salidas de Stock / Despacho Alquiler (STKOUT)</field>
+            <field name="prefix">STKOUT</field>
+            <field name="channel_scope">all</field>
+            <field name="is_default_creation">False</field>
+            <field name="active">True</field>
+        </record>
+        <record id="rental_seq_btl" model="oulalab.bo.rental.sequence">
+            <field name="sequence">30</field>
+            <field name="name">Órdenes Book The Look (BTL)</field>
+            <field name="prefix">BTL-RO-</field>
+            <field name="channel_scope">btl</field>
+            <field name="is_default_creation">False</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Configuración por defecto de Ubicaciones de Stock Disponible vs Flota Activa -->
+        <record id="stock_config_default" model="oulalab.bo.stock.config">
+            <field name="name">Configuración Inventario OulaLab BO</field>
+            <field name="available_location_barcodes">STKTCLLTN-LADEHESA,STKTCN-CLTCHS,STKBTL,STKBTL-CLTCHS,BTLPACKING</field>
+            <field name="active_fleet_location_barcodes">STKTCLLTN-LADEHESA,STKTCN-CLTCHS,STKBTL,STKBTL-CLTCHS,BTLPACKING,RENTALS,RENTTCN,RENTBTL,STKCLTCHS,OPRLCTN,QA01BD001,OUTSSCL,5ASECTRAPENSES,REPAIR,STKDH-PCKNG,PACKBD001,PICKSALEPREPARE,TRANSITPICKUP,REPAIRZONE,SANBD001</field>
+        </record>
+
+        <!-- Regla de Composición del Ciclo desde Políticas de Arriendo BO -->
+        <record id="cycle_family_outerwear" model="oulalab.bo.cycle.family.rule">
+            <field name="config_id" ref="stock_config_default"/>
+            <field name="name">chaquetas o abrigos</field>
+            <field name="keywords">chaqueta, chaquetas, abrigo, abrigos, campera, parka, tapado, trench, jacket, jackets, coat, coats, outerwear</field>
+            <field name="max_per_cycle">2</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>
