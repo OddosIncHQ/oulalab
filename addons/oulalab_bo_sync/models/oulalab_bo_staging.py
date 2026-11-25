@@ -267,7 +267,7 @@ class OulalabBoStagingLine(models.Model):
                 rec.review_decision = 'discarded'
 
     def _execute_upsert_for_entity(self, resolved_type, row, auto_create_partner=False, dry_run=True):
-        env = self.env.with_context(skip_bo_outbound=True)
+        env = self.with_context(skip_bo_outbound=True).env
         if resolved_type == 'plans':
             return env['oulalab.bo.plan.map'].upsert_from_bo_plan(row, dry_run=dry_run)
         elif resolved_type == 'categories':
