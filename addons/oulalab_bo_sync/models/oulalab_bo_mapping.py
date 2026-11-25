@@ -36,9 +36,10 @@ class OulalabBoRentalSequence(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('prefix_uniq', 'unique(prefix)', 'El prefijo de secuencia de alquiler debe ser único.'),
-    ]
+    _prefix_uniq = models.Constraint(
+        'unique(prefix)',
+        'El prefijo de secuencia de alquiler debe ser único.',
+    )
 
     @api.model
     def get_configured_prefixes(self):
@@ -203,9 +204,10 @@ class OulalabBoCommuneMap(models.Model):
     in_coverage = fields.Boolean(string='Dentro de Zona de Cobertura', default=True)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('bo_code_uniq', 'unique(bo_code)', 'El código de comuna BO debe ser único.'),
-    ]
+    _bo_code_uniq = models.Constraint(
+        'unique(bo_code)',
+        'El código de comuna BO debe ser único.',
+    )
 
     @api.model
     def resolve_commune(self, bo_code):
@@ -235,9 +237,10 @@ class OulalabBoStageMap(models.Model):
     out_of_zone_stage_name = fields.Char(string='Nombre Etapa Fuera de Zona (Fallback)', default='Fuera de Zona')
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('bo_status_uniq', 'unique(bo_status)', 'El estado de lead BO debe ser único.'),
-    ]
+    _bo_status_uniq = models.Constraint(
+        'unique(bo_status)',
+        'El estado de lead BO debe ser único.',
+    )
 
     @api.model
     def resolve_stage(self, bo_status, in_coverage=True):
@@ -276,9 +279,10 @@ class OulalabBoShowroomMap(models.Model):
     default_duration = fields.Float(string='Duración (Horas)', default=0.5)
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('bo_showroom_uuid_uniq', 'unique(bo_showroom_uuid)', 'El UUID del Showroom BO debe ser único.'),
-    ]
+    _bo_showroom_uuid_uniq = models.Constraint(
+        'unique(bo_showroom_uuid)',
+        'El UUID del Showroom BO debe ser único.',
+    )
 
     @api.model
     def resolve_showroom(self, showroom_uuid):

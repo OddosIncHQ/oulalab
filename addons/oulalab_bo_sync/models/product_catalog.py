@@ -127,7 +127,7 @@ class ProductTemplate(models.Model):
 
     x_bo_operational_status = fields.Char(string='Estado Operativo BO', copy=False)
     x_bo_photo_urls = fields.Text(string='URLs Fotos BO', copy=False)
-    x_bo_sku = fields.Char(string='SKU BO', index=True, copy=False)
+    x_bo_sku = fields.Char(string='Código SKU BO Sync', index=True, copy=False)
 
     @api.model
     def _filter_existing_fields(self, vals):
