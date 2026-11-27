@@ -31,6 +31,7 @@ a una Bandeja de Revisión Previa (Staging) con motor de validaciones e incongru
         'views/oulalab_bo_staging_views.xml',
         'views/oulalab_bo_sync_log_views.xml',
         'views/appointment_calendar_views.xml',
+        'views/bo_sync_views.xml',
         'wizard/oulalab_bo_import_wizard_views.xml',
         'wizard/oulalab_bo_export_wizard_views.xml',
         'views/menu_views.xml',
