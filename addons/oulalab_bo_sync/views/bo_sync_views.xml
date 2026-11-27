@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Herencia en Pedido de Venta / Alquiler -->
+    <record id="view_order_form_bo_sync" model="ir.ui.view">
+        <field name="name">sale.order.form.bo.sync</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Campos BO en la pestaña "Otra información" -->
+            <xpath expr="//group[@name='sales_person']" position="after">
+                <group string="Back Office (BO)" name="bo_sync_group">
+                    <field name="bo_order_ref"/>
+                    <field name="bo_rental_id"/>
+                    <field name="bo_sync_status" widget="badge"
+                           decoration-success="bo_sync_status == 'synced'"
+                           decoration-warning="bo_sync_status == 'partial'"
+                           decoration-danger="bo_sync_status == 'manual_review'"/>
+                    <field name="bo_last_sync" readonly="1"/>
+                </group>
+            </xpath>
+
+            <!-- Columnas BO en las líneas del pedido -->
+            <xpath expr="//field[@name='order_line']/list//field[@name='product_uom_qty']" position="after">
+                <field name="bo_garment_id" optional="hide"/>
+                <field name="bo_rental_line_id" optional="hide"/>
+                <field name="is_manual_odoo_line" optional="show" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- 2. Herencia en Ficha de Producto -->
+    <record id="product_template_form_bo_sync" model="ir.ui.view">
+        <field name="name">product.template.form.bo.sync</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+                <field name="bo_garment_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- 3. Vista del Wizard -->
+    <record id="view_bo_backfill_wizard_form" model="ir.ui.view">
+        <field name="name">bo.backfill.wizard.form</field>
+        <field name="model">bo.backfill.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sincronización Histórica BO">
+                <group>
+                    <field name="file_data" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                    <field name="dry_run"/>
+                    <field name="overwrite"/>
+                </group>
+                <group string="Resultado" invisible="not result_log">
+                    <field name="result_log" nolabel="1" colspan="2"/>
+                </group>
+                <footer>
+                    <button name="action_run_sync" string="Ejecutar" type="object" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- 4. Acción y Menú -->
+    <record id="action_bo_backfill_wizard" model="ir.actions.act_window">
+        <field name="name">Sincronizar Históricos BO</field>
+        <field name="res_model">bo.backfill.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_bo_backfill_wizard"
+              name="Sincronizar Históricos BO"
+              parent="sale.menu_sale_config"
+              action="action_bo_backfill_wizard"
+              sequence="90"/>
+</odoo>
