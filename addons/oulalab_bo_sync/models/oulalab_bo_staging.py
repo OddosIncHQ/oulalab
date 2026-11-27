@@ -45,6 +45,10 @@ class OulalabBoStagingBatch(models.Model):
     file_name = fields.Char(string='Origen / Archivo', readonly=True)
     entity_type = fields.Selection(ENTITY_SELECTION, string='Entidad BO', required=True, readonly=True)
     auto_create_partner_from_lead = fields.Boolean(string='Auto-crear Contacto desde Lead', readonly=True)
+    only_update_existing = fields.Boolean(
+        string='Solo Actualizar Existentes (Sin Crear Nuevos)',
+        help='Si está activo, toda fila cuya acción proyectada sea Crear Nuevo será omitida/descartada automáticamente.',
+    )
     state = fields.Selection(
         [
             ('pending_review', 'Pendiente de Revisión'),
@@ -130,12 +134,31 @@ class OulalabBoStagingBatch(models.Model):
             eff_type = line.effective_entity_type or self.entity_type
             try:
                 with self.env.cr.savepoint():
-                    action, rec, msg = line._execute_upsert_for_entity(
-                        eff_type,
-                        row,
-                        auto_create_partner=self.auto_create_partner_from_lead,
-                        dry_run=False,
-                    )
+                    if self.only_update_existing:
+                        dry_act, dry_rec, dry_msg = line._execute_upsert_for_entity(
+                            eff_type,
+                            row,
+                            auto_create_partner=False,
+                            dry_run=True,
+                        )
+                        if dry_act == 'created' or not dry_rec:
+                            action = 'skipped'
+                            rec = self.env['sale.order'].browse()
+                            msg = f"Omitido por modo 'Solo actualizar existentes': {dry_msg}"
+                        else:
+                            action, rec, msg = line._execute_upsert_for_entity(
+                                eff_type,
+                                row,
+                                auto_create_partner=False,
+                                dry_run=False,
+                            )
+                    else:
+                        action, rec, msg = line._execute_upsert_for_entity(
+                            eff_type,
+                            row,
+                            auto_create_partner=self.auto_create_partner_from_lead,
+                            dry_run=False,
+                        )
                 if action == 'created':
                     created += 1
                 elif action == 'updated':
@@ -509,15 +532,21 @@ class OulalabBoStagingLine(models.Model):
             eff_type = line.effective_entity_type or line.batch_id.entity_type
             try:
                 with self.env.cr.savepoint():
+                    only_upd = line.batch_id.only_update_existing
                     action, rec, dry_msg = line._execute_upsert_for_entity(
                         eff_type,
                         row,
-                        auto_create_partner=line.batch_id.auto_create_partner_from_lead,
+                        auto_create_partner=(False if only_upd else line.batch_id.auto_create_partner_from_lead),
                         dry_run=True,
                     )
-                blockers, warnings, diffs = line._detect_business_inconsistencies(
-                    eff_type, row, action, rec, dry_msg
-                )
+                if line.batch_id.only_update_existing and (action == 'created' or not rec):
+                    action = 'skipped'
+                    dry_msg = f"Omitido (Modo Solo Actualizar Existentes en Odoo): {dry_msg}"
+                    blockers, warnings, diffs = [], [dry_msg], [dry_msg]
+                else:
+                    blockers, warnings, diffs = line._detect_business_inconsistencies(
+                        eff_type, row, action, rec, dry_msg
+                    )
             except Exception as exc:
                 action = 'error'
                 rec = False
