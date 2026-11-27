@@ -110,7 +110,7 @@
                     </group>
                     <notebook>
                         <page string="Payload JSON Enviado">
-                            <field name="payload_json" widget="ace" options="{'mode': 'json'}"/>
+                            <field name="payload_json" widget="ace" options="{'mode': 'js'}"/>
                         </page>
                         <page string="Respuesta del BackOffice">
                             <field name="response_body"/>
