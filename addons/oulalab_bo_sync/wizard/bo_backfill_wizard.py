@@ -16,6 +16,11 @@ class BoBackfillWizard(models.TransientModel):
 
     file_data = fields.Binary(string='Archivo Excel / CSV', required=True)
     file_name = fields.Char(string='Nombre del archivo')
+    date_window_days = fields.Integer(
+        string='Ventana de fechas (± días)',
+        default=7,
+        help='Margen de días hacia atrás y adelante respecto a la fecha del BO para buscar la orden en Odoo.',
+    )
     skip_unlinked_cancelled = fields.Boolean(
         string='Omitir cancelados sin arriendo vinculado',
         default=True,
@@ -107,6 +112,7 @@ class BoBackfillWizard(models.TransientModel):
             bo_orders=bo_orders,
             overwrite=self.overwrite,
             dry_run=self.dry_run,
+            date_window_days=self.date_window_days,
         )
 
         mode_label = 'SIMULACIÓN (sin cambios guardados)' if self.dry_run else 'EJECUCIÓN REAL'
