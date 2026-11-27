@@ -151,7 +151,7 @@ class OulaLabShop(http.Controller):
             return {"ok": False, "error": "Esta prenda ya no está disponible."}
         cart = list(request.session.get(CART_KEY, []))
         if item.id not in cart:
-            cart.append(item.id)  # cada prenda es una sola unidad: nunca cantidad 2
+            cart.append(item.id)
         request.session[CART_KEY] = cart
         return {"ok": True, "count": len(cart)}
 
@@ -183,7 +183,6 @@ class OulaLabShop(http.Controller):
     # ------------------------------------------------------------------
     @staticmethod
     def _mask_email(email):
-        """v***a@gmail.com — para nombrar el correo sin revelarlo entero."""
         email = (email or "").strip()
         if "@" not in email:
             return ""
@@ -195,11 +194,6 @@ class OulaLabShop(http.Controller):
         return "%s@%s" % (visible, domain)
 
     def _find_existing_partner(self, clean_rut, email):
-        """Contacto ya registrado que coincide por RUT o por correo.
-
-        Se busca también por correo para no crear duplicados y para que el
-        correo ajeno quede igual de protegido que el RUT ajeno.
-        """
         Partner = request.env["res.partner"].sudo()
         found = self._portal()._find_partner_by_rut(clean_rut)
         if found:
@@ -212,7 +206,6 @@ class OulaLabShop(http.Controller):
         return Partner.browse()
 
     def _is_verified(self, partner):
-        """True si esta sesión ya demostró ser dueña de ese contacto."""
         if not partner:
             return False
         current = self._portal()._current_partner()
@@ -227,7 +220,6 @@ class OulaLabShop(http.Controller):
         request.session[VERIFIED_KEY] = ids
 
     def _otp_send(self, partner):
-        """Envía un código al correo REGISTRADO del contacto, nunca al tecleado."""
         code = "%06d" % secrets.randbelow(1000000)
         request.session[OTP_KEY] = {
             "partner_id": partner.id,
@@ -254,7 +246,6 @@ class OulaLabShop(http.Controller):
         mail.send()
 
     def _otp_check(self, partner, code):
-        """(ok, mensaje_de_error). Consume el código al acertar."""
         data = request.session.get(OTP_KEY) or {}
         if not data or data.get("partner_id") != partner.id:
             return False, "Necesitamos verificar tu correo. Te enviamos un código nuevo."
@@ -313,7 +304,6 @@ class OulaLabShop(http.Controller):
 
     @http.route("/prendas/checkout/shipping-quote", type="jsonrpc", auth="public")
     def shop_shipping_quote(self, rut=None, email=None, commune=None, **kw):
-        """Devuelve la cotización de despacho en vivo según el carrito y si el RUT/email es suscriptora."""
         items, _ = self._cart_items()
         total = sum(items.mapped("price"))
         partner = self._portal()._current_partner()
@@ -379,4 +369,91 @@ class OulaLabShop(http.Controller):
         if not EMAIL_RE.match(email):
             return fail("El correo no es válido.")
         if len(re.sub(r"\D", "", form["phone"])) < 8:
-            return fail("Indica un teléfono de contacto válido
+            return fail("Indica un teléfono de contacto válido.")
+
+        Partner = request.env["res.partner"].sudo()
+        mode = form["mode"] if form["mode"] in ("pickup", "delivery") else "pickup"
+        delivery_vals, error = self._portal()._validate_delivery(
+            Partner, mode, form["commune"], form["street"])
+        if error:
+            return fail(error)
+
+        existing = self._portal()._current_partner() or \
+            self._find_existing_partner(clean_rut, email)
+        if existing and not self._is_verified(existing):
+            if not existing.email:
+                return fail("Ese RUT ya está registrado y no tiene correo asociado. "
+                            "Escríbenos a hola@oulalab.com para completar tu compra.")
+            masked = self._mask_email(existing.email)
+            code = (post.get("otp") or "").strip()
+            if not code:
+                self._otp_send(existing)
+                return fail(
+                    "Ese RUT o correo ya está registrado con nosotros. Te enviamos un "
+                    "código de 6 dígitos a %s para confirmar que eres tú." % masked,
+                    otp_required=True, otp_email=masked)
+            ok, msg = self._otp_check(existing, code)
+            if not ok:
+                if "código nuevo" in msg or "venció" in msg:
+                    self._otp_send(existing)
+                return fail(msg, otp_required=True, otp_email=masked)
+            self._mark_verified(existing)
+
+        partner, shipping = self._resolve_partner(
+            form, clean_rut, email, mode, delivery_vals, existing=existing)
+        Item = request.env["liquidation.shop.item"].sudo()
+        try:
+            order = Item._shop_create_order(items, partner, shipping,
+                                            with_bag=form["oulabag"], delivery_mode=mode)
+        except (UserError, ValidationError) as e:
+            request.env.cr.rollback()
+            return fail(str(getattr(e, "args", [e])[0]))
+
+        request.session[CART_KEY] = []
+        request.session[LAST_ORDER_KEY] = order.id
+        request.session[LAST_ORDER_TS_KEY] = time.time()
+        return request.redirect(self._order_portal_relative_url(order))
+
+    def _resolve_partner(self, form, clean_rut, email, mode, delivery_vals, existing=None):
+        Partner = request.env["res.partner"].sudo()
+        cl_country = request.env.ref("base.cl", raise_if_not_found=False)
+        country_id = cl_country.id if cl_country else False
+        partner = existing
+        if partner:
+            partner = partner.sudo()
+            fill = {}
+            if not partner.vat:
+                fill["vat"] = clean_rut
+            if not partner.phone:
+                fill["phone"] = form["phone"]
+            if not partner.email:
+                fill["email"] = email
+            if not partner.country_id and country_id:
+                fill["country_id"] = country_id
+            if not partner.auction_delivery_mode:
+                fill.update(delivery_vals)
+            if fill:
+                partner.write(fill)
+        else:
+            partner = Partner.create(dict(
+                delivery_vals, name=form["name"], email=email,
+                vat=clean_rut, phone=form["phone"], country_id=country_id,
+            ))
+
+        shipping = partner
+        if mode == "delivery":
+            same = (partner.street or "").strip().lower() == form["street"].lower() \
+                and partner.auction_commune == form["commune"]
+            if not same:
+                communes = dict(Partner._fields["auction_commune"].selection)
+                shipping = Partner.create({
+                    "type": "delivery",
+                    "parent_id": partner.id,
+                    "name": form["name"],
+                    "street": form["street"],
+                    "street2": form.get("street2") or False,
+                    "city": communes.get(form["commune"]),
+                    "phone": form["phone"],
+                    "country_id": country_id,
+                })
+        return partner, shipping
