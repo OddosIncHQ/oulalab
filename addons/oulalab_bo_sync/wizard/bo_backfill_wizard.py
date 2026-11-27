@@ -1,9 +1,7 @@
-# wizard/bo_backfill_wizard.py
 import base64
 import csv
 import io
-from collections import defaultdict
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 try:
@@ -18,6 +16,11 @@ class BoBackfillWizard(models.TransientModel):
 
     file_data = fields.Binary(string='Archivo Excel / CSV', required=True)
     file_name = fields.Char(string='Nombre del archivo')
+    skip_unlinked_cancelled = fields.Boolean(
+        string='Omitir cancelados sin arriendo vinculado',
+        default=True,
+        help='Ignora los pedidos en estado cancelled que no tienen Arriendo vinculado.',
+    )
     overwrite = fields.Boolean(
         string='Sobrescribir datos existentes',
         default=False,
@@ -55,34 +58,47 @@ class BoBackfillWizard(models.TransientModel):
 
         raise UserError(_('Formato no soportado. Sube un archivo .xlsx o .csv.'))
 
-    def _group_by_order(self, rows):
-        grouped = {}
+    def _parse_bo_orders(self, rows):
+        orders = []
         for row in rows:
-            ref = str(row.get('order_ref') or '').strip()
+            ref = str(row.get('Código del pedido') or '').strip()
             if not ref:
                 continue
-            if ref not in grouped:
-                grouped[ref] = {
-                    'order_ref': ref,
-                    'rental_id': str(row.get('rental_id') or '').strip() or False,
-                    'customer_email': str(row.get('customer_email') or '').strip() or False,
-                    'customer_vat': str(row.get('customer_vat') or '').strip() or False,
-                    'order_date': row.get('order_date'),
-                    'lines': [],
-                }
-            sku = str(row.get('sku') or '').strip()
-            if sku:
-                grouped[ref]['lines'].append({
-                    'sku': sku,
-                    'garment_id': str(row.get('garment_id') or '').strip() or False,
-                    'line_id': str(row.get('line_id') or '').strip() or False,
+
+            estado = str(row.get('Estado') or '').strip().lower()
+            rental_id = str(row.get('Arriendo vinculado') or '').strip() or False
+
+            if self.skip_unlinked_cancelled and estado == 'cancelled' and not rental_id:
+                continue
+
+            item_ids = [x.strip() for x in str(row.get('IDs de ítems del pedido') or '').split(';') if x.strip()]
+            item_skus = [x.strip() for x in str(row.get('SKUs de ítems') or '').split(';') if x.strip()]
+            item_names = [x.strip() for x in str(row.get('Nombres de ítems') or '').split(';') if x.strip()]
+
+            lines = []
+            for i in range(max(len(item_ids), len(item_skus))):
+                lines.append({
+                    'line_id': item_ids[i] if i < len(item_ids) else False,
+                    'sku': item_skus[i] if i < len(item_skus) else False,
+                    'name': item_names[i] if i < len(item_names) else '',
                 })
-        return list(grouped.values())
+
+            orders.append({
+                'order_ref': ref,
+                'internal_id': str(row.get('ID interno') or '').strip() or False,
+                'rental_id': rental_id,
+                'rental_state': str(row.get('Estado del arriendo vinculado') or '').strip() or False,
+                'channel': str(row.get('Canal') or '').strip() or False,
+                'customer_email': str(row.get('Email del cliente') or '').strip() or False,
+                'order_date': str(row.get('Fecha de creación') or '').strip() or False,
+                'lines': lines,
+            })
+        return orders
 
     def action_run_sync(self):
         self.ensure_one()
         rows = self._parse_rows()
-        bo_orders = self._group_by_order(rows)
+        bo_orders = self._parse_bo_orders(rows)
 
         if not bo_orders:
             raise UserError(_('No se encontraron pedidos válidos en el archivo.'))
