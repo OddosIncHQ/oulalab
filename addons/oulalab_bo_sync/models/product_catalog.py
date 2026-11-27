@@ -191,9 +191,14 @@ class ProductTag(models.Model):
 
     @api.model
     def upsert_from_bo_occasion(self, row, dry_run=False):
-        name = (row.get('Nombre') or '').strip()
+        clean_row = {
+            str(k).lstrip('\ufeff').strip().lower(): (str(v).strip() if v is not None else '')
+            for k, v in row.items()
+            if k is not None
+        }
+        name = clean_row.get('nombre') or clean_row.get('descripción') or clean_row.get('descripcion') or ''
         if not name:
-            return 'skipped', self.browse(), 'Fila de ocasión sin Nombre (registro vacío en BO).'
+            return 'skipped', self.browse(), 'Fila de ocasión sin Nombre ni Descripción (registro vacío en BO).'
 
         existing = self.search([('name', '=ilike', name)], limit=1)
         if existing:
