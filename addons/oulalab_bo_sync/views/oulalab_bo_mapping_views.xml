@@ -64,7 +64,7 @@
                             </list>
                         </field>
                     </group>
-                                        <group string="Ajustes Book The Look (BTL) desde BO">
+                    <group string="Ajustes Book The Look (BTL) desde BO">
                         <group>
                             <field name="btl_reservation_days"/>
                             <field name="btl_prep_days"/>
@@ -228,7 +228,7 @@
                         </group>
                     </group>
                     <group string="Política del Plan (JSON v1 desde BackOffice)">
-                        <field name="policy_json" widget="ace" options="{'mode': 'json'}" nolabel="1" colspan="2"/>
+                        <field name="policy_json" widget="ace" options="{'mode': 'js'}" nolabel="1" colspan="2"/>
                     </group>
                 </sheet>
             </form>
