@@ -72,6 +72,7 @@
                             <field name="source_type"/>
                             <field name="file_name"/>
                             <field name="entity_type"/>
+                            <field name="only_update_existing" readonly="state in ('applied', 'discarded')"/>
                             <field name="sync_log_id" invisible="not sync_log_id"/>
                         </group>
                         <group string="Diagnóstico de Validación">
