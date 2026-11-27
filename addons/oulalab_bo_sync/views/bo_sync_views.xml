@@ -50,6 +50,7 @@
                 <group>
                     <field name="file_data" filename="file_name"/>
                     <field name="file_name" invisible="1"/>
+                    <field name="date_window_days"/>
                     <field name="skip_unlinked_cancelled"/>
                     <field name="dry_run"/>
                     <field name="overwrite"/>
