@@ -11,7 +11,7 @@ SPANISH_MONTHS = {
 
 
 def _pick(row, candidates):
-    lower_map = {str(k).strip().lower(): v for k, v in row.items() if k is not None}
+    lower_map = {str(k).lstrip('\ufeff').strip().lower(): v for k, v in row.items() if k is not None}
     for cand in candidates:
         val = lower_map.get(cand.lower())
         if val is not None and str(val).strip() != '':
@@ -189,6 +189,37 @@ class SaleOrder(models.Model):
 
         is_cancelled = status_raw in ('cancelled', 'canceled', 'churned')
         is_paused = status_raw in ('paused',)
+
+        # Proteger contrato activo contra ciclos históricos de 30 días más antiguos
+        if existing and next_dt and 'next_invoice_date' in existing._fields and existing.next_invoice_date:
+            if next_dt.date() < existing.next_invoice_date:
+                return 'skipped', existing, (
+                    f"Ciclo histórico omitido para {existing.name}: expiración BO ({next_dt.date()}) "
+                    f"es anterior a la vigencia actual en Odoo ({existing.next_invoice_date})."
+                )
+
+        if existing and is_cancelled and 'subscription_state' in existing._fields and existing.subscription_state == '3_progress':
+            if not next_dt or (existing.next_invoice_date and next_dt.date() <= existing.next_invoice_date):
+                return 'skipped', existing, (
+                    f"Cancelación histórica omitida para {existing.name}: ciclo antiguo "
+                    f"({next_dt.date() if next_dt else 'sin fecha'}) no puede cancelar contrato activo "
+                    f"vigente hasta {existing.next_invoice_date or 'N/A'}."
+                )
+
+        # Proteger contrato activo contra ciclos futuros pre-creados (ej. 3 días antes por cron BO)
+        today = fields.Date.today()
+        if (
+            existing
+            and start_dt
+            and start_dt.date() > today
+            and 'subscription_state' in existing._fields
+            and existing.subscription_state == '3_progress'
+            and status_raw != 'active'
+        ):
+            return 'skipped', existing, (
+                f"Ciclo futuro pre-creado omitido para {existing.name}: inicia el {start_dt.date()} "
+                f"en estado '{status_raw}' y no debe alterar el contrato activo en curso."
+            )
 
         if partner and not dry_run:
             p_vals = {
@@ -466,7 +497,6 @@ class SaleOrder(models.Model):
             f"Op MP {op_num} [{mp_status}] -> {target_order.name} "
             f"(Bruto: ${gross_amt:,.0f} | Comisión: ${fee_amt:,.0f} | Neto: ${net_amt:,.0f})"
         )
-
 
     # -------------------------------------------------------------------------
     # 4. ÓRDENES DE ALQUILER (rentals-*.csv -> Secuencias parametrizables RO / STKOUT)
@@ -905,7 +935,6 @@ class SaleOrder(models.Model):
                 body=f"<b>Devolución BO ({ret_id})</b>: estado actualizado a <b>{status_raw}</b>."
             )
         return 'updated', order, f"Devolución ({status_raw}) vinculada a {order.name}"
-
 
     # -------------------------------------------------------------------------
     # 8. WEBHOOK EN TIEMPO REAL MERCADO PAGO (API GET /v1/payments/{payment_id})
