@@ -3,6 +3,41 @@ from odoo import api, fields, models
 
 UUID_RE = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
 
+BO_STYLE_NAMES = {
+    'boho', 'cargo', 'casual', 'clásico', 'clasico', 'contemporáneo', 'contemporaneo',
+    'country', 'cowgirl', 'edgy', 'elegante', 'glam', 'grunge', 'gráfico', 'grafico',
+    'kitsch', 'maximalista', 'minimalista', 'moderno', 'moto', 'noventero',
+    'office / sastrero', 'outbound', 'party', 'patchwork', 'pop', 'preppy', 'punk',
+    'retro', 'rockero', 'romántico', 'romantico', 'setentero', 'sofisticada',
+    'vanguardista', 'vintage', 'western',
+}
+
+# Mapeo de nombres repetidos/sinónimos del BO -> Nombre canónico limpio en Odoo
+BO_CATEGORY_CANONICAL_MAP = {
+    'chaquetas': 'Chaquetas y Blazers',
+    'sweaters y polerones': 'Tejidos y Sudaderas',
+    'knitwear': 'Tejidos y Sudaderas',
+    'sweaters, hoodies & other warm vest': 'Tejidos y Sudaderas',
+    'gilet': 'Abrigos',
+    'lencera': 'Poleras y Tops',
+    'shirts, tops & blouses': 'Poleras y Tops',
+    'dresses & skirts': 'Vestidos',
+    'vestidos y enteritos': 'Vestidos',
+    'jumpsuits & other one piece apparels': 'Enteritos',
+}
+
+# Subcategorías que deben quedar anidadas bajo un padre específico (en minúsculas)
+BO_SUBCATEGORY_PARENT_MAP = {
+    'maxi': 'Vestidos',
+    'midi': 'Vestidos',
+    'mini': 'Vestidos',
+    'faldas maxi': 'Faldas',
+    'faldas midi': 'Faldas',
+    'faldas mini': 'Faldas',
+    'skorts': 'Faldas',
+    'abrigos de pelo': 'Abrigos',
+}
+
 
 class ProductCategory(models.Model):
     _inherit = 'product.category'
@@ -39,58 +74,89 @@ class ProductCategory(models.Model):
     @api.model
     def upsert_from_bo_category(self, row, dry_run=False):
         cat_uuid = (row.get('Id') or row.get('ID') or '').strip()
-        name = (row.get('Nombre') or '').strip()
-        if not name or UUID_RE.match(name):
+        raw_name = (row.get('Nombre') or '').strip()
+        if not raw_name or UUID_RE.match(raw_name):
             return 'skipped', self.browse(), 'Fila de categoría sin Nombre válido.'
+
+        name_lower = raw_name.lower()
+
+        # 1. Estilos del BO -> derivar a product.tag para no ensuciar product.category
+        if name_lower in BO_STYLE_NAMES:
+            if not dry_run:
+                Tag = self.env['product.tag'].sudo()
+                if not Tag.search([('name', '=ilike', raw_name)], limit=1):
+                    Tag.create({'name': raw_name})
+            return 'skipped', self.browse(), f"Estilo '{raw_name}' derivado a Etiqueta (product.tag), omitido de categorías."
 
         default_parent = self._get_default_bo_parent_category()
 
-        # 1. Buscar por UUID del BO
-        existing = self._find_by_bo_uuid(cat_uuid) if cat_uuid else self.browse()
-
-        # 2. Buscar por nombre SOLO dentro de Subscription Apparels (evita colisionar con Book The Look)
-        if not existing and default_parent:
-            existing = self.search([
-                ('name', '=ilike', name),
+        # 2. Resolver nombre canónico (unifica repetidas) y padre esperado (subcategorías)
+        canonical_name = BO_CATEGORY_CANONICAL_MAP.get(name_lower, raw_name)
+        expected_parent = default_parent
+        parent_name = BO_SUBCATEGORY_PARENT_MAP.get(name_lower)
+        if parent_name and default_parent:
+            parent_cat = self.search([
+                ('name', '=ilike', parent_name),
                 ('id', 'child_of', default_parent.id),
             ], limit=1)
+            if parent_cat:
+                expected_parent = parent_cat
 
-        # 3. Fallback: rescatar categoría huérfana (sin padre) con el mismo nombre
-        if not existing:
+        # 3. Buscar categoría existente: primero por nombre canónico dentro de Subscription Apparels
+        existing = self.browse()
+        if expected_parent:
             existing = self.search([
-                ('name', '=ilike', name),
-                ('parent_id', '=', False),
-                ('name', '!=', 'All'),
+                ('name', '=ilike', canonical_name),
+                ('id', 'child_of', expected_parent.id),
             ], limit=1)
+        if not existing and default_parent:
+            existing = self.search([
+                ('name', '=ilike', canonical_name),
+                ('id', 'child_of', default_parent.id),
+            ], limit=1)
+        if not existing and cat_uuid:
+            existing = self._find_by_bo_uuid(cat_uuid).filtered(
+                lambda c: not default_parent or c.id in self.search([('id', 'child_of', default_parent.id)]).ids
+            )[:1]
 
-        vals = {}
-        if cat_uuid:
-            vals['x_bo_category_uuid'] = cat_uuid
-
+        # 4. Vincular UUID(s) a la categoría canónica existente sin romper jerarquía
         if existing:
             if not dry_run:
                 for cat in existing:
-                    cat_vals = dict(vals)
-                    # Proteger estructura: solo asignar parent_id si estaba huérfana (sin padre)
-                    if not cat.parent_id and default_parent and cat.id != default_parent.id:
-                        cat_vals['parent_id'] = default_parent.id
-                    if cat_uuid and 'x_studio_id_bo_categoria' in self._fields:
-                        cur = (cat.x_studio_id_bo_categoria or '').strip()
-                        if cat_uuid not in cur:
-                            cat_vals['x_studio_id_bo_categoria'] = f"{cur},{cat_uuid}" if cur else cat_uuid
+                    cat_vals = {}
+                    if cat_uuid:
+                        if not cat.x_bo_category_uuid:
+                            cat_vals['x_bo_category_uuid'] = cat_uuid
+                        if 'x_studio_id_bo_categoria' in self._fields:
+                            cur = (cat.x_studio_id_bo_categoria or '').strip()
+                            existing_uuids = [u.strip() for u in cur.split(',') if u.strip()]
+                            if cat_uuid not in existing_uuids:
+                                existing_uuids.append(cat_uuid)
+                                cat_vals['x_studio_id_bo_categoria'] = ','.join(existing_uuids)
+                    # Solo reubicar si estaba huérfana (sin padre) o si es subcategoría mal ubicada
+                    if expected_parent and cat.id != expected_parent.id:
+                        if not cat.parent_id or (parent_name and cat.parent_id != expected_parent):
+                            cat_vals['parent_id'] = expected_parent.id
                     if cat_vals:
                         cat.with_context(skip_bo_outbound=True).write(cat_vals)
-            return 'updated', existing[:1], f"Categoría vinculada ({name})"
 
-        # Crear siempre bajo Subscription Apparels para heredar las rutas de alquiler
-        create_vals = {'name': name, **vals}
-        if default_parent:
-            create_vals['parent_id'] = default_parent.id
-        if 'x_studio_id_bo_categoria' in self._fields and cat_uuid:
-            create_vals['x_studio_id_bo_categoria'] = cat_uuid
+            alias_note = f" (consolidada desde '{raw_name}')" if canonical_name != raw_name else ''
+            return 'updated', existing[:1], f"Categoría vinculada: {existing[:1].complete_name}{alias_note}"
+
+        # 5. Crear categoría nueva siempre dentro de la rama correcta
+        create_vals = {
+            'name': canonical_name,
+            'parent_id': expected_parent.id if expected_parent else False,
+        }
+        if cat_uuid:
+            create_vals['x_bo_category_uuid'] = cat_uuid
+            if 'x_studio_id_bo_categoria' in self._fields:
+                create_vals['x_studio_id_bo_categoria'] = cat_uuid
         if not dry_run:
             existing = self.with_context(skip_bo_outbound=True).create(create_vals)
-        return 'created', existing, f"Categoría creada bajo Subscription Apparels ({name})"
+
+        parent_label = expected_parent.name if expected_parent else 'Subscription Apparels'
+        return 'created', existing, f"Categoría creada bajo {parent_label}: {canonical_name}"
 
 
 class ProductTag(models.Model):
