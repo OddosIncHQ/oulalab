@@ -6,11 +6,13 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
-            <!-- Campos BO en la pestaña "Otra información" -->
             <xpath expr="//group[@name='sales_person']" position="after">
                 <group string="Back Office (BO)" name="bo_sync_group">
                     <field name="bo_order_ref"/>
+                    <field name="bo_internal_id"/>
                     <field name="bo_rental_id"/>
+                    <field name="bo_rental_state"/>
+                    <field name="bo_channel"/>
                     <field name="bo_sync_status" widget="badge"
                            decoration-success="bo_sync_status == 'synced'"
                            decoration-warning="bo_sync_status == 'partial'"
@@ -19,7 +21,6 @@
                 </group>
             </xpath>
 
-            <!-- Columnas BO en las líneas del pedido -->
             <xpath expr="//field[@name='order_line']/list//field[@name='product_uom_qty']" position="after">
                 <field name="bo_garment_id" optional="hide"/>
                 <field name="bo_rental_line_id" optional="hide"/>
@@ -49,6 +50,7 @@
                 <group>
                     <field name="file_data" filename="file_name"/>
                     <field name="file_name" invisible="1"/>
+                    <field name="skip_unlinked_cancelled"/>
                     <field name="dry_run"/>
                     <field name="overwrite"/>
                 </group>
