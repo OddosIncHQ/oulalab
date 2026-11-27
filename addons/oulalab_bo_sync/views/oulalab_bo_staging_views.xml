@@ -148,7 +148,7 @@
                                             <field name="changes_summary"/>
                                         </group>
                                         <group string="Payload Recibido desde BO">
-                                            <field name="raw_payload_json" widget="ace" options="{'mode': 'json'}"/>
+                                            <field name="raw_payload_json" widget="ace" options="{'mode': 'js'}"/>
                                         </group>
                                     </sheet>
                                 </form>
