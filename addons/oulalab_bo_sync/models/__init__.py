@@ -7,3 +7,5 @@ from . import product_catalog
 from . import sale_order
 from . import oulalab_bo_outbound
 from . import oulalab_bo_staging
+from . import bo_sync_models
+from . import bo_backfill_service
