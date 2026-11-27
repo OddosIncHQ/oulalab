@@ -30,11 +30,6 @@ class SaleOrder(models.Model):
         string='Última sincronización BO',
         copy=False,
     )
-    
-    bo_internal_id = fields.Char(string='ID Interno Pedido BO', index=True, copy=False)
-    bo_rental_state = fields.Char(string='Estado Arriendo BO', copy=False)
-    bo_channel = fields.Char(string='Canal BO', copy=False)
-
 
 
 class SaleOrderLine(models.Model):
