@@ -10,6 +10,24 @@ class ProductCategory(models.Model):
     x_bo_category_uuid = fields.Char(string='UUID Categoría BO', index=True, copy=False)
 
     @api.model
+    def _get_default_bo_parent_category(self):
+        """
+        Retorna la categoría padre oficial para mantener la estructura y herencia de rutas:
+        All / Saleable / Leaseback Products / BO Categories / Subscription Apparels
+        """
+        target = self.env.ref('__export__.product_category_114_dad98ea9', raise_if_not_found=False)
+        if target:
+            return target
+        target = self.search([
+            ('complete_name', '=', 'All / Saleable / Leaseback Products / BO Categories / Subscription Apparels')
+        ], limit=1)
+        if target:
+            return target
+        return self.search([
+            ('complete_name', '=', 'All / Saleable / Leaseback Products / BO Categories')
+        ], limit=1)
+
+    @api.model
     def _find_by_bo_uuid(self, cat_uuid):
         if not cat_uuid:
             return self.browse()
@@ -25,32 +43,54 @@ class ProductCategory(models.Model):
         if not name or UUID_RE.match(name):
             return 'skipped', self.browse(), 'Fila de categoría sin Nombre válido.'
 
+        default_parent = self._get_default_bo_parent_category()
+
+        # 1. Buscar por UUID del BO
         existing = self._find_by_bo_uuid(cat_uuid) if cat_uuid else self.browse()
+
+        # 2. Buscar por nombre SOLO dentro de Subscription Apparels (evita colisionar con Book The Look)
+        if not existing and default_parent:
+            existing = self.search([
+                ('name', '=ilike', name),
+                ('id', 'child_of', default_parent.id),
+            ], limit=1)
+
+        # 3. Fallback: rescatar categoría huérfana (sin padre) con el mismo nombre
         if not existing:
-            existing = self.search([('name', '=ilike', name)], limit=1)
+            existing = self.search([
+                ('name', '=ilike', name),
+                ('parent_id', '=', False),
+                ('name', '!=', 'All'),
+            ], limit=1)
 
         vals = {}
         if cat_uuid:
             vals['x_bo_category_uuid'] = cat_uuid
-            if 'x_studio_id_bo_categoria' in self._fields:
-                for cat in existing:
-                    cur = (cat.x_studio_id_bo_categoria or '').strip()
-                    if cat_uuid not in cur:
-                        new_val = f"{cur},{cat_uuid}" if cur else cat_uuid
-                        if not dry_run:
-                            cat.with_context(skip_bo_outbound=True).write({'x_studio_id_bo_categoria': new_val, 'x_bo_category_uuid': cat_uuid})
 
         if existing:
-            if not dry_run and vals:
-                existing.with_context(skip_bo_outbound=True).write(vals)
+            if not dry_run:
+                for cat in existing:
+                    cat_vals = dict(vals)
+                    # Proteger estructura: solo asignar parent_id si estaba huérfana (sin padre)
+                    if not cat.parent_id and default_parent and cat.id != default_parent.id:
+                        cat_vals['parent_id'] = default_parent.id
+                    if cat_uuid and 'x_studio_id_bo_categoria' in self._fields:
+                        cur = (cat.x_studio_id_bo_categoria or '').strip()
+                        if cat_uuid not in cur:
+                            cat_vals['x_studio_id_bo_categoria'] = f"{cur},{cat_uuid}" if cur else cat_uuid
+                    if cat_vals:
+                        cat.with_context(skip_bo_outbound=True).write(cat_vals)
             return 'updated', existing[:1], f"Categoría vinculada ({name})"
 
+        # Crear siempre bajo Subscription Apparels para heredar las rutas de alquiler
         create_vals = {'name': name, **vals}
+        if default_parent:
+            create_vals['parent_id'] = default_parent.id
         if 'x_studio_id_bo_categoria' in self._fields and cat_uuid:
             create_vals['x_studio_id_bo_categoria'] = cat_uuid
         if not dry_run:
             existing = self.with_context(skip_bo_outbound=True).create(create_vals)
-        return 'created', existing, f"Categoría creada ({name})"
+        return 'created', existing, f"Categoría creada bajo Subscription Apparels ({name})"
 
 
 class ProductTag(models.Model):
