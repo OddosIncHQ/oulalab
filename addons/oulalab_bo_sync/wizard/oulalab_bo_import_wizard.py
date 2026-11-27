@@ -56,6 +56,12 @@ class OulalabBoImportWizard(models.TransientModel):
         string='Crear Contacto automáticamente si el Lead no existe en Clientes',
         default=False,
     )
+    only_update_existing = fields.Boolean(
+        string='Solo actualizar registros existentes en Odoo (No crear nuevos)',
+        default=False,
+        help='Ideal para cargas históricas del BO: vincula y actualiza los registros que ya existen en Odoo '
+             '(sin tocar las prendas reales ya cargadas manualmente en órdenes de alquiler), y omite cualquier fila que intentaría crear un registro nuevo.',
+    )
 
     def _decode_xlsx_mercadopago(self, raw_bytes):
         if not openpyxl:
@@ -191,6 +197,7 @@ class OulalabBoImportWizard(models.TransientModel):
                 'file_name': self.file_name or f'{resolved_type}.csv',
                 'entity_type': resolved_type,
                 'auto_create_partner_from_lead': self.auto_create_partner_from_lead,
+                'only_update_existing': self.only_update_existing,
                 'notes': f"Encabezados detectados: {', '.join(headers)}",
             })
             line_vals_list = []
@@ -233,6 +240,7 @@ class OulalabBoImportWizard(models.TransientModel):
             'file_name': self.file_name or f'{resolved_type}.csv',
             'entity_type': resolved_type,
             'auto_create_partner_from_lead': self.auto_create_partner_from_lead,
+                'only_update_existing': self.only_update_existing,
         })
         line_vals_list = []
         for idx, row in indexed_rows:

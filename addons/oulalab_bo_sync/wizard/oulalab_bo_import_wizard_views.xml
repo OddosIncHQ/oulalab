@@ -13,7 +13,8 @@
                     </group>
                     <group string="Control y Revisión Previa">
                         <field name="execution_mode" widget="radio"/>
-                        <field name="auto_create_partner_from_lead"/>
+                        <field name="only_update_existing"/>
+                        <field name="auto_create_partner_from_lead" invisible="only_update_existing"/>
                     </group>
                 </group>
                 <div class="alert alert-info" role="status">
