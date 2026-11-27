@@ -1,6 +1,6 @@
 {
     'name': 'OulaLab BackOffice CSV & Webhook Sync',
-    'version': '19.0.15.2.0',
+    'version': '19.0.16.0.0',
     'category': 'Sales/CRM',
     'summary': 'Sincronización BO OulaLab -> Odoo 19 con Bandeja de Revisión Previa (Staging), Validación de Incongruencias y Aprobación antes de escribir en Odoo',
     'description': '''
