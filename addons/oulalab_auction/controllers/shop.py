@@ -2,18 +2,20 @@ import hmac
 import re
 import secrets
 import time
+from collections import namedtuple
 
 from odoo import SUPERUSER_ID, http
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 from ..models.res_partner import validate_rut
-from collections import namedtuple
-
 from ..models.shop_item import fmt_clp, garment_type_of, shop_param
 from .auction_portal import EMAIL_RE, AuctionPortal
 
 CART_KEY = "oulalab_shop_cart"
+REMOVED_KEY = "oulalab_shop_removed"
+LAST_ORDER_KEY = "oulalab_shop_last_order"
+LAST_ORDER_TS_KEY = "oulalab_shop_last_order_ts"
 SHOWROOM = "Av. La Dehesa 222 of. 817, Lo Barnechea"
 Tipo = namedtuple("Tipo", "id name")  # la plantilla lee tp.id y tp.name
 
@@ -22,6 +24,7 @@ OTP_KEY = "oulalab_shop_otp"              # código pendiente en la sesión
 VERIFIED_KEY = "oulalab_shop_verified"    # ids de contactos ya verificados
 OTP_TTL = 10 * 60                         # 10 minutos de vigencia
 OTP_MAX_ATTEMPTS = 5                      # intentos por código
+AUTO_REDIRECT_TTL = 120                   # ventana anti-rebote WebView (segundos)
 
 
 class OulaLabShop(http.Controller):
@@ -42,6 +45,43 @@ class OulaLabShop(http.Controller):
         if removed or len(available) != len(ids):
             request.session[CART_KEY] = available.ids
         return available, removed
+
+    def _stash_removed(self, removed):
+        if removed:
+            prev = [i for i in request.session.get(REMOVED_KEY, []) if isinstance(i, int)]
+            merged = list(dict.fromkeys(prev + removed.ids))
+            request.session[REMOVED_KEY] = merged
+
+    def _pop_stashed_removed(self):
+        ids = [i for i in request.session.pop(REMOVED_KEY, []) if isinstance(i, int)]
+        if not ids:
+            return request.env["liquidation.shop.item"].sudo()
+        return request.env["liquidation.shop.item"].sudo().browse(ids).exists()
+
+    def _pending_order(self):
+        """Devuelve la última orden creada en esta sesión si sigue pendiente de pago."""
+        last_id = request.session.get(LAST_ORDER_KEY)
+        if not last_id or not isinstance(last_id, int):
+            return None
+        order = request.env["sale.order"].sudo().browse(last_id).exists()
+        if not order or order.state not in ("draft", "sent"):
+            return None
+        paid = any(t.state in ("done", "authorized") for t in order.transaction_ids)
+        if paid:
+            return None
+        return order
+
+    def _order_portal_relative_url(self, order):
+        token = order._portal_ensure_token()
+        return "/my/orders/%s?access_token=%s" % (order.id, token)
+
+    def _recent_pending_order_url(self):
+        """URL de pago si la orden se creó hace pocos segundos (evita rebote en Instagram WebView)."""
+        ts = request.session.get(LAST_ORDER_TS_KEY) or 0
+        if (time.time() - ts) > AUTO_REDIRECT_TTL:
+            return None
+        order = self._pending_order()
+        return self._order_portal_relative_url(order) if order else None
 
     def _cart_count(self):
         return len(request.session.get(CART_KEY, []))
@@ -124,10 +164,18 @@ class OulaLabShop(http.Controller):
     @http.route("/prendas/carrito", type="http", auth="public", website=True, sitemap=False)
     def shop_cart(self, **kw):
         items, removed = self._cart_items()
+        removed |= self._pop_stashed_removed()
+        if not items and not removed and not kw.get("stay"):
+            recent_url = self._recent_pending_order_url()
+            if recent_url:
+                return request.redirect(recent_url)
+        pending_order = self._pending_order()
+        pending_url = self._order_portal_relative_url(pending_order) if pending_order else None
         total = sum(items.mapped("price"))
         offer = request.env["liquidation.shop.item"].sudo()._oulabag_offer(total)
         return request.render("oulalab_auction.shop_cart_template", self._common(
             items=items, removed=removed, total=total, offer=offer,
+            pending_order=pending_order, pending_url=pending_url,
         ))
 
     # ------------------------------------------------------------------
@@ -284,6 +332,12 @@ class OulaLabShop(http.Controller):
     def shop_checkout(self, **kw):
         items, removed = self._cart_items()
         if not items:
+            if removed:
+                self._stash_removed(removed)
+                return request.redirect("/prendas/carrito")
+            recent_url = self._recent_pending_order_url()
+            if recent_url:
+                return request.redirect(recent_url)
             return request.redirect("/prendas/carrito")
         return request.render("oulalab_auction.shop_checkout_template",
                               self._checkout_values(items, removed=removed))
@@ -293,6 +347,12 @@ class OulaLabShop(http.Controller):
     def shop_checkout_submit(self, **post):
         items, removed = self._cart_items()
         if not items:
+            if removed:
+                self._stash_removed(removed)
+                return request.redirect("/prendas/carrito")
+            recent_url = self._recent_pending_order_url()
+            if recent_url:
+                return request.redirect(recent_url)
             return request.redirect("/prendas/carrito")
         form = {k: (post.get(k) or "").strip() for k in
                 ("name", "email", "phone", "rut", "mode", "commune", "street", "street2")}
@@ -319,96 +379,4 @@ class OulaLabShop(http.Controller):
         if not EMAIL_RE.match(email):
             return fail("El correo no es válido.")
         if len(re.sub(r"\D", "", form["phone"])) < 8:
-            return fail("Indica un teléfono de contacto válido.")
-
-        Partner = request.env["res.partner"].sudo()
-        mode = form["mode"] if form["mode"] in ("pickup", "delivery") else "pickup"
-        delivery_vals, error = self._portal()._validate_delivery(
-            Partner, mode, form["commune"], form["street"])
-        if error:
-            return fail(error)
-
-        # --- Puerta de verificación -----------------------------------
-        # Un RUT o un correo no son secretos: antes de usar un contacto ya
-        # registrado hay que probar que la sesión es su dueña.
-        existing = self._portal()._current_partner() or \
-            self._find_existing_partner(clean_rut, email)
-        if existing and not self._is_verified(existing):
-            if not existing.email:
-                return fail("Ese RUT ya está registrado y no tiene correo asociado. "
-                            "Escríbenos a hola@oulalab.com para completar tu compra.")
-            masked = self._mask_email(existing.email)
-            code = (post.get("otp") or "").strip()
-            if not code:
-                self._otp_send(existing)
-                return fail(
-                    "Ese RUT o correo ya está registrado con nosotros. Te enviamos un "
-                    "código de 6 dígitos a %s para confirmar que eres tú." % masked,
-                    otp_required=True, otp_email=masked)
-            ok, msg = self._otp_check(existing, code)
-            if not ok:
-                if "código nuevo" in msg or "venció" in msg:
-                    self._otp_send(existing)
-                return fail(msg, otp_required=True, otp_email=masked)
-            self._mark_verified(existing)
-
-        partner, shipping = self._resolve_partner(
-            form, clean_rut, email, mode, delivery_vals, existing=existing)
-        Item = request.env["liquidation.shop.item"].sudo()
-        try:
-            order = Item._shop_create_order(items, partner, shipping,
-                                            with_bag=form["oulabag"], delivery_mode=mode)
-        except (UserError, ValidationError) as e:
-            request.env.cr.rollback()
-            return fail(str(getattr(e, "args", [e])[0]))
-
-        request.session[CART_KEY] = []
-        request.session["oulalab_shop_last_order"] = order.id
-        return request.redirect(order.get_portal_url())
-
-    def _resolve_partner(self, form, clean_rut, email, mode, delivery_vals, existing=None):
-        """Cliente del pedido y dirección de despacho.
-
-        `existing` llega ya verificado desde shop_checkout_submit: este método
-        nunca busca un contacto por su cuenta. Nunca se sobrescriben los datos
-        de un contacto existente a partir de un formulario público: solo se
-        completan campos vacíos. Una dirección nueva se guarda como contacto de
-        entrega hijo.
-        """
-        Partner = request.env["res.partner"].sudo()
-        partner = existing
-        if partner:
-            partner = partner.sudo()
-            fill = {}
-            if not partner.vat:
-                fill["vat"] = clean_rut
-            if not partner.phone:
-                fill["phone"] = form["phone"]
-            if not partner.email:
-                fill["email"] = email
-            if not partner.auction_delivery_mode:
-                fill.update(delivery_vals)
-            if fill:
-                partner.write(fill)
-        else:
-            partner = Partner.create(dict(
-                delivery_vals, name=form["name"], email=email,
-                vat=clean_rut, phone=form["phone"],
-            ))
-
-        shipping = partner
-        if mode == "delivery":
-            same = (partner.street or "").strip().lower() == form["street"].lower() \
-                and partner.auction_commune == form["commune"]
-            if not same:
-                communes = dict(Partner._fields["auction_commune"].selection)
-                shipping = Partner.create({
-                    "type": "delivery",
-                    "parent_id": partner.id,
-                    "name": form["name"],
-                    "street": form["street"],
-                    "street2": form.get("street2") or False,
-                    "city": communes.get(form["commune"]),
-                    "phone": form["phone"],
-                })
-        return partner, shipping
+            return fail("Indica un teléfono de contacto válido
