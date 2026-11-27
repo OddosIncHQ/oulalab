@@ -20,25 +20,33 @@ class BoBackfillService(models.AbstractModel):
         dt = datetime.fromisoformat(clean)
         return dt.replace(tzinfo=None)
 
-    def _sku_matches_odoo(self, bo_sku, odoo_line):
+    def _sku_matches_odoo(self, bo_sku, odoo_line, bo_name=''):
         """
-        Compara un SKU del BO contra una línea de Odoo:
+        Compara un ítem del BO contra una línea de Odoo:
         1. Si el BO trae UUID: compara contra bo_garment_id del producto.
         2. Si el BO trae SKU base: compara exacto o por prefijo 'BO_SKU-' (ej. -00003).
+        3. Fallback por nombre parcial si el BO trajo UUID y aún no existe bo_garment_id.
         """
         bo_sku = (bo_sku or '').strip()
-        if not bo_sku:
-            return False
-
         product = odoo_line.product_id
         odoo_code = (product.default_code or '').strip()
 
-        if UUID_RE.match(bo_sku):
-            return (product.product_tmpl_id.bo_garment_id or '').strip().lower() == bo_sku.lower()
+        if bo_sku:
+            if UUID_RE.match(bo_sku):
+                if (product.product_tmpl_id.bo_garment_id or '').strip().lower() == bo_sku.lower():
+                    return True
+            elif odoo_code == bo_sku or odoo_code.startswith(f'{bo_sku}-'):
+                return True
 
-        return odoo_code == bo_sku or odoo_code.startswith(f'{bo_sku}-')
+        if bo_name and len(bo_name.strip()) >= 5:
+            clean_bo = bo_name.strip().lower()
+            clean_odoo = (product.name or '').strip().lower()
+            if clean_bo in clean_odoo or clean_odoo in clean_bo:
+                return True
 
-    def _find_matching_order(self, bo_order):
+        return False
+
+    def _find_matching_order(self, bo_order, date_window_days=7):
         SaleOrder = self.env['sale.order'].sudo()
         bo_ref = (bo_order.get('order_ref') or '').strip()
         bo_internal_id = (bo_order.get('internal_id') or '').strip()
@@ -61,7 +69,7 @@ class BoBackfillService(models.AbstractModel):
             if len(direct) > 1:
                 return False, f'Múltiples pedidos en Odoo coinciden con {bo_ref}.'
 
-        # Prioridad 2: Email cliente + Fecha (±1 día) + al menos 1 prenda coincidente
+        # Prioridad 2: Email cliente + Solo Órdenes de Alquiler + Ventana de fechas
         email = (bo_order.get('customer_email') or '').strip()
         order_dt = self._parse_iso_utc(bo_order.get('order_date'))
         if not email or not order_dt:
@@ -73,41 +81,51 @@ class BoBackfillService(models.AbstractModel):
 
         candidates = SaleOrder.search([
             ('partner_id', 'in', partners.ids),
-            ('date_order', '>=', order_dt - timedelta(days=1)),
-            ('date_order', '<=', order_dt + timedelta(days=1)),
+            ('is_rental_order', '=', True),
+            ('date_order', '>=', order_dt - timedelta(days=date_window_days)),
+            ('date_order', '<=', order_dt + timedelta(days=date_window_days)),
             ('state', '!=', 'cancel'),
         ])
 
         if not candidates:
-            return False, 'Sin pedidos del cliente en ventana de ±1 día.'
+            return False, f'Sin órdenes de alquiler del cliente en ventana de ±{date_window_days} días.'
 
         bo_lines = bo_order.get('lines', [])
         matched = candidates.filtered(
             lambda o: any(
-                self._sku_matches_odoo(bl.get('sku'), ol)
+                self._sku_matches_odoo(bl.get('sku'), ol, bl.get('name', ''))
                 for bl in bo_lines
                 for ol in o.order_line
                 if not ol.display_type and ol.product_id.is_storable
             )
         )
 
-        # Fallback: si solo hay 1 pedido del cliente ese día y todos los SKUs del BO eran UUID
-        if not matched and len(candidates) == 1:
-            all_uuids = all(UUID_RE.match(bl.get('sku') or '') for bl in bo_lines) if bo_lines else False
-            if all_uuids:
-                return candidates, False
+        # Si hay varios candidatos con coincidencia de prendas, priorizar sin bo_order_ref y luego el más cercano
+        if len(matched) > 1:
+            unsynced = matched.filtered(lambda o: not o.bo_order_ref)
+            if len(unsynced) == 1:
+                return unsynced, False
+            pool = unsynced or matched
+            closest = min(pool, key=lambda o: abs((o.date_order - order_dt).total_seconds()))
+            return closest, False
 
         if len(matched) == 1:
             return matched, False
-        if len(matched) > 1:
-            return False, f'Ambigüedad: {len(matched)} pedidos candidatos para {email} en esa fecha.'
-        return False, 'Pedido del cliente encontrado en fecha, pero ninguna prenda coincidió por SKU.'
 
-    def sync_historical_orders(self, bo_orders, overwrite=False, dry_run=False, batch_size=50):
+        # Fallback: si solo existe 1 orden de alquiler sin sincronizar en esa ventana
+        unsynced_candidates = candidates.filtered(lambda o: not o.bo_order_ref)
+        if len(unsynced_candidates) == 1:
+            return unsynced_candidates, False
+
+        return False, 'Orden del cliente encontrada en fecha, pero ninguna prenda coincidió por SKU/nombre.'
+
+    def sync_historical_orders(
+        self, bo_orders, overwrite=False, dry_run=False, date_window_days=7, batch_size=50
+    ):
         summary = {'synced': 0, 'partial': 0, 'unmatched': 0, 'errors': []}
 
         for idx, bo_order in enumerate(bo_orders, start=1):
-            order, error = self._find_matching_order(bo_order)
+            order, error = self._find_matching_order(bo_order, date_window_days=date_window_days)
             if not order:
                 summary['unmatched'] += 1
                 summary['errors'].append({
@@ -139,7 +157,10 @@ class BoBackfillService(models.AbstractModel):
 
             for line in garment_lines:
                 matched_bo_line = next(
-                    (bl for bl in remaining_bo_lines if self._sku_matches_odoo(bl.get('sku'), line)),
+                    (
+                        bl for bl in remaining_bo_lines
+                        if self._sku_matches_odoo(bl.get('sku'), line, bl.get('name', ''))
+                    ),
                     None,
                 )
                 if matched_bo_line:
