@@ -341,23 +341,60 @@ class SaleOrder(models.Model):
         return 'updated', sub, f"Pago BO ({status_raw} - {amount_clp:,.0f} CLP) consolidado en {sub.name}"
 
     # -------------------------------------------------------------------------
-    # 3. CONCILIACIÓN VENTAS MERCADO PAGO (Ventas_MercadoPago_*.xlsx / .csv)
+    # 3. CONCILIACIÓN VENTAS Y SUSCRIPTORES MERCADO PAGO (.xlsx / .csv)
     # -------------------------------------------------------------------------
     @api.model
     def upsert_from_mercadopago_sale(self, row, dry_run=False):
-        op_num = _pick(row, ['Número de operación'])
-        buy_date_str = _pick(row, ['Fecha de la compra'])
-        mp_status = _pick(row, ['Estado'])
-        status_desc = _pick(row, ['Descripción del estado'])
-        gross_raw = _pick(row, ['Cobro'])
-        fee_raw = _pick(row, ['Cargos e impuestos'])
-        refund_raw = _pick(row, ['Anulaciones y reembolsos'])
-        net_raw = _pick(row, ['Total a recibir'])
-        tool_raw = _pick(row, ['Herramienta de cobro'])
-        pay_method = _pick(row, ['Medio de pago'])
-        pay_method_desc = _pick(row, ['Descripción del medio de pago'])
-        item_desc = _pick(row, ['Descripción del ítem'])
-        ext_ref = _pick(row, ['Referencia externa'])
+        # Detectar si viene del export de Preapprovals / Suscriptores MP (en inglés)
+        is_mp_preapproval = bool(
+            _pick(row, ['id']) and (
+                _pick(row, ['billing_status', 'preapproval_plan_id', 'next_payment_date', 'charged_quantity'])
+                or not _pick(row, ['Número de operación'])
+            )
+        )
+
+        if is_mp_preapproval:
+            op_num = _pick(row, ['id'])
+            ext_ref = _pick(row, ['external_reference'])
+            buy_date_str = _pick(row, ['last_charge_date', 'date_created'])
+            raw_status = _pick(row, ['status']).lower()
+            billing_status = _pick(row, ['billing_status']).lower()
+            item_desc = _pick(row, ['reason'])
+            gross_raw = _pick(row, ['last_charge_amount', 'transaction_amount'])
+            fee_raw = '0'
+            refund_raw = '0'
+            net_raw = gross_raw
+            tool_raw = 'Suscripción MP (Preapproval)'
+            pay_method = 'preapproval'
+            pay_method_desc = f"billing_status={billing_status or 'N/A'}"
+            next_pay_str = _pick(row, ['next_payment_date'])
+
+            # Omitir registros de prueba internos (Prueba Oulalab, acidlabs, etc.)
+            reason_lower = item_desc.lower()
+            if any(tok in reason_lower for tok in ('prueba', 'acidlabs', 'acid')):
+                return 'skipped', self.browse(), f"Suscripción de prueba omitida ({op_num} | {item_desc})."
+
+            status_map = {
+                'authorized': 'Aprobado',
+                'cancelled': 'Cobro anulado',
+                'paused': 'Pausado',
+            }
+            mp_status = status_map.get(raw_status, raw_status.title() or 'Pendiente')
+            status_desc = f"status={raw_status} | billing={billing_status} | próx. cobro={next_pay_str or 'N/A'}"
+        else:
+            op_num = _pick(row, ['Número de operación'])
+            buy_date_str = _pick(row, ['Fecha de la compra'])
+            mp_status = _pick(row, ['Estado'])
+            status_desc = _pick(row, ['Descripción del estado'])
+            gross_raw = _pick(row, ['Cobro'])
+            fee_raw = _pick(row, ['Cargos e impuestos'])
+            refund_raw = _pick(row, ['Anulaciones y reembolsos'])
+            net_raw = _pick(row, ['Total a recibir'])
+            tool_raw = _pick(row, ['Herramienta de cobro'])
+            pay_method = _pick(row, ['Medio de pago'])
+            pay_method_desc = _pick(row, ['Descripción del medio de pago'])
+            item_desc = _pick(row, ['Descripción del ítem'])
+            ext_ref = _pick(row, ['Referencia externa'])
 
         if not op_num and not ext_ref:
             return 'skipped', self.browse(), 'Fila de Mercado Pago sin Número de operación ni Referencia externa.'
@@ -401,7 +438,7 @@ class SaleOrder(models.Model):
 
         status_lower = mp_status.lower()
         is_approved = status_lower == 'aprobado'
-        is_refunded = status_lower == 'reembolsado'
+        is_refunded = status_lower in ('reembolsado', 'pausado')
         is_rejected = status_lower in ('rechazado', 'cobro anulado')
 
         badge_color = '#198754' if is_approved else ('#fd7e14' if is_refunded else '#dc3545')
@@ -409,7 +446,7 @@ class SaleOrder(models.Model):
             f"<div style='border-left: 4px solid {badge_color}; padding-left: 10px;'>"
             f"<b>Conciliación Mercado Pago — Op. #{op_num}</b><br/>"
             f"Estado MP: <b style='color:{badge_color};'>{mp_status}</b> ({status_desc})<br/>"
-            f"Fecha compra: {buy_date_str} | Herramienta: {tool_raw} | Medio: {pay_method} ({pay_method_desc})<br/>"
+            f"Fecha: {buy_date_str or 'N/A'} | Herramienta: {tool_raw} | Medio: {pay_method} ({pay_method_desc})<br/>"
             f"Cobro Bruto: <b>${gross_amt:,.0f} CLP</b> | Comisión MP: <b>${fee_amt:,.0f} CLP</b> | "
             f"Reembolsos: <b>${refund_amt:,.0f} CLP</b> | Neto a recibir: <b>${net_amt:,.0f} CLP</b><br/>"
             f"Ítem: {item_desc} | Ref. Externa: <code>{ext_ref or 'N/A'}</code>"
@@ -429,6 +466,7 @@ class SaleOrder(models.Model):
             f"Op MP {op_num} [{mp_status}] -> {target_order.name} "
             f"(Bruto: ${gross_amt:,.0f} | Comisión: ${fee_amt:,.0f} | Neto: ${net_amt:,.0f})"
         )
+
 
     # -------------------------------------------------------------------------
     # 4. ÓRDENES DE ALQUILER (rentals-*.csv -> Secuencias parametrizables RO / STKOUT)
