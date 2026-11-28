@@ -30,6 +30,16 @@ AUTO_REDIRECT_TTL = 120                   # ventana anti-rebote WebView (segundo
 class OulaLabShop(http.Controller):
 
     # ------------------------------------------------------------------
+    # Redirección de sale.oulalab.com -> we.oulalab.com/prendas
+    # ------------------------------------------------------------------
+    @http.route("/", type="http", auth="public", website=True, sitemap=False)
+    def root_sale_redirect(self, **kw):
+        host = (request.httprequest.host or "").split(":")[0].lower()
+        if host == "sale.oulalab.com":
+            return request.redirect("https://we.oulalab.com/prendas", code=301, local=False)
+        return request.env["ir.http"]._serve_page()
+
+    # ------------------------------------------------------------------
     # Utilidades
     # ------------------------------------------------------------------
     def _portal(self):
