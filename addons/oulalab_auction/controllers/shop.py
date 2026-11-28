@@ -5,7 +5,6 @@ import time
 from collections import namedtuple
 
 from odoo import SUPERUSER_ID, http
-from odoo.addons.website.controllers.main import Website
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
@@ -26,16 +25,6 @@ VERIFIED_KEY = "oulalab_shop_verified"    # ids de contactos ya verificados
 OTP_TTL = 10 * 60                         # 10 minutos de vigencia
 OTP_MAX_ATTEMPTS = 5                      # intentos por código
 AUTO_REDIRECT_TTL = 120                   # ventana anti-rebote WebView (segundos)
-
-
-class OulaLabWebsiteRedirect(Website):
-
-    @http.route("/", auth="public", website=True, sitemap=True)
-    def index(self, **kw):
-        host = (request.httprequest.host or "").split(":")[0].lower()
-        if host == "sale.oulalab.com":
-            return request.redirect("https://we.oulalab.com/prendas", code=301, local=False)
-        return super().index(**kw)
 
 
 class OulaLabShop(http.Controller):
