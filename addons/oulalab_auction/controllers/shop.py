@@ -5,6 +5,7 @@ import time
 from collections import namedtuple
 
 from odoo import SUPERUSER_ID, http
+from odoo.addons.website.controllers.main import Website
 from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
@@ -27,17 +28,17 @@ OTP_MAX_ATTEMPTS = 5                      # intentos por código
 AUTO_REDIRECT_TTL = 120                   # ventana anti-rebote WebView (segundos)
 
 
-class OulaLabShop(http.Controller):
+class OulaLabWebsiteRedirect(Website):
 
-    # ------------------------------------------------------------------
-    # Redirección de sale.oulalab.com -> we.oulalab.com/prendas
-    # ------------------------------------------------------------------
-    @http.route("/", type="http", auth="public", website=True, sitemap=False)
-    def root_sale_redirect(self, **kw):
+    @http.route("/", auth="public", website=True, sitemap=True)
+    def index(self, **kw):
         host = (request.httprequest.host or "").split(":")[0].lower()
         if host == "sale.oulalab.com":
             return request.redirect("https://we.oulalab.com/prendas", code=301, local=False)
-        return request.env["ir.http"]._serve_page()
+        return super().index(**kw)
+
+
+class OulaLabShop(http.Controller):
 
     # ------------------------------------------------------------------
     # Utilidades
